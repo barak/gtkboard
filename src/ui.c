@@ -24,6 +24,8 @@
 #include <signal.h>
 #include <ctype.h>
 #include <dlfcn.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -138,10 +140,13 @@ int (*game_scorecmp_def_time) (gchar *, int, gchar*, int) = prefs_scorecmp_time;
 GtkWidget *main_window, *board_area = NULL;
 GtkWidget *board_rowbox = NULL, *board_colbox = NULL;
 
+static void ignore() {}
+
 void ui_cleanup ()
 {
 	if (opt_game)
 		ui_terminate_game();
+	signal (SIGCHLD, ignore);
 	if (engine_pid > 0)
 		kill (engine_pid, SIGKILL);
 	if (opt_verbose)
@@ -149,13 +154,26 @@ void ui_cleanup ()
 	exit (0);
 }
 
-void ui_segv_cleanup()
+void ui_segv_cleanup ()
 {
+	signal (SIGCHLD, ignore);
 	if (engine_pid > 0)
 		kill (engine_pid, SIGKILL);
 	fprintf (stderr, "gtkboard: caught segv, exiting.\n");
 	exit (1);
 }
+
+
+void ui_child_cleanup ()
+{
+	int status;
+	waitpid (engine_pid, &status, WNOHANG | WUNTRACED);
+	if (WIFSTOPPED (status))
+		return;
+	fprintf (stderr, "gtkboard: engine appears to have died, exiting.\n");
+	exit (1);
+}
+
 
 int ui_animate_cb ()
 {
@@ -368,7 +386,7 @@ void ui_send_make_move ()
 		fflush (move_fout);
 	}
 	/* this should be called even for opt_infile */
-	gtk_timeout_add (opt_delay, ui_get_machine_move, NULL);
+	g_timeout_add (opt_delay, ui_get_machine_move, NULL);
 }
 
 void ui_make_human_move (byte *move)
@@ -619,23 +637,37 @@ static void parse_opts (int argc, char **argv)
 	/* check sanity */
 	if ((wheur && !bheur) || (bheur && !wheur))
 	{
-		printf ("specify heuristic for both players or neither\n");
+		fprintf (stderr, "specify heuristic for both players or neither\n");
 		exit(1);
 	}
 	if (opt_infile && (opt_white != NONE || opt_black != NONE))
 	{
-		printf ("can't specify -f with -p\n");
+		fprintf (stderr, "can't specify -f with -p\n");
 		exit (1);
 	}
 	if (opt_quiet && (opt_white == HUMAN || opt_black == HUMAN))
 	{
-		printf ("can't be quiet with human players\n");
+		fprintf (stderr, "can't be quiet with human players\n");
 		exit (1);
 	}
 	if (game_single_player && (opt_infile))
 	{
-		printf ("can't load from file for single player game\n");
+		fprintf (stderr, "can't load from file for single player game\n");
 		exit (1);
+	}
+	if (opt_quiet && (opt_white != MACHINE || opt_black != MACHINE))
+	{
+		fprintf (stderr, "both white and black have to be machine for quiet mode.\n");
+		exit (1);
+	}
+	if (opt_quiet && !opt_game)
+	{
+		fprintf (stderr, "game must be specified for quiet mode.\n");
+		exit (1);
+	}
+	if (opt_quiet && !opt_logfile)
+	{
+		fprintf (stderr, "warning: no logfile specified in quiet mode.\n");
 	}
 
 	if (wheur && bheur)
@@ -643,12 +675,12 @@ static void parse_opts (int argc, char **argv)
 		int i = 0;
 		if (!opt_game)
 		{
-			printf ("heur fn specified but no game specified\n");
+			fprintf (stderr, "heur fn specified but no game specified\n");
 			exit (1);
 		}
 		if (!game_htab)
 		{
-			printf ("no support for changing eval fn. in %s\n", opt_game->name);
+			fprintf (stderr, "no support for changing eval fn. in %s\n", opt_game->name);
 			exit(1);
 		}
 		for (i=0; game_htab[i].name; i++)
@@ -660,12 +692,12 @@ static void parse_opts (int argc, char **argv)
 		}
 		if (!game_eval_white)
 		{
-			printf ("%s: no such eval fn. in %s\n", wheur, opt_game->name);
+			fprintf (stderr, "%s: no such eval fn. in %s\n", wheur, opt_game->name);
 			exit(1);
 		}
 		if (!game_eval_black)
 		{
-			printf ("%s: no such eval fn. in %s\n", bheur, opt_game->name);
+			fprintf (stderr, "%s: no such eval fn. in %s\n", bheur, opt_game->name);
 			exit(1);
 		}
 		// FIXME: engine should parse opts separately
@@ -761,6 +793,7 @@ void gui_init ()
 		{ "/Settings/_Flip Board", "<control>T", menu_board_flip_cb, 0, "" },
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
+		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
 	};
 	int i;
 	gdk_rgb_init ();
@@ -897,8 +930,6 @@ void gui_init ()
 	sb_update ();
 }
 
-void ignore() {}
-
 int main (int argc, char **argv)
 {
 	srand (time(0));
@@ -906,20 +937,31 @@ int main (int argc, char **argv)
 	parse_opts (argc, argv);
 	ui_start_player ();
 	
-	signal (SIGHUP, ignore);
 	signal (SIGINT, ui_cleanup);
 	signal (SIGTERM, ui_cleanup);
 	signal (SIGSEGV, ui_segv_cleanup);
-	gtk_init(&argc,&argv);    
-	gdk_rgb_init();
+	signal (SIGCHLD, ui_child_cleanup);
 	if (!opt_quiet)
+	{
+		gtk_init(&argc,&argv);    
+		gdk_rgb_init();
 		gui_init ();
+		gtk_main ();
+	}
 	else	// background mode
 	{
+		GMainLoop *loop;
+		signal (SIGHUP, ignore);
 		set_game_params ();
 		ui_stopped = FALSE;
 		ui_send_make_move ();
+#if GLIB_MAJOR_VERSION > 1
+		loop = g_main_loop_new (NULL, TRUE);
+#else
+		loop = g_main_new (TRUE);
+#endif
+		g_main_run (loop);
+		
 	}
-	gtk_main ();
 	return 0;
 }

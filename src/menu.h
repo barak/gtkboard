@@ -50,6 +50,7 @@ gboolean sb_update_periodic ();
 void sb_reset_human_time ();
 int sb_get_human_time ();
 void menu_show_about_dialog (gpointer);
+void menu_show_begging_dialog (gpointer);
 void menu_show_dialog (gchar *, gchar *);
 void menu_show_game_doc (gpointer, guint);	
 void sb_set_turn_image ();

@@ -1,7 +1,7 @@
 
 AC_INIT(src/)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gtkboard,0.10.1)
+AM_INIT_AUTOMAKE(gtkboard,0.10.2)
 AC_PROG_CC
 
 
@@ -11,9 +11,6 @@ PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.0.0, found_gtk2=1, found_gtk2=0)
 if test $found_gtk2 = 0; then
 	AM_PATH_GTK(1.2.3, , AC_MSG_ERROR(gretools needs GTK 1.2.3 or higher))
 fi
-
-#AM_PATH_GTK(1.2.3, , AC_MSG_ERROR(gtkboard needs GTK 1.2.3 or higher))
-
 
 dnl Checks for header files.
 AC_HEADER_STDC

@@ -211,7 +211,8 @@ void menu_board_flip_cb ()
 	board_redraw (NULL, NULL);
 }
 
-void menu_show_dialog (gchar *title, gchar *message)
+
+static void menu_show_dialog_real (gchar *title, gchar *message, gboolean wrap)
 	// A modal dialog with a label. Don't use it for showing large amounts of text
 {
 	GtkWidget *dialog, *okay_button, *label;
@@ -238,11 +239,23 @@ void menu_show_dialog (gchar *title, gchar *message)
 			"response", G_CALLBACK (gtk_widget_destroy), GTK_OBJECT (dialog));
 	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
 #endif
+	gtk_label_set_line_wrap (GTK_LABEL (label), wrap);
 	gtk_widget_grab_focus (okay_button);
 
 	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
 	gtk_widget_show_all (dialog);
 }
+
+void menu_show_dialog (gchar *title, gchar *message)
+{
+	menu_show_dialog_real (title, message, FALSE);
+}
+
+void menu_show_dialog_wrap (gchar *title, gchar *message)
+{
+	menu_show_dialog_real (title, message, TRUE);
+}
+	
 
 void menu_pause_cb (GtkWidget *dialog)
 {
@@ -303,6 +316,15 @@ void menu_show_about_dialog (gpointer data)
 			"/usr/local/doc/gtkboard-" VERSION "/ if you installed from binary rpm.\n"
 			"The latest documentation will always be available at\n"
 			"http://gtkboard.sourceforge.net/doc/"
+			);
+}
+
+void menu_show_begging_dialog (gpointer data)
+{
+	menu_show_dialog_wrap ("Begging bowl",
+			"Thanks for using gtkboard. I hope you liked it.\n\n"
+			"The download counter on sourceforge is broken. "
+			"They call it an \"inaccuracy\", but the fact of the matter is that it's firmly stuck at zero, which means that I have no idea how many people are downloading/using the software. So you see, I'm as lonely as a lark (or whatever it is that's supposed to be very lonely.) So if you have any comments or suggestions, or even just some kind words, it would be nice if you can mail them me. My email is arvindn@users.sourceforge.net. Thanks."
 			);
 }
 
@@ -766,6 +788,8 @@ void sb_reset_human_time ()
 {
 	gchar *tempstr;
 	sb_human_time = 0;
+	if (!state_gui_active)
+		return;
 	gtk_label_set_text (GTK_LABEL(sb_time_label), tempstr
 			 = g_strdup_printf ("Time:%s", sb_ftime(sb_human_time)));
 	g_free (tempstr);

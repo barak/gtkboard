@@ -227,8 +227,8 @@ static int oppcolor (byte *pos, int oldx, int oldy, int x, int y)
 	return 0;
 }
 
-int antichess_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player player, 
-		byte ** movep)
+int antichess_getmove (Pos *pos, int x, int y, 
+		GtkboardEventType type, Player player, byte ** movep)
 	/* Translate mouse clicks into move */
 {
 	static byte move [7];

@@ -317,9 +317,12 @@ static gboolean channel_process_input ()
 	char *linep = linebuf;
 	char *line;
 	int bytes_read;
+#if GLIB_MAJOR_VERSION > 1
 	// we need to call this again because we will get new events before returning
 	// from this function
+	// semantics of add_watch silently changing between glib versions!!!!
 	g_io_add_watch (channel_in, G_IO_IN, (GIOFunc) channel_process_input, NULL);
+#endif
 	g_io_channel_read (channel_in, linebuf, 4096, &bytes_read);
 	linebuf[bytes_read] = '\0';
 	while (*linep != '\0')
@@ -333,7 +336,11 @@ static gboolean channel_process_input ()
 	}	
 	while (process_line ())
 		;
+#if GLIB_MAJOR_VERSION == 1
+	return TRUE;
+#else
 	return FALSE;
+#endif
 }
 
 void engine_poll ()
@@ -351,12 +358,15 @@ void engine_poll ()
 	}
 }
 
+static void ignore () {}
+
 //! This is the main function for the engine
 void engine_main (int infd, int outfd)
 {
 	GMainLoop *loop;
 	char *line;
 	engine_flag = TRUE;
+	signal (SIGHUP, ignore);
 	engine_fin = fdopen (infd, "r");
 	engine_fout = fdopen (outfd, "w");
 	assert (engine_fin);
@@ -364,7 +374,11 @@ void engine_main (int infd, int outfd)
 	channel_in = g_io_channel_unix_new (infd);
 	g_io_add_watch (channel_in, G_IO_IN, (GIOFunc) channel_process_input, NULL);
 	g_io_add_watch (channel_in, G_IO_HUP | G_IO_NVAL, (GIOFunc) engine_hup_cb, NULL);
+#if GLIB_MAJOR_VERSION > 1
+	loop = g_main_loop_new (NULL, TRUE);
+#else
 	loop = g_main_new (TRUE);
+#endif
 	g_main_run (loop);
 }
 
