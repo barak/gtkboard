@@ -294,7 +294,7 @@ void menu_show_about_dialog (gpointer data)
 	menu_show_dialog ("About gtkboard", 
 			"gtkboard " VERSION "\n"
 			"http://gtkboard.sourceforge.net/\n"
-			"Maintainer: Arvind Narayanan <arvindn1@yahoo.com>\n"
+			"Maintainer: Arvind Narayanan <arvindn@users.sourceforge.net>\n"
 			"Released under the GNU General Public License");
 }
 

@@ -33,7 +33,7 @@ extern Game *games[];
 
 extern Pos cur_pos;
 
-extern int num_games;
+extern const int num_games;
 
 extern FILE *move_fin, *move_fout;
 

@@ -49,7 +49,7 @@ Game *games[] = {
 	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Othello,
 	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, };
 
-int num_games = sizeof (games) / sizeof (games[0]);
+const int num_games = sizeof (games) / sizeof (games[0]);
 
 gboolean engine_flag = FALSE; // are we client or server. server will set it to TRUE
 
