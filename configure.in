@@ -4,9 +4,17 @@ AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(gtkboard,0.10.7)
 AC_PROG_CC
 
+AC_ARG_ENABLE(gtk2,
+		[  --disable-gtk2      Don't look for GTK2 libraries],
+		enable_gtk2=$enableval,
+		enable_gtk2="yes")
 
-# check if user has gtk2
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.0.0, found_gtk2=1, found_gtk2=0)
+found_gtk2=0;
+
+if test $enable_gtk2 = "yes" ; then
+	# check if user has gtk2
+	PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.0.0, found_gtk2=1, found_gtk2=0)
+fi
 
 if test $found_gtk2 = 0; then
 	AM_PATH_GTK(1.2.3, , AC_MSG_ERROR(gtkboard needs GTK 1.2.3 or higher))
