@@ -59,12 +59,48 @@ extern Game
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
-	&Antichess, &Ataxx, &Blet, &Breakthrough, &Checkers, &Chess, 
-	&CapturePento, &Dnb, &Eightqueens, &Fifteen, &Flw, &Hiq,
-	&Hypermaze, &Infiltrate, &Knights, &Kttour, &Mastermind,
-	&Maze, &Memory, &Ninemm, &Othello, &Othello6x6, &Pacman, &Pentaline,
-	&Plot4, &Quarto, &Rgb, &Samegame, &Stopgate, &Tetris, &Towers,
-	&Wordtris};
+	&Chess, 
+	&Antichess, 
+	&Breakthrough, 
+	
+	&Pacman, 
+	&Fifteen, 
+	&Samegame, 
+	&Tetris, 
+
+	&Blet, 
+	&Eightqueens, 
+	&Towers,
+	&Hiq,
+	
+	&Plot4, 
+	&Quarto, 
+	&Rgb, 
+	&Pentaline,
+	
+	&Dnb, 
+	&Stopgate, 
+	&CapturePento, 
+	&Knights, 
+
+	&Othello, 
+	&Othello6x6, 
+	
+	&Wordtris,
+	&Flw, 
+		
+	&Maze, 
+	&Hypermaze, 
+	
+	&Infiltrate, 
+	&Kttour, 
+	&Mastermind,
+	&Ataxx, 
+	&Checkers, 
+	&Memory, 
+	&Ninemm, 
+		
+};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
 
@@ -95,6 +131,7 @@ int game_animation_time = 0;
 gchar *game_doc_about = NULL;
 gchar *game_doc_rules = NULL;
 gchar *game_doc_strategy = NULL;
+gchar *game_doc_history = NULL;
 
 gchar *game_white_string = "White", *game_black_string = "Black";
 
@@ -269,6 +306,7 @@ void reset_game_params ()
 	game_doc_about = NULL;
 	game_doc_rules = NULL;
 	game_doc_strategy = NULL;
+	game_doc_history = NULL;
 	game_white_string = "White";
 	game_black_string = "Black";
 	//state_player = WHITE;
@@ -1096,6 +1134,34 @@ void gui_init ()
 	sb_update ();
 }
 
+void html_help_gen_format (FILE *fout, gchar *outfile, gchar *title, gchar *string)
+{
+	gchar *tmpfilename = "tmp";
+	FILE *ftmp = fopen (tmpfilename, "w");
+	gchar *command;
+	if (!string) return;
+	if (!ftmp)
+	{
+		fprintf (stderr, "couldn't open %s for writing", tmpfilename);
+		perror (NULL);
+		exit(1);
+	}
+	fprintf (ftmp, string);
+	fclose (ftmp);
+	fprintf (fout, "<h2> %s </h2>\n\n <pre>", title);
+	fflush (fout);
+	command = g_strdup_printf ("lynx -dump -dont_wrap_pre \"%s\" | fmt -s >> \"%s\"", tmpfilename, outfile);
+	if (system (command) < 0)
+	{
+		fprintf (stderr, "failed to execute command %s: ", command);
+		perror (NULL);
+		exit (1);
+	}
+	fseek (fout, 0, SEEK_END);
+	fprintf (fout, "\n</pre>\n");
+	g_free (command);
+}
+
 void html_help_gen_game (Game *game)
 {
 	FILE *fout;
@@ -1104,24 +1170,59 @@ void html_help_gen_game (Game *game)
 	fout = fopen (filename, "w");
 	if (!fout)
 	{
-		fprintf (stderr, "couldn't open output file %s: ", filename);
+		fprintf (stderr, "couldn't open %s for writing: ", filename);
 		perror (NULL);
 		g_free (filename);
 		return;
 	}
-	g_free (filename);
+	reset_game_params ();
 	opt_game = game;
 	game->game_init(game);
-	fprintf (fout, 
-			"<h1>%s</h1>"
-			"%s"
-			"<h2>Rules</h2> <pre>%s</pre>"
-			"<h2>Strategy</h2> <pre>%s</pre>",
-			game->name,
-			game_single_player ? "Single player game" : "Two player game",
-			game_doc_rules ? game_doc_rules : "Not yet written",
-			game_doc_strategy ? game_doc_strategy : "Not yet written"
-			);
+	fprintf (fout, "<h1 align=\"center\"> %s </h1>\n\n", game->name);
+	fprintf (fout, "%s<br>\n", game_single_player ? "Single player game" : "Two player game");
+	html_help_gen_format (fout, filename, "Rules", game_doc_rules);
+	html_help_gen_format (fout, filename, "Strategy", game_doc_strategy);
+	html_help_gen_format (fout, filename, "History", game_doc_history);
+	g_free (filename);
+	fclose (fout);
+}
+
+void html_help_gen_gamelist ()
+{
+	int i;
+	static GSList *group_list = NULL;
+	gchar *group;
+	FILE *fout;
+	fout = fopen ("gamelist.html", "w");
+	if (!fout)
+	{
+		fprintf (stderr, "couldn't open gamelist.html for writing: ");
+		perror (NULL);
+		exit (1);
+	}
+	for (i=0; i<num_games; i++)
+	{
+		if (!games[i]->group) games[i]->group = "";
+		if (!g_slist_find (group_list, games[i]->group))
+			group_list = g_slist_append (group_list, games[i]->group);
+	}
+
+	fprintf (fout, "<h2> Games </h2> \n\n<ul>");
+	while ((group = g_slist_nth_data (group_list, 0)))
+	{
+		if (group[0] != '\0')
+			fprintf (fout, "<li> %s <ul>\n", group);
+		for (i=0; i<num_games; i++)
+		{
+			if (strcmp (games[i]->group, group)) continue;
+			fprintf (fout, "<li> <a href=\"/games/%s.html\">%s</a> </li>\n", games[i]->name, games[i]->name);
+		}
+		if (group[0] != '\0')
+			fprintf (fout, "</ul> </li>\n");
+			
+		group_list = g_slist_nth (group_list, 1);
+	}
+	fprintf (fout, "</ul>\n\n");
 	fclose (fout);
 }
 
@@ -1140,6 +1241,7 @@ void html_help_gen ()
 		html_help_gen_game (opt_game);
 		return;
 	}
+	html_help_gen_gamelist ();
 	for (i=0; i<num_games; i++)
 		html_help_gen_game (games[i]);
 }
