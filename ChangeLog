@@ -31,3 +31,10 @@
 2003-07-22	Arvind Narayanan	<arvindn@users.sourceforge.net>
 
 	* menu: added Help->Begging
+
+2003-07-25	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* flw.c: wrote a new game Four Letter Words. Still incomplete, needs highlighting of selected square, and is too simple to win.
+	* board: added highlighting feature. Still needs to be implemented by games though.
+	* menu.c: fixed bug where sb_update wasn't called when changing the player
+	* bumped version to 0.10.3

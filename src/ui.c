@@ -43,12 +43,12 @@ extern Game
 	Othello, Samegame, Rgb, Fifteen, Memory, 
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
-	Pentaline, Mastermind, Pacman
+	Pentaline, Mastermind, Pacman, Flw
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
-	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Hiq, 
+	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Flw, &Hiq, 
 	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Othello,
 	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, };
 
@@ -59,7 +59,7 @@ gboolean engine_flag = FALSE; // are we client or server. server will set it to 
 /* streams to communicate with engine */
 FILE *move_fin, *move_fout;
 
-Pos cur_pos = {NULL, NULL, 0};
+Pos cur_pos = {NULL, NULL, NULL, 0};
 
 int board_wid, board_heit;
 
@@ -88,6 +88,8 @@ gboolean state_gui_active = FALSE;
 gboolean game_draw_cell_boundaries = FALSE;
 gboolean game_start_immediately = FALSE;
 gboolean game_file_label = 0,  game_rank_label = 0;
+
+char *game_highlight_colors = NULL;
 
 HeurTab *game_htab = NULL;
 int game_state_size = 0;
@@ -235,6 +237,7 @@ void reset_game_params ()
 	game_state_size = 0;
 	game_newstate = NULL;
 	game_reset_uistate = NULL;
+	game_highlight_colors = NULL;
 	game_draw_cell_boundaries = FALSE;
 	game_start_immediately = FALSE;
 	game_file_label = FILERANK_LABEL_TYPE_NONE;
@@ -242,7 +245,9 @@ void reset_game_params ()
 	game_score_fields = prefs_score_fields_def;
 	game_score_field_names = prefs_score_field_names_def;
 	if (cur_pos.board) free (cur_pos.board);
+	if (cur_pos.render) free (cur_pos.render);
 	cur_pos.board = NULL;
+	cur_pos.render = NULL;
 	cur_pos.state = NULL;
 	cur_pos.num_moves = 0;
 }
@@ -315,9 +320,16 @@ void set_game_params ()
 	board_wid = game->board_wid;
 	board_heit = game->board_heit;
 
-	cur_pos.board = (char *) malloc (board_wid * board_heit);
+	cur_pos.board = (byte *) malloc (board_wid * board_heit);
 	assert (cur_pos.board);
 
+	if (!engine_flag)
+	{
+		cur_pos.render = (byte *) malloc (board_wid * board_heit);
+		memset (cur_pos.render, 0, board_wid * board_heit);
+		assert (cur_pos.render);
+	}
+	
 	if (engine_flag) 
 		// server always executes this
 		game_setinitpos (&cur_pos);
@@ -854,11 +866,7 @@ void gui_init ()
 
    	gtk_widget_set_events(board_area, 
 			gtk_widget_get_events (board_area) 
-			|	GDK_BUTTON_PRESS_MASK 
-			|   GDK_BUTTON_RELEASE_MASK
-			|   GDK_POINTER_MOTION_MASK
-			|	GDK_LEAVE_NOTIFY_MASK
-			|	GDK_KEY_PRESS_MASK);
+			|	GDK_ALL_EVENTS_MASK);
 	gtk_signal_connect (GTK_OBJECT (board_area), "leave_notify_event",
 		GTK_SIGNAL_FUNC (board_clicked), NULL);
 	gtk_signal_connect (GTK_OBJECT (board_area), "motion_notify_event",
@@ -868,6 +876,8 @@ void gui_init ()
 	gtk_signal_connect (GTK_OBJECT (board_area), "button_press_event",
 		GTK_SIGNAL_FUNC (board_clicked), NULL);
 	gtk_signal_connect (GTK_OBJECT (main_window), "key_press_event",
+		GTK_SIGNAL_FUNC (board_clicked), NULL);
+	gtk_signal_connect (GTK_OBJECT (main_window), "key_release_event",
 		GTK_SIGNAL_FUNC (board_clicked), NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
 	sb_game_label = gtk_label_new (opt_game ? opt_game->name : NULL);

@@ -35,11 +35,17 @@
 //! for showing names of rows and columns
 static GtkWidget *board_rowbox_real = NULL, *board_colbox_real = NULL;
 
-//! Colors for the light squares, dark squares and the lines
-GdkColor gdk_colors[3];
+//! Colors for the light squares, dark squares, lines
+GdkColor board_colors[6];
+
+//! Colors for highlighting
+GdkColor board_highlight_colors[3];
 
 //! gcs for light squares, dark squares and lines
 GdkGC *board_gcs[3] = {NULL, NULL, NULL};
+
+//! gcs for highlighting
+GdkGC *board_highlight_gcs[3] = {NULL, NULL, NULL};
 
 //! Images representing the pieces
 static GdkPixmap **pieces = NULL;
@@ -96,6 +102,23 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 				real_x * cell_size, real_y * cell_size,
 				(real_x + 1) * cell_size, real_y * cell_size);
 	}
+	if (cur_pos.render[y * board_wid + x] == RENDER_HIGHLIGHT1 && !board_suspended)
+	{
+		int incr = game_draw_cell_boundaries ? 1 : 0;
+		gdk_draw_line (board_area->window, board_highlight_gcs[0],
+			real_x * cell_size + incr, real_y * cell_size + incr,
+			real_x * cell_size + incr, (real_y + 1) * cell_size - 1);
+		gdk_draw_line (board_area->window, board_highlight_gcs[0],
+			real_x * cell_size + incr, real_y * cell_size + incr,
+			(real_x + 1) * cell_size - 1, real_y * cell_size + incr);
+		gdk_draw_line (board_area->window, board_highlight_gcs[0],
+			(real_x + 1) * cell_size - 1, real_y * cell_size + incr,
+			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
+		gdk_draw_line (board_area->window, board_highlight_gcs[0],
+			real_x * cell_size + incr, (real_y + 1) * cell_size - 1,
+			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
+	}
+
 }
 
 //! A wrapper around board_refresh_cell_real() to take care of whether the board is flipped
@@ -187,18 +210,19 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 /* FIXME: clean up this function */
 {
 	int row, col, type;
-	int status;
+	int status = 0;
 	byte *move;
 	if (!opt_game) return FALSE;
 	if (ui_gameover) return FALSE;
-	if (event->type == GDK_KEY_PRESS)
+	if (event->type == GDK_KEY_PRESS && 
+			!(((GdkEventKey *)event)->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
 	{
 		status = board_key_pressed (widget, (GdkEventKey *)event, data, &move);
 		if (status < 0) return FALSE;
 	}
 	else
 	{
-		if (event->type != GDK_MOTION_NOTIFY)
+		if (event->type == GDK_BUTTON_PRESS || event->type == GDK_BUTTON_RELEASE)
 		{
 			if (player_to_play != HUMAN)
 			{
@@ -300,6 +324,29 @@ static gchar *board_get_rank_label_str (int label, int idx)
 	return board_get_filerank_label_str (label, idx);
 }
 
+static void board_color_init (char *color, GdkColor *gdkcolor, GdkGC **gc, GdkColormap *cmap, GtkWidget *board_area)
+{
+	gdkcolor->red = 256 * color[0];
+	gdkcolor->green = 256 * color[1];
+	gdkcolor->blue = 256 * color[2];
+	gdk_color_alloc (cmap, gdkcolor);
+	if (*gc) 
+		gdk_gc_unref (*gc);
+	*gc = gdk_gc_new(board_area->window);
+	gdk_gc_set_foreground (*gc, gdkcolor);
+
+}
+/*{		board_colors[i].red = 256 * game->colors[i*3 + 0];
+		board_colors[i].green = 256 * game->colors[i*3 + 1];
+		board_colors[i].blue = 256 * game->colors[i*3 + 2];
+		gdk_color_alloc (board_colormap, &board_colors[i]);
+		if (board_gcs[i]) 
+			gdk_gc_unref (board_gcs[i]);
+		board_gcs[i] = gdk_gc_new(board_area->window);
+		gdk_gc_set_foreground (board_gcs[i], &board_colors[i]);
+
+}*/
+
 //! initialization of the board
 void board_init ()
 {
@@ -369,18 +416,15 @@ void board_init ()
 	
 	board_colormap = gdk_colormap_get_system ();
 
-	for (i=0; i<=2; i++)
-	{
-		if (i == 2 && !game_draw_cell_boundaries) continue;
-		gdk_colors[i].red = 256 * game->colors[i*3 + 0];
-		gdk_colors[i].green = 256 * game->colors[i*3 + 1];
-		gdk_colors[i].blue = 256 * game->colors[i*3 + 2];
-		gdk_color_alloc (board_colormap, &gdk_colors[i]);
-		if (board_gcs[i]) 
-			gdk_gc_unref (board_gcs[i]);
-		board_gcs[i] = gdk_gc_new(board_area->window);
-		gdk_gc_set_foreground (board_gcs[i], &gdk_colors[i]);
-	}
+	board_color_init (&game->colors[0], &board_colors[0], &board_gcs[0], board_colormap, board_area);
+	board_color_init (&game->colors[3], &board_colors[1], &board_gcs[1], board_colormap, board_area);
+	if (game_draw_cell_boundaries)
+		board_color_init (&game->colors[6], &board_colors[2], &board_gcs[2], board_colormap, board_area);
+	if (game_highlight_colors)
+		for (i=0; i<3; i++)
+			board_color_init (&game_highlight_colors[3*i],
+					&board_highlight_colors[i], &board_highlight_gcs[i], 
+					board_colormap, board_area);
 
 	for (i=0; i<2*num_pieces; i++)
 	{
@@ -418,7 +462,7 @@ void board_init ()
 			if (pixmap)
 			{
 				pieces[i] = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-					board_colormap, NULL, gdk_colors + i / num_pieces, pixmap);
+					board_colormap, NULL, board_colors + i / num_pieces, pixmap);
 				assert (pieces[i]);
 			}
 		}

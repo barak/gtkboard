@@ -378,7 +378,7 @@ void prefs_add_highscore (gchar *score, int temps)
 {
 	int i, j;
 	char *realscore = strpbrk (score, "0123456789");
-	if (!realscore) return;
+	if (!realscore) realscore = "";
 	if (!game_scorecmp) return;
 	for (i=0; i<num_highscores; i++)
 		if (game_scorecmp (realscore, temps, 

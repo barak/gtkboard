@@ -34,6 +34,7 @@
 typedef enum {WHITE, BLACK} Player;
 
 //! Used for representing the type of user input in game_getmove() and game_getmove_kb()
+/** This layer of abstraction exists so that to write a game it will not be necessary to have the g[dt]k headers */
 typedef enum {
 	GTKBOARD_BUTTON_PRESS = 1, 
 	GTKBOARD_BUTTON_RELEASE, 
@@ -108,6 +109,19 @@ typedef struct
 	void (*game_init) ();
 }Game;
 
+//! How to render a square
+typedef enum 
+{
+	//! Just use the default pixmap
+	RENDER_NONE, 
+	//! Draw a colored border around the square. See #game_highlight_colors
+	RENDER_HIGHLIGHT1, RENDER_HIGHLIGHT2, RENDER_HIGHLIGHT3,
+	//! Shade the square. Not yet implemented
+	RENDER_SHADE1, RENDER_SHADE2, RENDER_SHADE3,
+	//! Hide the square (show the background color)
+	RENDER_HIDE
+} RenderType;
+
 //! A struct describing a position in a game.
 typedef struct
 {
@@ -118,6 +132,10 @@ typedef struct
 	  0 always indicates an empty square. The origin of the coordinates is
 	  at the bottom left. */
 	byte *board;
+
+	//! Additional information about how to render the square
+	/** For example, highlight, shade, hide etc. See #RenderType*/
+	byte *render;
 
 	//! State information required to completely describe the position
 	/** Some games are <i>stateful</i>, which means that the position can not
@@ -252,6 +270,9 @@ extern gboolean game_stateful;
 /** Example of game which draws boundaries: pentaline (pentaline.c)
     Example of game which doesn't draw boundaries: memory (memory.c) */
 extern gboolean game_draw_cell_boundaries;
+
+//! Colors to use for highlighting squares.
+extern char *game_highlight_colors;
 
 //! Should we allow the user to move back and forward in the game. Default: TRUE
 /** You should not set this to FALSE unless you have a compelling reason to do so.

@@ -53,6 +53,7 @@
 static char antichess_colors[] = 
 	{200, 200, 130, 
 	0, 140, 0};
+char antichess_highlight_colors[9] = {0xff, 0, 0};
 
 static int antichess_initpos[] = 
 {
@@ -110,6 +111,7 @@ void antichess_init ()
 	game_eval_incr = antichess_eval_incr;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_highlight_colors = antichess_highlight_colors;
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"
@@ -227,13 +229,19 @@ static int oppcolor (byte *pos, int oldx, int oldy, int x, int y)
 	return 0;
 }
 
+static int oldx = -1, oldy = -1, oldval = -1;
+static int prom = 0, prom_x, prom_oldx;
+
+void antichess_free ()
+{
+	oldx = -1, oldy = -1, prom = 0;
+}
+
 int antichess_getmove (Pos *pos, int x, int y, 
 		GtkboardEventType type, Player player, byte ** movep)
 	/* Translate mouse clicks into move */
 {
 	static byte move [7];
-	static int oldx = -1, oldy = -1, oldval = -1;
-	static int prom = 0, prom_x, prom_oldx;
 	int val;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;

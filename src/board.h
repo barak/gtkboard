@@ -26,8 +26,6 @@
 #include "game.h"
 
 
-extern GdkColor gdk_colors[3];
-extern GdkGC *board_gcs[3];
 extern gboolean board_suspended ;
 extern GtkWidget *board_area;
 extern GtkWidget *board_rowbox, *board_colbox;

@@ -488,8 +488,8 @@ void menu_set_player (gpointer *data, guint what, GtkWidget *widget)
 			ui_black = NONE;
 			break;
 	}
-	if (ui_white == NONE || ui_black == NONE)
-		return;
+
+	sb_update ();
 }
 
 void menu_save_file_dialog ()
@@ -672,7 +672,7 @@ void menu_back_forw (gpointer data, guint what)
 			cur_pos.num_moves --;
 			if (game_single_player)
 			{
-				if (!ui_cheated)
+				if (!ui_cheated && game_scorecmp)
 					sb_message ("You cheated! No highscore for this game.", FALSE);
 				ui_cheated = TRUE;
 			}
