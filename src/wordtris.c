@@ -503,15 +503,32 @@ static char ** wordtris_getbgxpm ()
 	return xpm;
 }
 
+// returns hamming distance
+static int diffcnt (const char *w1, const char *w2, int len)
+{
+	int cnt = 0, i;
+	for (i=0; i<len; i++)
+		if (w1[i] != w2[i])
+			cnt++;
+	return cnt;
+}
 
 static void wordtris_setinitpos (Pos *pos)
 {
 	int i, j;
-	const char *word = flwords [random() % num_flwords];
+	const char *word;
 	for (i=0; i<board_wid * board_heit; i++)
 		pos->board[i] = 0;
-	for (i=0; i<WORDTRIS_LEN; i++)
-		pos->board [i] = word[i] - 'a' + 1;
+	// make sure we have a neighbor
+	while (1)
+	{
+		word = flwords [random() % num_flwords];
+		for (i=0; i<WORDTRIS_LEN; i++)
+			pos->board [i] = word[i] - 'a' + 1;
+		for (j=0; j<num_flwords; j++)
+			if (diffcnt (word, flwords[j], WORDTRIS_LEN) == 1)
+				return;
+	}
 }
 
 static void wordtris_setinitrender (Pos *pos)
@@ -621,7 +638,7 @@ int wordtris_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_
 gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 {
 	int i, j;
-	int minx = -1, miny = board_heit;
+	int minx = -1, miny = board_heit, minval = WORDTRIS_WILDCARD;
 	for (i=0; i < WORDTRIS_LEN; i++)
 	{
 		for (j=1; j<board_heit; j++)
@@ -629,10 +646,12 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 			int val = board [j * board_wid + i];
 			if (val == letter || val == WORDTRIS_WILDCARD)
 			{
-				if (j < miny)
+				if (j < miny 
+						|| (minval == WORDTRIS_WILDCARD && val != WORDTRIS_WILDCARD))
 				{
 					minx = i;
 					miny = j;
+					minval = val;
 				}
 			}
 #ifdef ONLY_LOWEST

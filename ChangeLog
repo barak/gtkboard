@@ -78,3 +78,8 @@
 	* game.h: implemented game_setinitrender	
 	* wordtris.c: implemented changing render with kb
 	* mastermind.c: implemented changing render with kb
+
+2003-08-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* flw.c: implemented render
+	* wordtris: fixed starting with words without any neighbor

@@ -39,6 +39,7 @@
 #define FLW_LEN 4
 
 char flw_colors[9] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0, 0, 0xff};
+char flw_highlight_colors[9] = {0xff, 0, 0, 0, 0, 0, 0, 0, 0};
 
 static char **flw_pixmaps [] = 
 {
@@ -151,6 +152,7 @@ static void flw_init ()
 	game_scorecmp = game_scorecmp_def_iscore;
 	game_score_fields = flw_score_fields;
 	game_score_field_names = flw_score_field_names;
+	game_highlight_colors = flw_highlight_colors;
 	game_doc_about = 
 		"Four letter words\n"
 		"Single player game\n"
@@ -178,10 +180,18 @@ ResultType flw_who_won (Pos *pos, Player to_play, char **commp)
 int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp, int ** rmovep)
 {
+	static int rmove[7];
+	int *rp = rmove;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
 	if (y == 0 || y == board_heit - 1) return 0;
 	if (pos->board [y * board_wid + x] == 0) return 0;
+	if (y != 1 && pos->board [(y-1) * board_wid + x] != 0) return 0;
+	if (flw_curx == x && flw_cury == y) return 0;
+	*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = 0;
+	*rp++ = x; *rp++ = y; *rp++ = RENDER_HIGHLIGHT1;
+	*rp++ = -1;
+	*rmovep = rmove;
 	flw_curx = x;
 	flw_cury = y;
 	return 0;
@@ -189,6 +199,8 @@ int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 
 int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
 {
+	static int rmove[7];
+	int *rp = rmove;
 	static byte move[10];
 	byte *mp = move;
 	int i, j, cury;
@@ -198,6 +210,7 @@ int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **r
 		if (!(pos->board [flw_cury * board_wid] &&
 				(pos->board [(flw_cury-1) * board_wid] == 0 || flw_cury == 1)))
 		{
+			assert (0);
 			// find the current row
 			for (j = board_heit - 1; j>=0 && pos->board[j * board_wid]; j--)
 				;
@@ -222,12 +235,22 @@ int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **r
 			return -1;
 		if (flw_cury >= 0)
 		{
-			int diffcnt = 0;
+			int diff_cnt_prev = 0, diff_cnt_last = 0;
 			for (i=0; i<FLW_LEN; i++)
+			{
 				if (word[i] != prevword[i])
-					diffcnt++;
-			if (diffcnt != 1)
-				return -1;			
+					diff_cnt_prev++;
+				if (word[i] != flw_chain[FLW_LEN+1][i])
+					diff_cnt_last++;
+			}
+			if (diff_cnt_prev != 1)
+				return -1;
+			if (cury == 1 && diff_cnt_last != 1)
+				return -1;	
+		}
+		if (flw_cury >= 0)
+		{
+			*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = 0;
 		}
 		if (flw_cury < 0)
 		{
@@ -235,6 +258,9 @@ int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **r
 			flw_cury = board_heit - 1;
 		}
 		flw_cury --;
+		*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
 		for (i=0; i<FLW_LEN; i++)
 		{
 			*mp++ = i; *mp++ = flw_cury; *mp++ = word[i] - 'a' + 1;
@@ -247,12 +273,20 @@ int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **r
 		return -1;
 	if (key == GDK_Right)
 	{
+		*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = 0;
 		if (++flw_curx == FLW_LEN) flw_curx = 0;
+		*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
 		return 0;
 	}
 	if (key == GDK_Left)
 	{
+		*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = 0;
 		if (--flw_curx < 0) flw_curx = FLW_LEN - 1;
+		*rp++ = flw_curx; *rp++ = flw_cury; *rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
 		return 0;
 	}
 	if (key >= GDK_A && key <= GDK_Z)
