@@ -136,11 +136,14 @@
 	* othello.c: mapped space key to passing
 	* towers.c: started Towers of Hanoi
 
-2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+2003-09-05	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* towers.c: tower of Hanoi almost finished, but some decent looking pixmaps badly needed!
 	
-2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+2003-09-06	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* towers.c: improved graphics
 	* quarto.c: new game implemented
 	* board.c: fixed some bugs in RENDER_SHADE etc
 	* ataxx.c: implemented highlight
+
+2003-09-07	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* kttour.c: knight's tour - new game

@@ -179,6 +179,7 @@ float game_ab_hash (Pos *pos, int player, int level,
 		{
 			ab_leaf_cnt ++;
 			ab_tree_exhausted = 0;
+			hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
 		}
 		else 
 		{
@@ -196,9 +197,9 @@ float game_ab_hash (Pos *pos, int player, int level,
 				else
 					val = game_ab_hash 
 						(&newpos, WHITE, level-1, alpha, beta, NULL, depth+1);
+				hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
 			}
 		}
-		hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
 		if (first) 
 		{
 			if (ret_movep)	movcpy (best_move, move);

@@ -240,6 +240,15 @@ byte *quarto_movegen (Pos *pos, Player player)
 	byte movbuf[2048];
 	byte *movlist, *movp = movbuf;
 	int from_x, from_y, to_x, to_y;
+
+	int count = 0;
+	for (to_x=0; to_x<4; to_x++)
+	for (to_y=0; to_y<4; to_y++)
+		if (pos->board [to_y * board_wid + to_x] != QUARTO_EMPTY)
+			count++;
+	assert ((player == WHITE && count % 2 == 0) || (player == BLACK && count % 2 == 1));
+
+		
 	for (from_x=5; from_x<9; from_x++)
 	for (from_y=0; from_y<4; from_y++)
 	{

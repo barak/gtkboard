@@ -72,10 +72,18 @@ void kttour_init ()
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL("kttour");
 	game_doc_rules = 
-		" Kttour rules\n\n"
-		" Complete the knight's tour of the chessboard.\n"
+		"Kttour rules\n\n"
+		"  Complete the knight's tour of the chessboard.\n"
 		"\n"
-		"In the initial position click on any square to start the tour on that square. Next click on the square you want the knight to move to, and so on. The square where you started will be shown in green and the other squares in the tour will be grey. At any point you can click on the green square to make it the current square, in which case the current square will become the \"start\" square. The objective is to fill all 64 squares in such a way that the last square is one knight-move away from the first, in as little time as possible. In this game, you can undo your moves freely. This won't prevent you from getting a highscore."
+		"  In the initial position click on any square to start the tour on that square. "
+		"Next click on the square you want the knight to move to, and so on. "
+		"The square where you started will be shown in green and the other squares in the tour will be grey. "
+		"At any point you can click on the green square to make it the current square, in which case the current square will become the \"start\" square. "
+		"\n\n"
+		"  The objective is to fill all 64 squares in such a way that the last square is one knight-move away from the first, in as little time as possible. "
+		"In this game, you can undo your moves freely. This won't prevent you from getting a highscore. "
+		"\n\n"
+		"  The blue balls that you see are hints. They are there to make your life easier, but you don't have to necessarily click on a ball."
 		;
 }
 
@@ -142,6 +150,77 @@ ResultType kttour_who_won (Pos *pos, Player to_play, char **commp)
 	return are_nbrs (x1, y1, x2, y2) ? RESULT_WON : RESULT_NOTYET;
 }
 
+static int incx[] = {-2, -2, -1, -1, 1, 1, 2, 2};
+static int incy[] = {-1, 1, -2, 2, -2, 2, -1, 1};
+
+#define IS_FREE(x) ((x) == KTTOUR_EMPTY || (x) == KTTOUR_HINT)
+
+static int get_degree (byte *board, int i, int j)
+{
+	int k, x, y;
+	int count = 0;
+	for (k=0; k<8; k++)
+	{
+		x = i + incx[k];
+		y = j + incy[k];
+		if (ISINBOARD (x, y) && IS_FREE(board [y * board_wid + x]))
+			count++;
+	}
+	return count;
+}
+
+static int get_min_degree (byte *board, int i, int j)
+{
+	int k, x, y;
+	int min_deg = 8;
+	for (k=0; k<8; k++)
+	{
+		int deg;
+		x = i + incx[k];
+		y = j + incy[k];
+		if (ISINBOARD (x, y) && IS_FREE(board [y * board_wid + x]))
+			if ((deg = get_degree (board, x, y)) < min_deg)
+				min_deg = deg;
+	}
+	return min_deg;
+}
+
+static void add_hints 
+	(byte *board, int new_x, int new_y, byte **mp)
+{
+	int min_deg_new, min_deg_old;
+	int k, x, y;
+	min_deg_new = get_min_degree (board, new_x, new_y);
+	
+	for (k=0; k<8; k++)
+	{
+		x = new_x + incx[k];
+		y = new_y + incy[k];
+		if (!ISINBOARD (x, y) || board [y * board_wid + x] != KTTOUR_EMPTY)
+				continue;
+		if (get_degree (board, x, y) == min_deg_new)
+		{
+			*(*mp)++ = x;
+			*(*mp)++ = y;
+			*(*mp)++ = KTTOUR_HINT;
+		}
+	}
+	
+	for (x=0; x<board_wid; x++)
+	for (y=0; y<board_heit; y++)
+	{
+		if (board [y * board_wid + x] != KTTOUR_HINT)
+			continue;
+		if (x == new_x && y == new_y)
+			continue;
+		if (are_nbrs (x, y, new_x, new_y) && get_degree (board, x, y) == min_deg_new)
+			continue;
+		*(*mp)++ = x;
+		*(*mp)++ = y;
+		*(*mp)++ = KTTOUR_EMPTY;
+	}
+}
+
 int kttour_getmove 
 	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
 {
@@ -165,6 +244,7 @@ int kttour_getmove
 		*mp++ = cur_x;
 		*mp++ = cur_y;
 		*mp++ = KTTOUR_START;
+		add_hints (pos->board, x, y, &mp);
 		*mp++ = -1;
 		*movp = move;
 		return 1;
@@ -180,6 +260,7 @@ int kttour_getmove
 		*mp++ = cur_y;
 		*mp++ = pos->num_moves == 1 ? KTTOUR_START : KTTOUR_USED;
 	}
+	add_hints (pos->board, x, y, &mp);
 	*mp++ = -1;
 	*movp = move;
 	return 1;
