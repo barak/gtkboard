@@ -396,8 +396,10 @@ byte * engine_search (Pos *pos, int player)
 	byte *move;
 	engine_stop_search = FALSE;
 	if (game_search)
+	{
 		game_search (pos, player, &move);
-	return move;
+		return move;
+	}
 	if (game_single_player)
 		return NULL;
 	move = ab_dfid (pos, player);

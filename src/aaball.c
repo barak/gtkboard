@@ -191,6 +191,11 @@ void rgbmap_ball_shadow_gen (int len, unsigned char *rgbbuf, int fg, int bg, flo
 {
 	int i, j;
 	unsigned char *bufp = rgbbuf;
+	int newred, newgreen, newblue, newcolor;
+	newred   = (fg >> 16) / 4 + 192;
+	newgreen = ((fg >>  8) & 0xff) / 4 + 192;
+	newblue  = (fg & 0xff) / 4 + 192;
+	newcolor = (newred << 16) + (newgreen << 8) + newblue;
 	for (i=0; i<len; i++)
 	for (j=0; j<len; j++)
 	{
@@ -200,6 +205,8 @@ void rgbmap_ball_shadow_gen (int len, unsigned char *rgbbuf, int fg, int bg, flo
 	}
 	rgbmap_ball_gen_real (len, rgbbuf, 0, rad, grad, 
 			(len + shadowlen)/2, (len + shadowlen)/2);
+	rgbmap_ball_gen_real (len, rgbbuf, newcolor, rad, grad, 
+			(len - 1.5 * shadowlen)/2, (len - 1.5 * shadowlen)/2);
 	rgbmap_ball_gen_real (len, rgbbuf, fg, rad, grad, 
 			(len - shadowlen)/2, (len - shadowlen)/2);
 }
