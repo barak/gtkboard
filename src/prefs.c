@@ -26,6 +26,7 @@
 
 #include "prefs.h"
 #include "ui_common.h"
+#include "sound.h"
 
 static Score scores[MAX_HIGHSCORES];
 static int num_highscores = 0;
@@ -38,12 +39,23 @@ gchar* prefs_score_field_names_def[] = {"User", "Score", "Time", "Date", NULL};
 
 ConfigVar prefs_config_vars[] = 
 {
-	{ "sound_dir", "directory to load sounds from", NULL, NULL, NULL },
-	{ "recent_game_1", "recent game 1", NULL, NULL, NULL },
-	{ "recent_game_2", "recent game 1", NULL, NULL, NULL },
-	{ "recent_game_3", "recent game 1", NULL, NULL, NULL },
+	{ "sound_dir", "Directory to load sounds from", NULL, NULL, NULL, NULL },
+	{ "enable_sound", "Enable sound effects", NULL, "true", NULL, sound_enable_pref_cb },
+	{ "recent_game_1", "Recent game 1", NULL, NULL, NULL, NULL },
+	{ "recent_game_2", "Recent game 2", NULL, NULL, NULL, NULL },
+	{ "recent_game_3", "Recent game 3", NULL, NULL, NULL, NULL },
 	{ NULL} 
 };
+
+
+gboolean prefs_get_bool_val (gchar *value)
+{
+	if (!value) return FALSE;
+	if (!strcasecmp (value, "false")) return FALSE;
+	if (!strcasecmp (value, "no")) return FALSE;
+	if (!strcasecmp (value, "0")) return FALSE;
+	return TRUE;
+}
 
 static void prefs_strip_special_chars (gchar *str)
 	// $ is the field separator in our scores file
@@ -455,7 +467,7 @@ gchar *prefs_get_config_val (gchar *key)
 	return NULL;
 }
 
-void prefs_set_config_val (char *key, char *value)
+void prefs_set_config_val_real (char *key, char *value, gboolean callback)
 {
 	ConfigVar *entry = prefs_config_vars;
 	while (entry->key)
@@ -464,11 +476,18 @@ void prefs_set_config_val (char *key, char *value)
 		{
 			// NOTE: here the old value should not be freed because it is static
 			entry->cur_val = g_strdup (value);
+			if (callback && entry->callback)
+				entry->callback (key, value);
 			return;
 		}
 		entry++;
 	}
 	fprintf (stderr, "Warning: invalid key %s in config file\n", key);
+}
+
+void prefs_set_config_val (char *key, char *value)
+{
+	prefs_set_config_val_real (key, value, FALSE);
 }
 
 void prefs_write_config_file ()
@@ -493,7 +512,8 @@ void prefs_write_config_file ()
 			fprintf (out, "#%s\n", entry->description);
 		if (entry->comment)
 			fprintf (out, "#\n#%s\n", entry->comment);
-		fprintf (out, "%s = %s\n", entry->key, entry->cur_val ? entry->cur_val : "");
+		fprintf (out, "%s = %s\n", entry->key, entry->cur_val ? entry->cur_val : 
+				(entry->def_val ? entry->def_val : ""));
 		entry++;
 	}
 	
@@ -523,7 +543,8 @@ void prefs_read_config_file ()
 	{
 		gchar **tokens;
 		line_num ++;
-		fgets (linebuf, 1024, in);
+		if (fgets (linebuf, 1024, in) == NULL)
+			continue;
 		g_strstrip (linebuf);
 		if (linebuf[0] == '#' || linebuf[0] == '\0')
 			continue;
@@ -537,7 +558,7 @@ void prefs_read_config_file ()
 		}
 		g_strstrip (tokens[0]);
 		g_strstrip (tokens[1]);
-		prefs_set_config_val (tokens[0], tokens[1][0] ? tokens[1] : NULL);
+		prefs_set_config_val_real (tokens[0], tokens[1][0] ? tokens[1] : NULL, TRUE);
 		g_strfreev (tokens);
 	}
 	

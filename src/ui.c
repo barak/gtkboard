@@ -961,6 +961,8 @@ void gui_init ()
 //		{ "/Settings/_Eval function/_White", NULL, NULL, 0, "<Branch>" },
 //		{ "/Settings/_Eval function/_Black", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Flip Board", "<control>T", menu_board_flip_cb, 0, "" },
+		{ "/Settings/_Enable Sound", NULL, menu_enable_sound_cb, 1, ""},
+		{ "/Settings/_Disable Sound", NULL, menu_enable_sound_cb, 0, ""},
 		{ "/Settings/_Time per move", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Time per move/Default", NULL, 
 			menu_set_delay_cb, DEF_TIME_PER_MOVE, "<RadioItem>" },
@@ -1044,17 +1046,7 @@ void gui_init ()
 		gamename = prefs_get_config_val (tmp = g_strdup_printf ("recent_game_%d", i));
 		g_free (tmp);
 		if (gamename && gamename[0] != '\0')
-//		{
-			/*
-			GtkWidget * child;
-			GtkMenu *game_menu;
-			game_menu = (GtkMenu *) gtk_item_factory_get_widget (menu_factory, "/Game");
-			assert (game_menu);
-			child = gtk_menu_item_new_with_label (gamename);
-			gtk_menu_shell_insert (GTK_MENU_SHELL (game_menu),  child, i);
-			*/
 			menu_insert_game_item (gamename, i);
-//		}
 	}
 
 	menu_set_eval_function ();

@@ -257,8 +257,9 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 //! A wrapper around board_refresh_cell_real() to take care of whether the board is flipped
 void board_refresh_cell (int x, int y)
 {
-	int real_x = (state_board_flipped ? board_wid - 1 - x : x);
-	int real_y = (state_board_flipped ? y : board_heit - 1 - y);
+	int real_x, real_y;
+	real_x = (state_board_flipped ? board_wid - 1 - x : x);
+	real_y = (state_board_flipped ? y : board_heit - 1 - y);
 	board_refresh_cell_real (x, y, real_x, real_y);
 }
 

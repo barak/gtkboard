@@ -28,6 +28,9 @@
 
 #define NUM_RECENT_GAMES 3
 
+typedef void (*PrefsCallbackFunc) (gchar * key, gchar *value);
+
+
 typedef struct
 {
 	char name[32];
@@ -53,6 +56,9 @@ typedef struct
 
 	//! current value
 	char *cur_val;
+
+	//! callback function to call when the value changes
+	PrefsCallbackFunc callback;
 } ConfigVar;
 
 
@@ -71,5 +77,6 @@ void prefs_read_config_file ();
 gchar *prefs_get_config_val (gchar *key);
 void prefs_set_config_val (gchar *key, gchar *value);
 void prefs_write_config_file ();
+gboolean prefs_get_bool_val (gchar *value);
 extern int (*game_scorecmp) (gchar *, int, gchar*, int);
 #endif

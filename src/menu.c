@@ -28,6 +28,7 @@
 #include "aaball.h"
 #include "board.h"
 #include "prefs.h"
+#include "sound.h"
 
 GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
@@ -693,7 +694,10 @@ static void menu_recent_game_cb (GtkWidget *widget, gpointer gamename)
 		if (!strcasecmp (games[i]->name, name))
 		{
 			menu_cleanup_var_menus ();
+			if (opt_game)
+				ui_terminate_game ();
 			opt_game = games[i];
+			menu_start_game ();
 			menu_put_game ();
 		}
 	}
@@ -830,9 +834,6 @@ void menu_cleanup_var_menus ()
 	if (game_levels)
 		// FIXME: do we need to delete recursively?
 		gtk_item_factory_delete_item (menu_factory, "/Game/Levels");
-
-	if (opt_game)
-		ui_terminate_game ();
 }
 
 void menu_set_game (gpointer data, guint which, GtkWidget *widget)
@@ -844,6 +845,8 @@ void menu_set_game (gpointer data, guint which, GtkWidget *widget)
 	g_assert (which >= 0 && which < num_games);
 	
 	menu_cleanup_var_menus ();
+	if (opt_game)
+		ui_terminate_game ();
 	opt_game = games[which];
 	menu_start_game ();
 	sb_update ();
@@ -963,6 +966,12 @@ void menu_set_eval_function ()
 	}
 	oldtab = game_htab;
 }
+
+void menu_enable_sound_cb (gpointer data, guint what)
+{
+	sound_set_enabled (what == 0 ? FALSE : TRUE);
+	sb_update ();
+}
 	
 void sb_error (char *msg, gboolean serious)
 {
@@ -1061,6 +1070,7 @@ void menu_update ()
 	if (ui_stopped) menu_sensitize (MENU_SENS_UI_STOPPED, FALSE);
 	if (eval_fn) menu_sensitize (MENU_SENS_EVAL_FUNCTION, FALSE);
 
+	// TODO: express this in data rather than code
 	if (ui_stopped) 
 	{
 		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
@@ -1075,9 +1085,25 @@ void menu_update ()
 		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
 			"/Game/Pause"));
 	}
+
+	if (sound_get_enabled ())
+	{
+		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
+					"/Settings/Disable Sound"));
+		gtk_widget_hide (gtk_item_factory_get_widget (menu_factory,
+					"/Settings/Enable Sound"));
+	}
+	else
+	{
+		gtk_widget_hide (gtk_item_factory_get_widget (menu_factory,
+					"/Settings/Disable Sound"));
+		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
+					"/Settings/Enable Sound"));
+	}
 		
 }
 	
+//! NOTE: sb_update() is idempotent. When in doubt, call sb_update().
 void sb_update ()
 {
 	char player[5] = "?/?";

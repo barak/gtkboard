@@ -17,6 +17,26 @@ Mix_Music *music = NULL;
 
 char *sound_dir = NULL;
 
+gboolean sound_initialized = FALSE;
+gboolean sound_enabled = TRUE;
+
+void sound_set_enabled (gboolean enabled)
+{
+	sound_enabled = enabled;
+	prefs_set_config_val ("enable_sound", enabled ? "true" : "false");
+}
+
+gboolean sound_get_enabled ()
+{
+	return sound_enabled;
+}
+
+// callback when reading the value from the config file
+void sound_enable_pref_cb (gchar *key, gchar *value)
+{
+	sound_enabled = prefs_get_bool_val (value);
+}
+
 static void find_sound_dir ()
 {
 	sound_dir = prefs_get_config_val ("sound_dir");
@@ -50,9 +70,10 @@ void sound_init()
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers))
 	{
 		fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
-		exit(1);
+//		exit(1);
+		return;
 	}
-
+	sound_initialized = TRUE;
 #endif
 }
 
@@ -92,6 +113,7 @@ void sound_play (SoundEvent event)
 {
 	gchar *sound_file;
 	gchar *file;
+	if (!sound_enabled) return;
 	switch (event)
 	{
 		case SOUND_PROGRAM_START:
@@ -120,6 +142,7 @@ void sound_play (SoundEvent event)
 	}
 	if (!file) return;
 	sound_init ();
+	if (!sound_initialized) return;
 	if (!sound_dir) return;
 	sound_file = g_strdup_printf ("%s/%s", sound_dir, file);
 	sound_play_real (sound_file);

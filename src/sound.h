@@ -19,5 +19,9 @@ typedef enum
 void sound_init();
 void sound_stop ();
 void sound_play (SoundEvent event);
+void sound_set_enabled (gboolean enabled);
+gboolean sound_get_enabled ();
+void sound_set_enabled (gboolean enabled);
+void sound_enable_pref_cb (gchar *key, gchar *value);
 
 #endif
