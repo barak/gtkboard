@@ -45,6 +45,7 @@ extern gboolean ui_stopped;
 extern gboolean ui_cheated;
 extern gboolean ui_gameover;
 extern gboolean state_gui_active;
+extern gboolean game_file_label, game_rank_label;
 
 extern Game *opt_game;
 extern FILE *opt_infile;

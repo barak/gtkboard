@@ -119,6 +119,8 @@ void chess_init ()
 	game_stateful = TRUE;
 	game_state_size = sizeof (Chess_state);
 	game_newstate = chess_newstate;
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Chess\n"
 		"Two player game\n"

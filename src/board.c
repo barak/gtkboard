@@ -32,6 +32,9 @@
 #include "ui.h"
 #include "menu.h"
 
+//! for showing names of rows and columns
+static GtkWidget *board_rowbox_real = NULL, *board_colbox_real = NULL;
+
 //! Colors for the light squares, dark squares and the lines
 GdkColor gdk_colors[3];
 
@@ -257,6 +260,42 @@ void board_free ()
 		free (pieces);
 		pieces = NULL;
 	}
+	if (board_rowbox_real)
+	{
+		gtk_widget_destroy (board_rowbox_real);
+		board_rowbox_real = NULL;
+	}
+	if (board_colbox_real)
+	{
+		gtk_widget_destroy (board_colbox_real);
+		board_colbox_real = NULL;
+	}
+}
+
+static gchar *board_get_filerank_label_str (int label, int idx)
+	// callers must free returned string
+{
+	static gchar tempstr[8];
+	int tmp = label & FILERANK_LABEL_TYPE_MASK;
+	if (tmp == FILERANK_LABEL_TYPE_NUM) 
+		snprintf (tempstr, 8, " %d ", idx + 1);
+	if (tmp == FILERANK_LABEL_TYPE_ALPHA) 
+		snprintf (tempstr, 8, " %c ", 'a' + idx);
+	if (tmp == FILERANK_LABEL_TYPE_ALPHA_CAPS) 
+		snprintf (tempstr, 8, " %c ", 'A' + idx);
+	return tempstr;
+}
+
+static gchar *board_get_file_label_str (int label, int idx)
+{
+	if (label & FILERANK_LABEL_DESC) idx = board_wid - 1 - idx;
+	return board_get_filerank_label_str (label, idx);
+}
+
+static gchar *board_get_rank_label_str (int label, int idx)
+{
+	if (label & FILERANK_LABEL_DESC) idx = board_heit - 1 - idx;
+	return board_get_filerank_label_str (label, idx);
 }
 
 //! initialization of the board
@@ -266,6 +305,7 @@ void board_init ()
 	GdkColormap *board_colormap;
 	Game *game = opt_game;
 	GdkGC *def_gc = gdk_gc_new ((GdkWindow *)board_area->window);
+//	GtkWidget *hbox, *vbox;
 
 	if (!game)
 	{
@@ -281,6 +321,31 @@ void board_init ()
 	for (i=0; i<2*num_pieces; i++)
 		pieces[i] = NULL;
 
+	if (game_file_label)
+	{
+		board_rowbox_real = gtk_hbox_new (TRUE, 0);
+		gtk_box_pack_end (GTK_BOX (board_rowbox), board_rowbox_real, FALSE, FALSE, 0);
+		gtk_widget_set_size_request 
+			(GTK_WIDGET (board_rowbox_real), cell_size * board_wid, -1);
+		for (i=0; i<board_wid; i++)
+			gtk_container_add (GTK_CONTAINER (board_rowbox_real), 
+				gtk_label_new (board_get_file_label_str (game_file_label, i)));
+		gtk_widget_show_all (board_rowbox);
+	}
+	if (game_rank_label)
+	{
+		board_colbox_real = gtk_vbox_new (TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (board_colbox), board_colbox_real, FALSE, FALSE, 0);
+		gtk_widget_set_size_request 
+			(GTK_WIDGET (board_colbox_real), -1, cell_size * board_heit);
+		for (i=0; i<board_heit; i++)
+			gtk_container_add (GTK_CONTAINER (board_colbox_real), 
+				gtk_label_new (board_get_rank_label_str 
+					(game_rank_label, i)));
+		gtk_widget_show_all (board_colbox);
+	}
+	
+	
 	board_colormap = gdk_colormap_get_system ();
 
 	for (i=0; i<=2; i++)

@@ -72,6 +72,10 @@ void ataxx_init ()
 	game_getmove = ataxx_getmove;
 	game_who_won = ataxx_who_won;
 	game_get_pixmap = ataxx_get_pixmap;
+	game_white_string = "Red";
+	game_black_string = "Blue";
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Ataxx\n"
 		"Two player game\n"
@@ -92,7 +96,7 @@ ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
 	int i, wscore = 0, bscore = 0, who_idx;
-	char *who_str [3] = { "white won", "black won", "its a tie" };
+	char *who_str [3] = { "Red won", "Blue won", "its a tie" };
 	byte *move = ataxx_movegen (pos, to_play);
 	for (i=0; i<board_wid * board_heit; i++)
 		if (pos->board[i] == ATAXX_WP)

@@ -196,13 +196,15 @@ static float rgb_eval (Pos *pos, Player to_play)
 	int i, j;
 	int lines[8][2] = 
 	{ 
+		//{start, incr}
+		// rows
 		{0, 1}, {3, 1}, {6, 1},
+		// cols
 		{0, 3}, {1, 3}, {2, 3},
+		// diagonals
 		{0, 4}, {2, 2},
 	};
 	int val, found;
-	int wt = 1 << 24;
-	//return rand();	// unless we have stateful we can't do anything better
 	for (i=0; i<8; i++)
 	{
 		val = -1; found = 1;
@@ -213,12 +215,10 @@ static float rgb_eval (Pos *pos, Player to_play)
 			val = pos->board[lines[i][0] + j * lines[i][1]];
 			if (val == RGB_EMPTY) { found = 0; break; }
 		}
-		if (found) 
+		if (found)
 		{
-			for (i=0; i<board_wid * board_heit; i++)
-				wt >= pos->board[i];
-			return (to_play == WHITE ? -wt : wt);
+			return (to_play == WHITE ? -2*GAME_EVAL_INFTY : 2*GAME_EVAL_INFTY);
 		}
 	}
-	return 0; //1.0 * rand() / RAND_MAX / 10;
+	return 0;
 }

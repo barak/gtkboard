@@ -43,6 +43,14 @@ typedef enum {
 //! Used for representing the result of game_who_won()
 typedef enum {RESULT_WHITE, RESULT_BLACK, RESULT_TIE, RESULT_NOTYET, RESULT_MISC} ResultType;
 
+//! values of #game_file_label and #game_rank_label
+typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_TYPE_ALPHA, FILERANK_LABEL_TYPE_ALPHA_CAPS} FILERANK_LABEL_TYPE;
+
+#define FILERANK_LABEL_TYPE_MASK 0x3
+
+//! if #game_file_label or #game_rank_label is ORed with this the order of file/rank labels will be reversed
+#define FILERANK_LABEL_DESC (1 << 2)
+
 //! Both moves and positions are arrays of <tt>byte</tt>s
 #ifndef byte 
 #define byte gint8
@@ -252,6 +260,9 @@ extern gboolean game_allow_back_forw;
 //! Should the user's clock start ticking as soon as the game is selected. Default: FALSE.
 /** Doesn't make a lot of sense for two player games. In games like maze (maze.c), the user can solve the maze without even making a move, so it would be unfair to let them look at the maze without starting the clock. */
 extern gboolean game_start_immediately;
+
+//! How to display names of rows and columns. This should be of type FILERANK_LABEL_TYPE, optionally ORed with FILERANK_LABEL_DESC
+extern gboolean game_file_label, game_rank_label;
 	
 //! Size of the Pos::state structure
 /** For stateful games, you need to specify the size of the state structure (as defined by the sizeof operator.) */
@@ -266,6 +277,9 @@ extern gchar *game_doc_about;
 extern gchar *game_doc_rules;
 //! The text to be shown in the Strategy dialog for the game (Help->GameName->Strategy).
 extern gchar *game_doc_strategy;
+
+//! User visible labels for white and black
+extern gchar *game_white_string, *game_black_string;
 
 
 //! The columns that will be shown in the highscores.

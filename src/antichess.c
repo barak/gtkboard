@@ -108,6 +108,8 @@ void antichess_init ()
 	game_movegen = antichess_movegen;
 	game_eval = antichess_eval;
 	game_eval_incr = antichess_eval_incr;
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"

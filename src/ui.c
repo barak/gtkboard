@@ -76,6 +76,8 @@ gchar *game_doc_about = NULL;
 gchar *game_doc_rules = NULL;
 gchar *game_doc_strategy = NULL;
 
+gchar *game_white_string = "White", *game_black_string = "Black";
+
 gboolean ui_gameover = FALSE;
 gboolean ui_stopped = TRUE;
 gboolean ui_cheated = FALSE;
@@ -83,6 +85,7 @@ gboolean game_stateful = FALSE;
 gboolean state_gui_active = FALSE;
 gboolean game_draw_cell_boundaries = FALSE;
 gboolean game_start_immediately = FALSE;
+gboolean game_file_label = 0,  game_rank_label = 0;
 
 HeurTab *game_htab = NULL;
 int game_state_size = 0;
@@ -208,12 +211,16 @@ void reset_game_params ()
 	game_doc_about = NULL;
 	game_doc_rules = NULL;
 	game_doc_strategy = NULL;
+	game_white_string = "White";
+	game_black_string = "Black";
 	state_player = WHITE;
 	game_state_size = 0;
 	game_newstate = NULL;
 	game_reset_uistate = NULL;
 	game_draw_cell_boundaries = FALSE;
 	game_start_immediately = FALSE;
+	game_file_label = FILERANK_LABEL_TYPE_NONE;
+	game_rank_label = FILERANK_LABEL_TYPE_NONE;
 	game_score_fields = prefs_score_fields_def;
 	game_score_field_names = prefs_score_field_names_def;
 	if (cur_pos.board) free (cur_pos.board);
@@ -333,7 +340,6 @@ void ui_check_who_won()
 	while(!isspace(*line) && *line) line++;
 	while(isspace(*line)) line++;
 	sb_set_score (line);
-	printf ("%s\n", line);
 	if (!g_strncasecmp(who_str, "NYET", 4))
 	{
 		ui_gameover = FALSE;
@@ -683,7 +689,7 @@ static void parse_opts (int argc, char **argv)
 
 void gui_init ()
 {
-	GtkWidget *hbox = NULL, *vbox = NULL, *frame = NULL;
+	GtkWidget *hbox = NULL, *vbox = NULL, *vbox1 = NULL, *frame = NULL;
 	GtkWidget *separator;
 	GtkAccelGroup *ag;
 	GtkItemFactoryEntry game_items [num_games+1];
@@ -792,14 +798,22 @@ void gui_init ()
 	gtk_box_pack_start (GTK_BOX(vbox), menu_main, FALSE, FALSE, 0);
 
 	frame = gtk_frame_new (NULL);
-	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
 
 	{
+	GtkWidget *innerframe;
 	board_colbox = gtk_vbox_new (FALSE, 0);
 	board_area = gtk_drawing_area_new ();
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), board_colbox, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), board_area, TRUE, FALSE, 0);
+	vbox1 = gtk_vbox_new (FALSE, 0);
+	board_rowbox = gtk_hbox_new (FALSE, 0);
+	innerframe = gtk_frame_new (NULL);
+	gtk_frame_set_shadow_type (GTK_FRAME (innerframe), GTK_SHADOW_IN);
+	gtk_container_add (GTK_CONTAINER (vbox1), innerframe);
+	gtk_container_add (GTK_CONTAINER (innerframe), board_area);
+	gtk_container_add (GTK_CONTAINER (vbox1), board_rowbox);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox1, TRUE, FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (frame), hbox);
 
 	gtk_signal_connect (GTK_OBJECT (board_area), "expose_event",
@@ -851,9 +865,11 @@ void gui_init ()
 	separator = gtk_hseparator_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+	separator = gtk_hseparator_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
-	board_rowbox = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), board_rowbox, FALSE, FALSE, 0);
+	separator = gtk_hseparator_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	sb_message_label = gtk_label_new (NULL);
 	gtk_misc_set_alignment (GTK_MISC (sb_message_label), 0, 0.5);
 	hbox = gtk_hbox_new (TRUE, 0);

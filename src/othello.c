@@ -68,6 +68,10 @@ void othello_init ()
 	game_eval = othello_eval;
 	game_movegen = othello_movegen;
 	game_get_pixmap = othello_get_pixmap;
+	game_white_string = "Red";
+	game_black_string = "Blue";
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Othello\n"
 		"Two player game\n"
@@ -180,7 +184,7 @@ ResultType othello_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
 	int i, wscore = 0, bscore = 0, who_idx ,x, y;
-	char *who_str [3] = { "white won", "black won", "its a tie" };
+	char *who_str [3] = { "Red won", "Blue won", "its a tie" };
 	int found = 0;
 	for (i=0; i<board_wid * board_heit; i++)
 		if (pos->board[i] == OTHELLO_WP)
@@ -275,7 +279,7 @@ static float othello_eval_count (Pos *pos)
 static int othello_eval_mobility_count (Pos *pos, int color)
 {
 	int i, x, y, found, sum = 0;
-	byte our = color == WHITE ? OTHELLO_WP : OTHELLO_BP;
+	byte our = (color == WHITE ? OTHELLO_WP : OTHELLO_BP);
 	for (x=0; x<board_wid; x++)
 		for (y=0; y<board_heit; y++)
 		{

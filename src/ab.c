@@ -162,20 +162,19 @@ float game_ab_hash (Pos *pos, int player, int level,
 			memcpy (newpos.state, newstate, game_state_size);
 		}
 		move_apply (newpos.board, move);
+		retval = hash_get_eval (newpos.board, board_wid * board_heit,
+			   level, &cacheval);
+		if (retval && fabs (cacheval) < GAME_EVAL_INFTY) val = cacheval;
+		else val = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE);
 		if (level == 0)
 		{
 			ab_leaf_cnt ++;
 			ab_tree_exhausted = 0;
-			retval = hash_get_eval (newpos.board, board_wid * board_heit,
-				   level, &cacheval);
-			if (retval) val = cacheval;
-			val = game_eval (&newpos, to_play);
 		}
 		else 
 		{
-			retval = hash_get_eval (newpos.board, board_wid * board_heit,
-				   level, &cacheval);
-			if (retval) val = cacheval;
+			if (fabs (val) >= GAME_EVAL_INFTY)
+				val *= (1 + level);
 			else
 			{
 				if (player == WHITE)
@@ -280,7 +279,8 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			{
 				retval = hash_get_eval (pos->board, board_wid * board_heit,
 				   level, &cacheval);
-				if (retval)  { val = cacheval; found = 1; }
+				if (retval && cacheval < GAME_EVAL_INFTY)  
+					{ val = cacheval; found = 1; }
 			}
 			if (!found)
 				val = game_ab_hash_incr

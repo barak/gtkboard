@@ -80,6 +80,8 @@ void checkers_init ()
 	game_who_won = checkers_who_won;
 	game_eval = checkers_eval;
 	game_get_pixmap = checkers_get_pixmap;
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Checkers\n"
 		"Two player game\n"

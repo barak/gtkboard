@@ -693,7 +693,9 @@ void menu_set_eval_function ()
 	GtkWidget *menu, *menuitem;
 	GtkItemFactoryEntry heur_item;
 	static HeurTab *oldtab = NULL;
-	char *colors[2] = {"White", "Black" }, **color, pathbuf[64];
+	char *colors[2], **color, pathbuf[64];
+	colors[0] = game_white_string;
+	colors[1] = game_black_string;
 	for (color = colors; color <= colors+1; color++)
 	{
 		if (oldtab)
@@ -847,7 +849,7 @@ void sb_update ()
 		gtk_label_set_text (GTK_LABEL(sb_player_label), 
 				ui_white != NONE ? player : "File");
 		gtk_label_set_text (GTK_LABEL(sb_who_label), state_player == WHITE ? 
-				"White" : "Black");
+				game_white_string : game_black_string);
 	}
 	gtk_label_set_text (GTK_LABEL(sb_score_label), sb_score_str);
 	sb_set_turn_image();
