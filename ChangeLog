@@ -60,12 +60,21 @@
 	* menu.c: implemented different cursor types reflecting the state of the game
 
 2003-07-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
 	* board: implemented support for bg image
 	* ninemm: implemented pixmaps and getmove (partially)
 
 
 2003-07-30	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
 	* wordtris.c: fixed compiler warning on NetBsd
 	* game.h: implemented highlighting in game_getmove; implemented support in mastermind and wordtris
 	* :globally changed rand() to random() to fix freeze on some OSes
 	* wordtris.c: implemented wildcard
+
+2003-07-31	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* game.h: implemented render for getmove_kb
+	* game.h: implemented game_setinitrender	
+	* wordtris.c: implemented changing render with kb
+	* mastermind.c: implemented changing render with kb

@@ -128,7 +128,7 @@ float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
 int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
-int (*game_getmove_kb) (Pos *, int, Player, byte **) = NULL;
+int (*game_getmove_kb) (Pos *, int, Player, byte **, int **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
 int (*game_animate) (Pos *, byte **) = NULL;
 char **( *game_get_pixmap) (int, int) = NULL;
@@ -136,6 +136,7 @@ guchar *( *game_get_rgbmap) (int, int) = NULL;
 void (*game_free) () = NULL;
 void * (*game_newstate) (Pos *, byte *) = NULL;
 void (*game_setinitpos) (Pos *) = game_setinitpos_def;
+void (*game_setinitrender) (Pos *) = NULL;
 void (*game_reset_uistate) () = NULL;
 int (*game_scorecmp) (gchar *, int, gchar*, int) = NULL;
 int (*game_scorecmp_def_dscore) (gchar *, int, gchar*, int) = prefs_scorecmp_dscore;
@@ -224,6 +225,7 @@ void reset_game_params ()
 	game_get_pixmap = NULL;
 	game_get_rgbmap = NULL;
 	game_setinitpos = game_setinitpos_def;
+	game_setinitrender = NULL;
 	game_animate = NULL;
 	game_free = NULL;
 	game_scorecmp = NULL;
@@ -337,9 +339,15 @@ void set_game_params ()
 	if (engine_flag) 
 		// server always executes this
 		game_setinitpos (&cur_pos);
-	else if (game_setinitpos == game_setinitpos_def) 
+	else
+	{
+		if (game_setinitpos == game_setinitpos_def) 
 		// client executes only if it is the default
 		game_setinitpos (&cur_pos);
+
+		if (game_setinitrender)
+			game_setinitrender (&cur_pos);
+	}
 	
 	if (!engine_flag)	
 		if (move_fout)

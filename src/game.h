@@ -234,9 +234,10 @@ extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Play
 /**	@param pos
 	@param key the key that the user pressed
 	@param to_play
-	@param movp
+	@param movp a pointer to the move. The game must allocate memory for this (statically).
+	@param rmovp pointer to rendering change
 */
-extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp);
+extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp);
 
 //! Checks if the game is over, and if so, who has won
 /** This function is called after every move, both after single player and two player games. 
@@ -247,6 +248,9 @@ extern ResultType (*game_who_won) (Pos *pos, Player player, char ** scorep);
 //! Pointer to function which sets the game's initial position.
 /** In some games such as maze (maze.c), the initial position is not constant but randomly generated. Such functions use game_setinitpos. The function is expected to set the value of pos->board.*/
 extern void (*game_setinitpos) (Pos *pos);
+
+//! Sets the initial state of the rendering hints
+extern void (*game_setinitrender) (Pos *pos);
 
 //! Returns the pixmap for a piece.
 /** In many games, the pixmaps are generated at runtime (see aaball.c). Such games use this function. The second argument color is 0 or 1 depending on whether the piece will be shown on a light square or a dark square. If your pixmap is antialiased you need this.*/

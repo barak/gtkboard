@@ -42,7 +42,7 @@
 #define WORDTRIS_WILDCARD 27
 
 char wordtris_colors[9] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0, 0, 0xff};
-char wordtris_highlight_colors[9] = {0x80, 0x80, 0x0, 0, 0, 0, 0, 0, 0};
+char wordtris_highlight_colors[9] = {0x0, 0x0, 0xff, 0, 0, 0, 0, 0, 0};
 
 static char *smiley_xpm[] = 
 {
@@ -438,7 +438,7 @@ static int wordtris_wordcmp (const void *p1, const void *p2)
 
 static void wordtris_init ();
 int wordtris_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int wordtris_getmove_kb (Pos *, int, Player, byte **);
+int wordtris_getmove_kb (Pos *, int, Player, byte **, int **);
 void wordtris_free ();
 ResultType wordtris_who_won (Pos *, Player , char **);
 int wordtris_animate (Pos *pos, byte **movp);
@@ -514,6 +514,11 @@ static void wordtris_setinitpos (Pos *pos)
 		pos->board [i] = word[i] - 'a' + 1;
 }
 
+static void wordtris_setinitrender (Pos *pos)
+{
+	pos->render [0] = RENDER_HIGHLIGHT1;
+}
+
 static void wordtris_init ()
 {
 	int i;
@@ -533,6 +538,7 @@ static void wordtris_init ()
 	game_newstate = wordtris_newstate;
 	game_bg_pixmap = wordtris_getbgxpm ();
 	game_highlight_colors = wordtris_highlight_colors;
+	game_setinitrender = wordtris_setinitrender;
 	game_doc_about = 
 		"Wordtris\n"
 		"Single player game\n"
@@ -641,18 +647,36 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 	return TRUE;
 }
 
-int wordtris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
+int wordtris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
 {
+	static int rmove[10];
 	static byte move[10];
 	byte *mp = move;
+	int *rp = rmove;
 	if (key == GDK_Right)
 	{
+		*rp++ = wordtris_curx;
+		*rp++ = 0;
+		*rp++ = 0;
 		if (++wordtris_curx == WORDTRIS_LEN) wordtris_curx = 0;
+		*rp++ = wordtris_curx;
+		*rp++ = 0;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
 		return 0;
 	}
 	if (key == GDK_Left)
 	{
+		*rp++ = wordtris_curx;
+		*rp++ = 0;
+		*rp++ = 0;
 		if (--wordtris_curx < 0) wordtris_curx = WORDTRIS_LEN - 1;
+		*rp++ = wordtris_curx;
+		*rp++ = 0;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
 		return 0;
 	}
 	if (key >= GDK_A && key <= GDK_Z)

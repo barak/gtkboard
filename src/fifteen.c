@@ -47,7 +47,7 @@ static char ** fifteen_get_pixmap (int idx, int color);
 static guchar * fifteen_get_rgbmap (int idx, int color);
 int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player, byte **, int **);
 static int fifteen_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move);
+		byte **move, int **);
 void fifteen_free ();
 void fifteen_init ();
 ResultType fifteen_who_won (Pos *, Player, char **);
@@ -113,7 +113,7 @@ ResultType fifteen_who_won (Pos *pos, Player to_play, char **commp)
 }
 
 
-int fifteen_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
+int fifteen_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	byte *mp = move;

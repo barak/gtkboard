@@ -30,7 +30,7 @@
 #include "../pixmaps/misc.xpm"
 
 #define MASTERMIND_CELL_SIZE 40
-#define MASTERMIND_NUM_PIECES 26
+#define MASTERMIND_NUM_PIECES 28
 
 #define MASTERMIND_BOARD_WID 8
 #define MASTERMIND_BOARD_HEIT 11
@@ -39,11 +39,111 @@
 #define MASTERMIND_MAIN_COL_START 2
 #define MASTERMIND_MAIN_COL_END 5
 
-#define MASTERMIND_GET_SELECTION(x,y) (((x)==7&&(y)>1&&(y)<8)?(y)-1:-1)
+#define MASTERMIND_ARROW 27
+#define MASTERMIND_RETURN 28
+
+#define MASTERMIND_RIGHT_ROW_START 2
+#define MASTERMIND_RIGHT_ROW_END   7
+#define MASTERMIND_GET_SELECTION(x,y) (((x)==7&&(y)>=MASTERMIND_RIGHT_ROW_START&&(y)<(MASTERMIND_RIGHT_ROW_START+6))?(y):-1)
 #define MASTERMIND_IS_MAIN_COL(x) ((x)>1&&(x)<6)
 
 char mastermind_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 char mastermind_highlight_colors[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+static char * arrow_blue_return_40_xpm[]=
+{
+"40 40 2 1",
+". c blue",
+"  c none",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                            ....        ",
+"                            ....        ",
+"                            ....        ",
+"                            ....        ",
+"                            ....        ",
+"                            ....        ",
+"                            ....        ",
+"               .            ....        ",
+"              ..            ....        ",
+"             ...            ....        ",
+"            ....            ....        ",
+"           .....            ....        ",
+"          ......            ....        ",
+"         .......................        ",
+"        ........................        ",
+"        ........................        ",
+"         .......................        ",
+"          ......                        ",
+"           .....                        ",
+"            ....                        ",
+"             ...                        ",
+"              ..                        ",
+"               .                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+};
+
+static char * arrow_blue_left_40_xpm[]=
+{
+"40 40 2 1",
+". c blue",
+"  c none",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"               .                        ",
+"              ..                        ",
+"             ...                        ",
+"            ....                        ",
+"           .....                        ",
+"          ......                        ",
+"         .......                        ",
+"        ........                        ",
+"       .........                        ",
+"      ............................      ",
+"     .............................      ",
+"     .............................      ",
+"      ............................      ",
+"       .........                        ",
+"        ........                        ",
+"         .......                        ",
+"          ......                        ",
+"           .....                        ",
+"            ....                        ",
+"             ...                        ",
+"              ..                        ",
+"               .                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+"                                        ",
+};
+
 
 int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] = 
 {
@@ -57,7 +157,7 @@ int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] =
 	0, 0, 0, 0, 0, 0, 0, 2,
 	0, 0, 0, 0, 0, 0, 0, 1,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0,27, 0,
 };
 
 
@@ -76,11 +176,14 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 static ResultType mastermind_who_won (Pos *, Player, char **);
 static void mastermind_setinitpos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
-int mastermind_getmove_kb (Pos *, int , Player, byte **);
+int mastermind_getmove_kb (Pos *, int , Player, byte **, int **);
 void mastermind_reset_uistate ();
 byte * mastermind_movegen (Pos *, int);
 float mastermind_eval (Pos *, int);
 int mastermind_get_cur_row (byte *);
+void mastermind_setinitrender (Pos *);
+void mastermind_free ();
+
 
 
 void mastermind_init ()
@@ -97,6 +200,8 @@ void mastermind_init ()
 	game_score_fields = mastermind_score_fields;
 	game_score_field_names = mastermind_score_field_names;
 	game_highlight_colors = mastermind_highlight_colors;
+	game_setinitrender = mastermind_setinitrender;
+	game_free = mastermind_free;
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"
@@ -109,6 +214,11 @@ void mastermind_init ()
 		"Select a color by clicking on one of the balls on the extreme right. Place any 4 colors of your choice on the middle 4 squares of the bottom row and hit enter. You will get two numbers on the left. The number of black balls indicates how many balls you've got in the correct position. The number of white balls indicates how many balls you've got n the wrong position. Now try again on the second row. Repeat until you get all four black balls.";
 	
 	// TODO: complete this
+}
+
+void mastermind_setinitrender (Pos *pos)
+{
+	pos->render [MASTERMIND_RIGHT_ROW_START * board_wid + board_wid - 1] = RENDER_HIGHLIGHT1;
 }
 
 ResultType mastermind_who_won (Pos *pos, Player to_play, char **commp)
@@ -164,6 +274,10 @@ char ** mastermind_get_pixmap (int idx, int color)
 	static char dice_pixbuf[MASTERMIND_CELL_SIZE*(MASTERMIND_CELL_SIZE)+1];
 	static gboolean first = TRUE;
 	colors = mastermind_colors;
+	if (idx == MASTERMIND_ARROW)
+		return arrow_blue_left_40_xpm;
+	else if (idx == MASTERMIND_RETURN)
+		return arrow_blue_return_40_xpm;
 	if (idx < 16)
 	{
 		fg += (idx & 1);
@@ -195,11 +309,15 @@ char ** mastermind_get_pixmap (int idx, int color)
 	return NULL;
 }
 
-static int active = -1;
+static int active = MASTERMIND_RIGHT_ROW_START;
+
+void mastermind_free ()
+{
+	active = MASTERMIND_RIGHT_ROW_START;
+}
 
 void mastermind_reset_uistate ()
 {
-	active = -1;
 }
 
 int mastermind_getmove 
@@ -208,7 +326,9 @@ int mastermind_getmove
 	static int rmove[7];
 	int *rp = rmove;
 	int tmp;
-	static byte move[4];
+	int i, found;
+	static byte move[7];
+	byte *mp = move;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
 	tmp = MASTERMIND_GET_SELECTION(x,y);
@@ -236,23 +356,67 @@ int mastermind_getmove
 	if (!MASTERMIND_IS_MAIN_COL(x)) return -1;
 	if (y == board_heit -1) return -1;
 	if (y != mastermind_get_cur_row (pos->board)) return -1;
-	move[0] = x;
-	move[1] = y;
-	move[2] = active;
-	move[3] = -1;
+	*mp++ = x;
+	*mp++ = y;
+	*mp++ = active - MASTERMIND_RIGHT_ROW_START + 1;
 	if (movp)
 		*movp = move;	
+	for (found = 0, i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)
+	{
+		if (pos->board [y * board_wid + i] == MASTERMIND_EMPTY && i != x)
+		{
+			found = 1;
+			break;
+		}
+	}
+	if (!found)
+	{
+		*mp++ = MASTERMIND_MAIN_COL_END + 1;
+		*mp++ = y;
+		*mp++ = MASTERMIND_RETURN;
+	}
+	*mp++ = -1;
 	return 1;
 }
 
 
-int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
+int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
 {
 	static byte move[32];
+	static int rmove[7];
 	byte *mp = move;
+	int *rp = rmove;
 	int i, j, nblack = 0, nwhite = 0, seen[4] = { 0 };
 	byte *board = pos->board;
 	int cur_row;
+	if (key == GDK_Up)
+	{
+		*rp++ = board_wid - 1;
+		*rp++ = active;
+		*rp++ = 0;
+		if (++active > MASTERMIND_RIGHT_ROW_END)
+			active = MASTERMIND_RIGHT_ROW_START;
+		*rp++ = board_wid - 1;
+		*rp++ = active;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
+		return 0;
+	}
+	if (key == GDK_Down)
+	{
+		*rp++ = board_wid - 1;
+		*rp++ = active;
+		*rp++ = 0;
+		if (--active < MASTERMIND_RIGHT_ROW_START)
+			active = MASTERMIND_RIGHT_ROW_END;
+		*rp++ = board_wid - 1;
+		*rp++ = active;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovp = rmove;
+		return 0;
+	}
 	if (key != GDK_Return) return 0;
 	if (active < 0) return 0;
 	cur_row = mastermind_get_cur_row (board);
@@ -261,6 +425,15 @@ int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
 	{
 		if (board [cur_row * board_wid + i] == MASTERMIND_EMPTY)
 			return 0;
+	}
+	*mp++ = MASTERMIND_MAIN_COL_END + 1;
+	*mp++ = cur_row;
+	*mp++ = MASTERMIND_EMPTY;
+	if (cur_row < board_heit - 2)
+	{
+		*mp++ = MASTERMIND_MAIN_COL_END + 1;
+		*mp++ = cur_row+1;
+		*mp++ = MASTERMIND_ARROW;
 	}
 	nblack = 0;
 	for (i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)

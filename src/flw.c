@@ -111,7 +111,7 @@ void flw_find_chain (char chain[FLW_LEN+1][FLW_LEN+1])
 
 static void flw_init ();
 int flw_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int flw_getmove_kb (Pos *, int, Player, byte **);
+int flw_getmove_kb (Pos *, int, Player, byte **, int **);
 void flw_free ();
 ResultType flw_who_won (Pos *, Player , char **);
 
@@ -187,7 +187,7 @@ int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 	return 0;
 }
 
-int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
+int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	byte *mp = move;

@@ -249,7 +249,7 @@ gint board_key_pressed (GtkWidget *widget, GdkEventKey *event,
 	if (event->type != GDK_KEY_PRESS)
 		return -1;
 	if (!game_getmove_kb) return -1;
-	status = game_getmove_kb (&cur_pos, event->keyval, state_player, movp);
+	status = game_getmove_kb (&cur_pos, event->keyval, state_player, movp, rmovep);
 	return status;
 }
 
