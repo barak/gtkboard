@@ -98,8 +98,9 @@ gboolean prefs_load_scores (gchar *name)
 		g_free (scorefile);		
 		return FALSE;
 	}
-	for (i=0; !feof (in) && i < MAX_HIGHSCORES; i++)
+	for (i=0; !feof (in) && i < MAX_HIGHSCORES;)
 	{
+		gchar **realline;
 		gchar ** score_fields;
 		/*
 		if (fscanf (in, "%[^$]$%[^$]$%d$%d\n", 
@@ -108,17 +109,28 @@ gboolean prefs_load_scores (gchar *name)
 		//scanf is buggy!!! - %[] shouldn't strip leading whitespace but does
 		if (!fgets (linebuf, 128, in))
 			break;
-		score_fields = g_strsplit (linebuf, "$", -1);
-		if (!score_fields[3])
+		realline = g_strsplit (linebuf, "#", -1);
+		score_fields = g_strsplit (realline[0], "$", -1);
+		if (!score_fields[0] || !score_fields[1])
+		{
+			g_strfreev (realline);
+			g_strfreev (score_fields);
+			continue;
+		}
+		if (!score_fields[2] || !score_fields[3])
 		{
 			sb_error ("Error loading scores file", FALSE);
+			g_strfreev (realline);
+			g_strfreev (score_fields);
 			break;
 		}
 		strncpy (scores[i].name, score_fields[0], 31);
 		strncpy (scores[i].score, score_fields[1], 31);
 		scores[i].time = atoi(score_fields[2]);
 		scores[i].date = atoi(score_fields[3]);
+		g_strfreev (realline);
 		g_strfreev (score_fields);
+		i++;
 	}
 	num_highscores = i;
 	fclose (in);
@@ -254,6 +266,10 @@ gboolean prefs_save_scores (gchar *name)
 		g_free (scorefile);		
 		return FALSE;
 	}
+	fprintf (out, "#This is the gtkboard highscores file for the game %s\n"
+			"#The format is: name$score$time taken in ms$date (time (2))\n"
+			"#VERSION=0.10.0\n"
+			, gamename);
 	for (i=0; i < num_highscores; i++)
 	{
 		fprintf (out, "%s$%s$%d$%d\n", 
@@ -262,7 +278,6 @@ gboolean prefs_save_scores (gchar *name)
 	}
 	fclose (out);
 	g_free (scorefile);
-//	printf ("wrote scores %s %d\n", name, num_highscores);
 	gamename = NULL;
 	return TRUE;
 }

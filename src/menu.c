@@ -295,7 +295,15 @@ void menu_show_about_dialog (gpointer data)
 			"gtkboard " VERSION "\n"
 			"http://gtkboard.sourceforge.net/\n"
 			"Maintainer: Arvind Narayanan <arvindn@users.sourceforge.net>\n"
-			"Released under the GNU General Public License");
+			"Released under the GNU General Public License\n"
+			"See the file COPYING for details\n"
+			"\n"
+			"The documentation is available in the doc/ directory\n"
+			"of the source distribution or in the directory\n" 
+			"/usr/local/doc/gtkboard-" VERSION "/ if you installed from binary rpm.\n"
+			"The latest documentation will always be available at\n"
+			"http://gtkboard.sourceforge.net/doc/"
+			);
 }
 
 	
