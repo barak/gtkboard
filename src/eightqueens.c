@@ -72,6 +72,7 @@ void eightqueens_init ()
 	game_score_fields =  eightqueens_score_fields;
 	game_score_field_names = eightqueens_score_field_names;
 	game_draw_cell_boundaries = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Eightqueens\n"
 		"Single player game\n"

@@ -72,6 +72,7 @@ void infiltrate_init ()
 	game_eval = infiltrate_eval;
 	game_get_rgbmap = infiltrate_get_rgbmap;
 	game_reset_uistate = infiltrate_reset_uistate;
+	game_doc_about_status = STATUS_PARTIAL;
 	game_doc_about = 
 		"Infiltrate\n"
 		"Two player game\n"

@@ -160,6 +160,7 @@ void memory_init ()
 	game_draw_cell_boundaries = FALSE;
 	game_allow_back_forw = FALSE;
 	game_scorecmp = game_scorecmp_def_iscore;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Memory\n"
 		"Single player game\n"

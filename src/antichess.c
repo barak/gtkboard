@@ -115,6 +115,7 @@ void antichess_init ()
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_highlight_colors = antichess_highlight_colors;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"

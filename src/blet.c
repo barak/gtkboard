@@ -72,6 +72,7 @@ void blet_init ()
 	game_score_fields = blet_score_fields;
 	game_score_field_names = blet_score_field_names;
 	game_event_handler = blet_event_handler;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Blet\n"
 		"Single player game\n"

@@ -148,6 +148,7 @@ void pacman_init ()
 	game_getmove_kb = pacman_getmove_kb;
 	game_animation_time = 100;
 	game_animate = pacman_animate;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Pacman\n"
 		"Single player game\n"

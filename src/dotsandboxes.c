@@ -206,6 +206,7 @@ void dnb_init ()
 	game_getmove = dnb_getmove;
 	game_search = dnb_search;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Dots and boxes\n"
 		"Two player game\n"

@@ -259,6 +259,7 @@ void stopgate_init ()
 	game_movegen = stopgate_movegen;
 	game_white_string = "White";
 	game_black_string = "Black";
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Stopgate\n"
 		"Two player game\n"

@@ -200,6 +200,7 @@ void mastermind_init ()
 	game_highlight_colors = mastermind_highlight_colors;
 	game_set_init_render = mastermind_set_init_render;
 	game_free = mastermind_free;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"

@@ -79,6 +79,7 @@ void ataxx_init ()
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_reset_uistate = ataxx_reset_uistate;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Ataxx\n"
 		"Two player game\n"

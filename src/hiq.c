@@ -142,6 +142,7 @@ void hiq_init ()
 	game_who_won = hiq_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
 	game_reset_uistate = hiq_reset_uistate;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Hiq\n"
 		"Single player game\n"

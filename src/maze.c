@@ -67,6 +67,7 @@ void maze_init ()
 	game_scorecmp = game_scorecmp_def_time;
 	game_score_fields = maze_score_fields;
 	game_score_field_names = maze_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Maze\n"
 		"Single player game\n"

@@ -32,9 +32,10 @@
 
 GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
-	*menu_main, *menu_info_bar, *menu_info_separator;
+	*menu_main, *menu_info_bar, *menu_info_separator, *menu_warning_bar;
 GtkWidget *sb_game_separator, *sb_who_separator, *sb_score_separator,
-	*sb_player_separator, *sb_time_separator, *sb_turn_separator;
+	*sb_player_separator, *sb_time_separator, *sb_turn_separator,
+	*sb_warning_separator;
 #define SB_MESSAGE_STRLEN 64
 gchar sb_message_str[SB_MESSAGE_STRLEN] = "";
 #define SB_SCORE_STRLEN 32
@@ -247,8 +248,8 @@ static void menu_show_dialog_real (gchar *title, gchar *message, gboolean wrap)
 {
 	GtkWidget *dialog, *okay_button, *label;
 
-	label = gtk_label_new (message);
 #if GTK_MAJOR_VERSION == 1
+	label = gtk_label_new (message);
 	dialog = gtk_dialog_new();
 	gtk_window_set_title (GTK_WINDOW (dialog), title);
 	gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (main_window));
@@ -260,6 +261,8 @@ static void menu_show_dialog_real (gchar *title, gchar *message, gboolean wrap)
 	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
 			okay_button);
 #else
+	label = gtk_label_new (NULL);
+	gtk_label_set_markup (GTK_LABEL (label), message);
 	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
 			GTK_DIALOG_MODAL, NULL);
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
@@ -571,14 +574,34 @@ void menu_load_file_dialog ()
 void menu_show_game_doc (gpointer data, guint which)
 {
 	GtkWidget *dialog, *msgarea, *okay_button, *vbar, *hbox, *scrwin;
+	char *impl;
 	char *msgstr = "Nothing available"; // default
 	char titlestr[64];
 	switch (which)
 	{
 		case MENU_DOC_ABOUT:
+			switch (game_doc_about_status)
+			{
+				case STATUS_NONE: impl = ""; break;
+				case STATUS_UNPLAYABLE: impl = "Partially implemented (unplayable)"; break;
+				case STATUS_PARTIAL: impl = "Partially implemented (playable)"; break;
+				case STATUS_COMPLETE: impl = "Fully implemented"; break;
+				default: assert (0);
+			}
 			snprintf (titlestr, 64, "About %s - gtkboard", menu_get_game_name());
-			if (game_doc_about) msgstr = game_doc_about;
+#if GTK_MAJOR_VERSION > 1
+			msgstr = g_strdup_printf ("<big><b>%s</b></big> <i>%s</i>\n<b>Status:</b> %s\n<b>URL:</b> <tt>http://gtkboard.sourceforge.net/games/%s</tt>",
+#else
+			msgstr = g_strdup_printf ("%s -- %s\nStatus: %s\nURL: http://gtkboard.sourceforge.net/games/%s",
+#endif
+					opt_game->name,
+					game_single_player ? "Single player game" : "Two player game",
+					impl, 
+					opt_game->name
+					);
+//			if (game_doc_about) msgstr = game_doc_about;
 			menu_show_dialog (titlestr, msgstr);
+			g_free (msgstr);
 			return;
 		case MENU_DOC_RULES:
 			snprintf (titlestr, 64, "%s rules - gtkboard", menu_get_game_name());
@@ -1128,6 +1151,16 @@ void menu_update ()
 		gtk_widget_show (gtk_item_factory_get_item (menu_factory, "/Game/Levels"));
 	else
 		gtk_widget_hide (gtk_item_factory_get_item (menu_factory, "/Game/Levels"));
+	if (game_doc_about_status == STATUS_COMPLETE || game_doc_about_status == STATUS_NONE)
+	{
+		gtk_widget_hide (menu_warning_bar);
+		gtk_widget_hide (sb_warning_separator);
+	}
+	else
+	{
+		gtk_widget_show (menu_warning_bar);
+		gtk_widget_show (sb_warning_separator);
+	}
 	
 }
 	

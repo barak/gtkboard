@@ -65,6 +65,7 @@ void rgb_init ()
 	game_get_rgbmap = rgb_get_rgbmap;
 	game_draw_cell_boundaries = TRUE;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Rgb\n"
 		"Two player game\n"

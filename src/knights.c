@@ -90,6 +90,7 @@ void knights_init ()
 	game_draw_cell_boundaries = TRUE;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Knights\n"
 		"Two player game\n"

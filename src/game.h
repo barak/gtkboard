@@ -129,6 +129,26 @@ typedef struct
 	gchar *human_readable;
 }MoveInfo;
 
+//! the completion status of the game
+/** 
+  This is the type of #game_doc_about_status.
+  At the moment it only matters if the status is STATUS_COMPLETE or not 
+ */
+typedef enum
+{
+	//! don't use this
+	STATUS_NONE,
+
+	//! unplayable
+	STATUS_UNPLAYABLE,
+
+	//! partial
+	STATUS_PARTIAL,
+
+	//! complete
+	STATUS_COMPLETE
+} CompletionStatus;
+
 //! values of #game_file_label and #game_rank_label
 typedef enum {
 	FILERANK_LABEL_TYPE_NONE, 
@@ -454,6 +474,9 @@ extern gchar *game_doc_rules;
 extern gchar *game_doc_strategy;
 //! The text to be shown in the History dialog for the game (Help->GameName->History).
 extern gchar *game_doc_history;
+
+//! Completion status of the game
+extern CompletionStatus game_doc_about_status;
 
 //! User visible labels for white and black
 extern gchar *game_white_string, *game_black_string;

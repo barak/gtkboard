@@ -253,6 +253,7 @@ void towers_init (Game *game)
 	game_reset_uistate = towers_reset_uistate;
 	game_get_render = towers_get_render;
 	game_levels = towers_levels;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Towers\n"
 		"Single player game\n"

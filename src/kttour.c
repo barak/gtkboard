@@ -66,6 +66,7 @@ void kttour_init ()
 	game_score_field_names = kttour_score_field_names;
 	game_draw_cell_boundaries = TRUE;
 	game_allow_undo = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Kttour\n"
 		"Single player game\n"

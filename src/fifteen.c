@@ -79,6 +79,7 @@ void fifteen_init ()
 	game_getmove_kb = fifteen_getmove_kb;
 	game_who_won = fifteen_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Fifteen puzzle\n"
 		"Single player game\n"

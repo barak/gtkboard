@@ -94,6 +94,7 @@ void samegame_init ()
 	game_scorecmp = game_scorecmp_def_dscore;
 	game_score_fields =  samegame_score_fields;
 	game_score_field_names = samegame_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Samegame\n"
 		"Single player game\n"

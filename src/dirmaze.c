@@ -78,6 +78,7 @@ void hypermaze_init ()
 	game_scorecmp = game_scorecmp_def_time;
 	game_score_fields = hypermaze_score_fields;
 	game_score_field_names = hypermaze_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"HyperMaze\n"
 		"Single player game\n"

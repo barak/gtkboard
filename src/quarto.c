@@ -81,6 +81,7 @@ void quarto_init ()
 	game_reset_uistate = quarto_reset_uistate;
 	game_get_render = quarto_get_render;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Quarto\n"
 		"Two player game\n"

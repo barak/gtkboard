@@ -556,6 +556,7 @@ static void wordtris_init ()
 	game_bg_pixmap = wordtris_getbgxpm ();
 	game_highlight_colors = wordtris_highlight_colors;
 	game_set_init_render = wordtris_set_init_render;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Wordtris\n"
 		"Single player game\n"

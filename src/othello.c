@@ -92,6 +92,7 @@ void othello_init (Game *game)
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	
+	game_doc_about_status = STATUS_COMPLETE;
 	if (game == &Othello)
 		game_doc_about =
 			"Othello\n"

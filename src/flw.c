@@ -154,6 +154,7 @@ static void flw_init ()
 	game_score_fields = flw_score_fields;
 	game_score_field_names = flw_score_field_names;
 	game_highlight_colors = flw_highlight_colors;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Four letter words\n"
 		"Single player game\n"

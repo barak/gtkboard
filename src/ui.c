@@ -133,6 +133,8 @@ gchar *game_doc_about = NULL;
 gchar *game_doc_rules = NULL;
 gchar *game_doc_strategy = NULL;
 gchar *game_doc_history = NULL;
+CompletionStatus game_doc_about_status = STATUS_NONE;
+ 
 
 gchar *game_white_string = "White", *game_black_string = "Black";
 
@@ -306,6 +308,7 @@ void reset_game_params ()
 	game_allow_back_forw = TRUE;
 	game_single_player = FALSE;
 	game_allow_undo = FALSE;
+	game_doc_about_status = STATUS_NONE;
 	game_doc_about = NULL;
 	game_doc_rules = NULL;
 	game_doc_strategy = NULL;
@@ -1135,6 +1138,10 @@ void gui_init ()
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 	separator = gtk_hseparator_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
+	menu_warning_bar = gtk_label_new ("Warning: this game has not yet been completely implemented.");
+	gtk_box_pack_start (GTK_BOX (vbox), menu_warning_bar, FALSE, FALSE, 0);
+	sb_warning_separator = separator = gtk_hseparator_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
 	separator = gtk_hseparator_new ();

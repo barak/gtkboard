@@ -165,6 +165,7 @@ void ninemm_init ()
 	game_bg_pixmap = ninemm_bg_xpm;
 	game_getmove = ninemm_getmove;
 	game_reset_uistate = ninemm_reset_uistate;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Ninemm\n"
 		"Two player game\n"

@@ -73,6 +73,7 @@ void plot4_init ()
 	game_get_pixmap = plot4_get_pixmap;
 	game_white_string = "Green";
 	game_black_string = "Yellow";
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Plot4\n"
 		"Two player game\n"

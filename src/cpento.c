@@ -187,6 +187,7 @@ static void cpento_init()
     game_who_won = NULL;
     game_get_pixmap = NULL;
     game_scorecmp = game_scorecmp_def_iscore;
+	game_doc_about_status = STATUS_UNPLAYABLE;
     game_doc_about =
     "Capture Pentominoes\n"
     "Two player game\n"

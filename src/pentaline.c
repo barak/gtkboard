@@ -79,6 +79,7 @@ void pentaline_init ()
 	game_state_size = sizeof (Pentaline_state);
 	game_newstate = pentaline_newstate;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
