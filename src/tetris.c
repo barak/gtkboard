@@ -27,20 +27,47 @@
 #include "aaball.h"
 
 #define TETRIS_CELL_SIZE 20
-#define TETRIS_NUM_PIECES 31
+#define TETRIS_NUM_PIECES 32
 
-#define TETRIS_BOARD_WID 10
+#define TETRIS_REAL_WID 10
+#define TETRIS_BOARD_WID 16
 #define TETRIS_BOARD_HEIT 22
+#define TETRIS_PREVIEW_HEIT 3
 
-char tetris_colors[6] = {50, 50, 50, 50, 50, 50};
+char tetris_colors[9] = {50, 50, 50, 50, 50, 50, 150, 150, 150};
 
-int * tetris_init_pos = NULL;
+static int tetris_init_pos [TETRIS_BOARD_WID*TETRIS_BOARD_HEIT] = 
+{
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 0 , 0 , 0 , 0 , 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 0 , 0 , 0 , 0 , 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 0 , 0 , 0 , 0 , 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 0 , 0 , 0 , 0 , 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 32, 32, 32, 32, 32, 32, 
+};
+
 
 void tetris_init ();
 
 Game Tetris = { TETRIS_CELL_SIZE, TETRIS_BOARD_WID, TETRIS_BOARD_HEIT, 
 	TETRIS_NUM_PIECES,
-	tetris_colors,  NULL, NULL, "Tetris", "Arcade", tetris_init};
+	tetris_colors,  tetris_init_pos, NULL, "Tetris", "Arcade", tetris_init};
 
 SCORE_FIELD tetris_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_SCORE, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
 char *tetris_score_field_names[] = {"User", "Score", "Date", NULL};
@@ -57,6 +84,7 @@ char *tetris_score_field_names[] = {"User", "Score", "Date", NULL};
 #define TETRIS_BRICK_DYING 9
 #define TETRIS_BRICK_MASK 15
 #define TETRIS_BRICK_MOTION_MASK 16
+#define TETRIS_UNUSED 32
 
 static void tetris_set_init_pos (Pos *pos);
 static char ** tetris_get_pixmap (int idx, int color);
@@ -98,7 +126,7 @@ void tetris_init ()
 	game_doc_about = 
 		"Tetris\n"
 		"Single player game\n"
-		"Status: Fully implemented (playable)\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("tetris");
 }
 
@@ -118,7 +146,7 @@ void *tetris_newstate (Pos *pos, byte *move)
 	for (i=0; move[3*i] >= 0; i++)
 		if (move[3*i+2] == 0)
 			score++;
-	score /= board_wid;
+	score /= TETRIS_REAL_WID;
 	score = linepts [score];
 	state.score = (pos->state ? ((Tetris_state *)pos->state)->score : 0) + score;
 	return &state;
@@ -127,7 +155,7 @@ void *tetris_newstate (Pos *pos, byte *move)
 int tetris_game_over (byte *board)
 {
 	int i;
-	for (i=0; i<board_wid; i++)
+	for (i=0; i<TETRIS_REAL_WID; i++)
 		if (board[(board_heit - 2) * board_wid + i] == TETRIS_BRICK_INACTIVE)
 			return 1;
 	return 0;
@@ -154,7 +182,7 @@ int tetris_fall (byte *pos, byte **movp, int height)
 	int canfall = 1;
 	int i, j, k;
 	for (j=0; j<board_heit; j++)
-	for (i=0; i<board_wid; i++)
+	for (i=0; i<TETRIS_REAL_WID; i++)
 	{
 		if (pos [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK)
 		{
@@ -172,7 +200,7 @@ int tetris_fall (byte *pos, byte **movp, int height)
 	}
 	if (moving && canfall)
 	{
-		for (i=0; i<board_wid; i++)
+		for (i=0; i<TETRIS_REAL_WID; i++)
 		for (j=0; j<board_heit; j++)
 		{
 			if (j < board_heit - height)
@@ -215,7 +243,7 @@ int tetris_animate (Pos *pos, byte **movp)
 	if (tetris_fall(board, movp, 1) > 0)
 		return 1;
 
-	for (i=0; i<board_wid; i++)
+	for (i=0; i<TETRIS_REAL_WID; i++)
 	for (j=0; j<board_heit; j++)
 		if (board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK)
 		{
@@ -228,7 +256,7 @@ int tetris_animate (Pos *pos, byte **movp)
 		while (nfull + j < board_heit)
 		{
 			int full = 1;
-			for (i=0; i<board_wid; i++) 
+			for (i=0; i<TETRIS_REAL_WID; i++) 
 				if (board [(j+nfull) * board_wid + i] == 0) { full = 0; break; }
 			if (!full) break;
 			nfull++;
@@ -237,7 +265,7 @@ int tetris_animate (Pos *pos, byte **movp)
 		{
 			for (; j+nfull<board_heit; j++)
 			{
-				for (i=0; i<board_wid; i++) 
+				for (i=0; i<TETRIS_REAL_WID; i++) 
 				{
 					if (board [j * board_wid + i] != 
 							board [(j+nfull) * board_wid + i])
@@ -253,7 +281,7 @@ int tetris_animate (Pos *pos, byte **movp)
 			for (; j<board_heit; j++)
 			{
 				int empty = 1;
-				for (i=0; i<board_wid; i++) 
+				for (i=0; i<TETRIS_REAL_WID; i++) 
 				{
 					if (board [j * board_wid + i] != 0)
 					{
@@ -274,19 +302,23 @@ int tetris_animate (Pos *pos, byte **movp)
 	{
 	int idx;
 	byte *saved_m = mp;
+	static int next_tile = -1;
 	// This depends on the #defs!!
 	// FIXME: change the shapes so that no brick is more than 2 rows tall
 	byte shapes [][4][2] = {
 		{ { 3, 1} , {4, 1}, {5, 1}, {6, 1} },
 		{ { 4, 1} , {5, 1}, {4, 2}, {5, 2} },
-		{ { 4, 1} , {4, 2}, {5, 2}, {5, 3} },
-		{ { 5, 2} , {5, 1}, {4, 2}, {4, 3} },
+		{ { 4, 2} , {5, 2}, {5, 1}, {6, 1} },
+		{ { 4, 1} , {5, 1}, {5, 2}, {6, 2} },
 		{ { 4, 1} , {5, 1}, {6, 1}, {5, 2} },
-		{ { 4, 3} , {5, 3}, {4, 2}, {4, 1} },
-		{ { 4, 3} , {5, 3}, {5, 2}, {5, 1} },
+		{ { 6, 1} , {5, 1}, {4, 2}, {4, 1} },
+		{ { 3, 1} , {4, 1}, {5, 1}, {5, 2} },
 	};
 
-	idx = random() % 7;
+	idx = next_tile;
+	next_tile = random() % 7;
+	if (idx < 0)
+		idx = random() % 7;	
 	for (i=0; i<4; i++)
 	{
 		*mp++ = shapes[idx][i][0]; 
@@ -299,6 +331,19 @@ int tetris_animate (Pos *pos, byte **movp)
 			return 1;
 		}
 		*mp++ = (idx+1) | TETRIS_BRICK_MOTION_MASK;
+	}
+	for (i=0; i<4; i++)
+	for (j=0; j<4; j++)
+	{
+		*mp++ = TETRIS_REAL_WID + 1 + i;
+		*mp++ = board_heit - 1 - TETRIS_PREVIEW_HEIT - j;
+		*mp++ = 0;
+	}
+	for (i=0; i<4; i++)
+	{
+		*mp++ = TETRIS_REAL_WID + shapes[next_tile][i][1] + 1; 
+		*mp++ = board_heit - TETRIS_PREVIEW_HEIT + shapes[next_tile][i][0] - 7;
+		*mp++ = (next_tile+1);
 	}
 	*mp++ = -1;
 	*movp = move;
@@ -338,7 +383,7 @@ int tetris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 		int sumx = 0, sumy = 0, k = 0, incy;
 		int thebrick = 0;
 		byte newboard [4][2];
-		for (i=0; i<board_wid; i++)
+		for (i=0; i<TETRIS_REAL_WID; i++)
 		for (j=0; j<board_heit; j++)
 			if (board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK)
 			{ 
@@ -350,21 +395,21 @@ int tetris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 			}
 		if (sumy == 0) return -1;
 		sumx += 3; incy = sumy % 4 > 0 ? 1 : 0; sumx /= 4; sumy /= 4;
-		for (i=0; i<board_wid; i++)
+		for (i=0; i<TETRIS_REAL_WID; i++)
 		for (j=0; j<board_heit; j++)
 			if (board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK)
 			{
 				newboard[k][0] = sumx + sumy - j;
 				newboard[k][1] = sumy - sumx + i + incy;
 				if (newboard[k][0] < 0 || newboard[k][1] < 0 || 
-						newboard[k][0] >= board_wid || newboard[k][1] >= board_heit)
+						newboard[k][0] >= TETRIS_REAL_WID || newboard[k][1] >= board_heit)
 					return -1;
 				if (board [newboard [k][1] * board_wid + newboard[k][0]]
 						== TETRIS_BRICK_INACTIVE)
 					return -1;
 				k++;
 			}
-		for (i=0; i<board_wid; i++)
+		for (i=0; i<TETRIS_REAL_WID; i++)
 		for (j=0; j<board_heit; j++)
 		{
 			if (!(board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK))
@@ -400,26 +445,26 @@ int tetris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 		case GDK_Right: incx = -1; break;
 		default: return -1;
 	}
-	for (i=0; i<board_wid; i++)
+	for (i=0; i<TETRIS_REAL_WID; i++)
 	for (j=0; j<board_heit; j++)
 		if (board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK)
 		{
-			if (i - incx < 0 || i - incx >= board_wid) return -1;
+			if (i - incx < 0 || i - incx >= TETRIS_REAL_WID) return -1;
 			if (board [j * board_wid + i - incx] != 0 && 
 					!(board [j * board_wid + i - incx] & TETRIS_BRICK_MOTION_MASK))
 				return -1;
 		}
-	for (i=0; i<board_wid; i++)
+	for (i=0; i<TETRIS_REAL_WID; i++)
 	for (j=0; j<board_heit; j++)
 	{
-		if (i+incx >= 0 && i+incx < board_wid)
+		if (i+incx >= 0 && i+incx < TETRIS_REAL_WID)
 		if (!(board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK) 
 			&& (board [j * board_wid + i+incx] & TETRIS_BRICK_MOTION_MASK))
 		{
 			*mp++ = i; *mp++ = j; *mp++ = board [j * board_wid + i+incx];
 		}
 		if (board [j * board_wid + i] & TETRIS_BRICK_MOTION_MASK 
-			&& (i+incx < 0 || i+incx >= board_wid || 
+			&& (i+incx < 0 || i+incx >= TETRIS_REAL_WID || 
 				!(board [j * board_wid + i+incx] & TETRIS_BRICK_MOTION_MASK)))
 		{
 			*mp++ = i; *mp++ = j; *mp++ = 0;
@@ -438,18 +483,21 @@ char ** tetris_get_pixmap (int idx, int color)
 	char *line = "                    ";
 	//pixmap = g_new(char *, TETRIS_CELL_SIZE + 2);
 	pixmap[0] = "20 20 1 1";
-	switch (idx & TETRIS_BRICK_MASK)
-	{
-		case TETRIS_BRICK_4: pixmap[1] = "  c blue"; break;
-		case TETRIS_BRICK_22: pixmap[1] = "  c red"; break;
-		case TETRIS_BRICK_121A: pixmap[1] = "  c yellow"; break;
-		case TETRIS_BRICK_121B: pixmap[1] = "  c magenta"; break;
-		case TETRIS_BRICK_T: pixmap[1] = "  c green"; break;
-		case TETRIS_BRICK_LA: pixmap[1] = "  c pink"; break;
-		case TETRIS_BRICK_LB: pixmap[1] = "  c orange"; break;
-		case TETRIS_BRICK_INACTIVE: pixmap[1] = "  c gray"; break;
-		default: return NULL;
-	}
+	if (idx == TETRIS_UNUSED)
+		pixmap[1] = "  c #969696";
+	else
+		switch (idx & TETRIS_BRICK_MASK)
+		{
+			case TETRIS_BRICK_4: pixmap[1] = "  c blue"; break;
+			case TETRIS_BRICK_22: pixmap[1] = "  c red"; break;
+			case TETRIS_BRICK_121A: pixmap[1] = "  c yellow"; break;
+			case TETRIS_BRICK_121B: pixmap[1] = "  c magenta"; break;
+			case TETRIS_BRICK_T: pixmap[1] = "  c green"; break;
+			case TETRIS_BRICK_LA: pixmap[1] = "  c pink"; break;
+			case TETRIS_BRICK_LB: pixmap[1] = "  c orange"; break;
+			case TETRIS_BRICK_INACTIVE: pixmap[1] = "  c gray"; break;
+			default: return NULL;
+		}
 	for (i=0; i<TETRIS_CELL_SIZE; i++) pixmap[2+i] = line;
 	return pixmap;
 }
