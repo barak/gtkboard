@@ -161,6 +161,16 @@ void memory_init ()
 	game_draw_cell_boundaries = FALSE;
 	game_allow_back_forw = FALSE;
 	game_scorecmp = game_scorecmp_def_iscore;
+	game_doc_about = 
+		"Memory\n"
+		"Single player game\n"
+		"Status: Fully implemented\n"
+		"URL: "GAME_DEFAULT_URL("memory");
+	game_doc_rules = 
+		"Memory rules\n"
+		"\n"
+		"There are 36 pairs of images. Your goal is to match these pairs in as few turns as possible.\n"
+		"In each turn you click on two squares. If they match they stay uncovered for the rest of the game. If not they go back to being hidden.";
 }
 
 static int waiting = 0;

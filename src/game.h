@@ -55,7 +55,7 @@ typedef enum {RESULT_WHITE, RESULT_BLACK, RESULT_TIE, RESULT_NOTYET, RESULT_MISC
 #define ISINBOARD(x,y) ((x)>=0 && (y)>=0 && (x)<board_wid && (y)< board_heit)
 
 //! Home page for the game <tt>x</tt>
-#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/doc/"x"/"
+#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/games/"x"/"
 
 //! The Game struct gives essential information about the game
 /** Only information that <b>must</b> be provided by every game

@@ -80,6 +80,11 @@ void checkers_init ()
 	game_who_won = checkers_who_won;
 	game_eval = checkers_eval;
 	game_get_pixmap = checkers_get_pixmap;
+	game_doc_about = 
+		"Checkers\n"
+		"Two player game\n"
+		"Status: Partially implemented (currently unplayable)\n"
+		"URL: "GAME_DEFAULT_URL("checkers");
 }
 
 ResultType checkers_who_won (Pos *pos, Player player, char **commp)

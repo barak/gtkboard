@@ -76,6 +76,7 @@ void hypermaze_init ()
 	game_doc_about = 
 		"HyperMaze\n"
 		"Single player game\n"
+		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("hypermaze");
 	game_doc_rules = 
 		"Hypermaze rules\n"

@@ -82,6 +82,7 @@ void fifteen_init ()
 	game_doc_about = 
 		"Fifteen puzzle\n"
 		"Single player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("fifteen");
 	game_doc_rules = 
 		"Fifteen puzzle rules\n"

@@ -93,6 +93,7 @@ void samegame_init ()
 	game_doc_about = 
 		"Samegame\n"
 		"Single player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("samegame");
 	game_doc_rules = 
 		" Samegame rules\n\n"

@@ -109,6 +109,7 @@ void antichess_init ()
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("antichess");
 	game_doc_rules = 
 		"Antichess rules\n"

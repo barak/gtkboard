@@ -151,6 +151,11 @@ void pacman_init ()
 	game_getmove_kb = pacman_getmove_kb;
 	game_animation_time = 100;
 	game_animate = pacman_animate;
+	game_doc_about = 
+		"Pacman\n"
+		"Single player game\n"
+		"Status: Partially implemented (currently unplayable)\n"
+		"URL: "GAME_DEFAULT_URL ("pacman");
 }
 
 void pacman_get_cur_pos (byte *pos, int *x, int *y)

@@ -97,6 +97,11 @@ void tetris_init ()
 	game_score_field_names = tetris_score_field_names;
 	game_draw_cell_boundaries = TRUE;
 	game_free = tetris_free;
+	game_doc_about = 
+		"Tetris\n"
+		"Single player game\n"
+		"Status: Fully implemented (playable)\n"
+		"URL: "GAME_DEFAULT_URL ("tetris");
 }
 
 void tetris_free ()

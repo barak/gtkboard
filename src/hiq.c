@@ -144,6 +144,7 @@ void hiq_init ()
 	game_doc_about = 
 		"Hiq\n"
 		"Single player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("hiq");
 	game_doc_rules = 
 		"Hiq rules\n"

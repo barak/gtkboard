@@ -75,6 +75,7 @@ void ataxx_init ()
 	game_doc_about = 
 		"Ataxx\n"
 		"Two player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("ataxx");
 	game_doc_rules = 
 		"Ataxx rules\n"

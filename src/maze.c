@@ -65,6 +65,7 @@ void maze_init ()
 	game_doc_about = 
 		"Maze\n"
 		"Single player game\n"
+		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("maze");
 	game_doc_rules = 
 		"Maze rules\n"

@@ -75,6 +75,7 @@ void infiltrate_init ()
 	game_doc_about = 
 		"Infiltrate\n"
 		"Two player game\n"
+		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL ("infiltrate");
 	game_doc_rules = 
 		"Infiltrate rules\n"

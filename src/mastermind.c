@@ -87,6 +87,7 @@ void mastermind_init ()
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"
+		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("mastermind");
 	game_doc_rules = 
 		"Mastermind rules\n"

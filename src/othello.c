@@ -71,6 +71,7 @@ void othello_init ()
 	game_doc_about = 
 		"Othello\n"
 		"Two player game\n"
+		"Status: Fully implemented (but AI needs improvement)\n"
 		"URL: "GAME_DEFAULT_URL ("othello");
 	game_doc_rules = 
 		"Othello rules\n"

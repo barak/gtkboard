@@ -67,6 +67,7 @@ void rgb_init ()
 	game_doc_about = 
 		"Rgb\n"
 		"Two player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("rgb");
 	game_doc_rules = 
 		"Rgb rules\n"

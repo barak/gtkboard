@@ -69,6 +69,7 @@ void pentaline_init ()
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
+		"Status: Fully implemented (But AI needs improvement)\n"
 		"URL: "GAME_DEFAULT_URL("pentaline");
 	game_doc_rules = 
 		"Pentaline rules\n"
@@ -277,28 +278,6 @@ float pentaline_eval_incr (Pos *pos, Player to_play, byte *move)
 }
 
 float pentaline_eval (Pos *pos, Player to_play)
-	// TODO: count runs similar to plot4
 {
-	/*int i, j, k, l;
-	int incx[3] = { 0, 1, 1 };
-	int incy[3] = { 1, 0, 1 };
-	for (i=0; i<board_wid; i++)
-	for (j=0; j<board_heit; j++)
-	for (k=0; k<3; k++)
-	{
-		int found = 1, val = 0;
-		for (l=0; l<5; l++)
-		{
-			if (j + l * incy[k] >= board_heit || i + l * incx[k] >= board_wid)
-			{ found = 0; break; }
-			val = pos [(j + l * incy[k]) * board_wid + i + l * incx[k]];
-			if (val == PENTALINE_EMPTY) {found = 0; break; }
-			if (val != pos [j * board_wid + i]) { found = 0; break; }
-		}
-		if (found) {
-			return (val == PENTALINE_RP ? 1: -1); }
-	}
-	return 0;*/
 	return eval_runs (pos->board);
-
 }

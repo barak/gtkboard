@@ -119,6 +119,11 @@ void chess_init ()
 	game_stateful = TRUE;
 	game_state_size = sizeof (Chess_state);
 	game_newstate = chess_newstate;
+	game_doc_about = 
+		"Chess\n"
+		"Two player game\n"
+		"Status: Partially implemented (currently unplayable)\n"
+		"URL: "GAME_DEFAULT_URL("chess");
 }
 
 void *chess_newstate (Pos *pos, byte *move)

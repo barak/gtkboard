@@ -71,6 +71,7 @@ void plot4_init ()
 	game_doc_about = 
 		"Plot4\n"
 		"Two player game\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("plot4");
 	game_doc_rules = 
 		"Plot4 rules\n"

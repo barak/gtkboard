@@ -6,44 +6,47 @@ LDADD = @GTK_LIBS@
 
 bin_PROGRAMS = gtkboard
 
-gtkboard_SOURCES = 	othello.c\
-	ui.c\
+gtkboard_SOURCES = 	\
 	board.c\
-	prefs.c\
 	menu.c\
+	prefs.c\
+	ui.c\
+	\
+	aaball.c\
+	ab.c\
+	engine.c\
 	hash.c\
+	minimax.c\
 	move.c\
 	stack.c\
-	engine.c\
-	minimax.c\
-	ab.c\
-	samegame.c\
-	rgb.c\
-	aaball.c\
-	memory.c\
-	tetris.c\
-	chess.c\
+	\
 	antichess.c\
-	hiq.c\
-	checkers.c\
-	plot4.c\
-	maze.c\
-	dirmaze.c\
-	infiltrate.c\
 	ataxx.c\
-	pentaline.c\
-	mastermind.c\
+	checkers.c\
+	chess.c\
+	dirmaze.c\
 	fifteen.c\
-	game.h\
-	pacman.c
+	hiq.c\
+	infiltrate.c\
+	mastermind.c\
+	maze.c\
+	memory.c\
+	othello.c\
+	pacman.c\
+	pentaline.c\
+	plot4.c\
+	rgb.c\
+	samegame.c\
+	tetris.c
 
 #NOTE: we want to install game.h
-noinst_HEADERS =  board.h\
-	ui_common.h\
-	move.h\
-	stack.h\
-	engine.h\
+noinst_HEADERS =  \
 	aaball.h\
+	board.h\
+	engine.h\
 	menu.h\
-	ui.h\
-	prefs.h
+	move.h\
+	prefs.h\
+	stack.h\
+	ui_common.h\
+	ui.h
