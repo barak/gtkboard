@@ -1,0 +1,15 @@
+
+* Key press abstraction layer (major)
+* Change client-server model to p2p model (major)
+* Full impl of dyn loading (major)
+* Next tile in tetris
+* Text inside board area (major)
+* Widgets outside board area (major)
+* Drag and drop (major)
+* getmove fn dependent on square
+* context sensitive help
+* nine men morris
+* battleship
+* fix edge-square highlight bug by changing board size when game_draw_cell_boundaries is set
+* implement game_flippable
+* eval needs new parameter to give the result -- done
