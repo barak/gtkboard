@@ -1,5 +1,5 @@
 
-SUBDIRS=doc src
+SUBDIRS=doc src sounds
 
 noinst_HEADERS = pixmaps
 

@@ -355,8 +355,8 @@ void prefs_show_username_dialog ()
 	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
 			GTK_DIALOG_MODAL, NULL);
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
-	g_signal_connect_swapped (GTK_OBJECT (entry),
-			"activate", G_CALLBACK (prefs_username_cb), GTK_OBJECT (dialog));
+//	g_signal_connect_swapped (GTK_OBJECT (entry),
+//			"activate", G_CALLBACK (prefs_username_cb), GTK_OBJECT (dialog));
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_OK, GTK_RESPONSE_NONE);
 #endif
 

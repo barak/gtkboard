@@ -19,6 +19,8 @@
 /** \file engine.c
  \brief The engine forms the backend that does the number crunching
  */
+#include "config.h"
+
 #include "game.h"
 #include "move.h"
 #include "stack.h"

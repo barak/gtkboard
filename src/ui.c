@@ -483,7 +483,8 @@ void ui_check_who_won()
 	sb_update ();
 	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "WON", 3))
 	{
-		gboolean retval = prefs_add_highscore (line, sb_get_human_time ());
+		gboolean retval;
+		retval = prefs_add_highscore (line, sb_get_human_time ());
 		if (retval)
 			sound_play (SOUND_HIGHSCORE);
 		else 
@@ -539,7 +540,6 @@ void ui_make_human_move (byte *move, int *rmove)
 		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	}
 	cur_pos.num_moves ++;
-	sound_play (SOUND_USER_MOVE);
 	ui_check_who_won ();
 	sb_update ();
 	ui_send_make_move ();
@@ -1301,7 +1301,7 @@ int main (int argc, char **argv)
 		gui_init ();
 		sound_play (SOUND_PROGRAM_START);
 		gtk_main ();
-		sound_exit ();
+		sound_stop ();
 	}
 	else	// background mode
 	{

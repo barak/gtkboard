@@ -420,6 +420,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 			menu_start_stop_game (NULL, MENU_START_GAME); 
 		return FALSE;
 	}
+	sound_play (SOUND_USER_MOVE);
 	menu_start_stop_game (NULL, MENU_START_GAME); 
 	ui_make_human_move (move, rmove);
 	return FALSE;

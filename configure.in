@@ -38,7 +38,7 @@ if test $enable_sdl = "yes" ; then
 			AC_MSG_WARN([*** SDL version $SDL_VERSION not found. Sound will be disabled])
 	)
 	CFLAGS="$CFLAGS $SDL_CFLAGS"
-	LIBS="$LIBS $SDL_LIBS"
+	LIBS="$LIBS $SDL_LIBS -lSDL_mixer"
 fi
 
 dnl Checks for header files.
@@ -52,10 +52,9 @@ dnl Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(mkdir strtol)
 
-
-
 AC_OUTPUT([
 		Makefile
 		doc/Makefile
 		src/Makefile
+		sounds/Makefile
 		])

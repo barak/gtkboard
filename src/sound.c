@@ -8,140 +8,113 @@
 #ifdef HAVE_SDL
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_audio.h>
+#include <SDL/SDL_mixer.h>
 
-Uint8 *sound_data;
-int sound_len, sound_cur;
-
-gboolean sound_active = FALSE;
-
-void sound_mix_cb (void *unused, Uint8 *stream, int len)
-{
-	int amount;
-
-	if (!sound_active) return;
-
-	amount = (sound_len - sound_cur);
-	if (amount > len) amount = len;
-
-	SDL_MixAudio(stream, &sound_data[sound_cur], amount, SDL_MIX_MAXVOLUME);
-	sound_cur += amount;
-}
+Mix_Music *music = NULL;
 
 #endif
+
+char *sound_dir = NULL;
+
+static void find_sound_dir ()
+{
+	// TODO: eventually we will allow the user to set the sound directory in the prefs file
+	sound_dir = g_strdup_printf ("%s/sounds/gtkboard", DATADIR);
+	if (!g_file_test (sound_dir, G_FILE_TEST_IS_DIR))
+	{
+		fprintf (stderr, "Sound directory %s not found\n", sound_dir);
+		g_free (sound_dir);
+		sound_dir = NULL;
+	}
+}
 
 void sound_init()
 {
 #ifdef HAVE_SDL
-	SDL_AudioSpec fmt;
+	int audio_rate = 22050;
+	Uint16 audio_format = AUDIO_S16; /* 16-bit stereo */
+	int audio_channels = 2;
+	int audio_buffers = 4096;
+
 	static gboolean first = TRUE;
 	if (!first) return;
 	first = FALSE;
 
-	/* Set 16-bit stereo audio at 22Khz */
-	fmt.freq = 22050;
-	fmt.format = AUDIO_S16;
-	fmt.channels = 2;
-	fmt.samples = 512;
-	fmt.callback = sound_mix_cb;
-	fmt.userdata = NULL;
+	find_sound_dir ();
+	SDL_Init(SDL_INIT_AUDIO);
 
-	/* Open the audio device and start playing sound! */
-	if (SDL_OpenAudio(&fmt, NULL) < 0 ) 
+	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers))
 	{
 		fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
-		return;
+		exit(1);
 	}
 
-	sound_active = TRUE;
-	sound_data = NULL;
-	sound_len = sound_cur = 0;
 #endif
 }
 
-void sound_exit ()
+void sound_stop ()
 {
 #ifdef HAVE_SDL
-	if (!sound_active) return;
-	SDL_CloseAudio();
-	if (sound_data) free (sound_data);
-	sound_active = FALSE;
+	if (music)
+	{
+		Mix_HaltMusic ();
+		Mix_FreeMusic (music);
+		music = NULL;
+	}
 #endif
 }
 
-void sound_play_real (char *file, gboolean reset)
+void sound_play_real (char *file)
 {
 #ifdef HAVE_SDL
 	SDL_AudioSpec wave;
 	SDL_AudioCVT cvt;
 	Uint8 *tmp;
 
-//	if (sound_cur < sound_len) return;
-
-	sound_active = FALSE;
-
-	if (reset)
+	sound_stop ();
+	
+	music = Mix_LoadMUS (file);
+	if (!music)
 	{
-		if (sound_data) free (sound_data);
-		sound_cur = 0;
-
-		if (SDL_LoadWAV(file, &wave, &tmp, &sound_len) == NULL )
-		{
-			fprintf(stderr, "Couldn't load %s: %s\n", file, SDL_GetError());
-			return;
-		}
-		SDL_BuildAudioCVT(&cvt, wave.format, wave.channels, wave.freq,
-				AUDIO_S16, 2, 22050);
-		sound_data = malloc(sound_len * cvt.len_mult);
-		memcpy (sound_data, tmp, sound_len);
-		cvt.buf = sound_data;
-		cvt.len = sound_len;
-		SDL_ConvertAudio(&cvt);
-		SDL_FreeWAV(tmp);
+		fprintf(stderr, "Couldn't load %s: %s\n", file, SDL_GetError());
+		return;
 	}
-	else
-		sound_cur = 0;
+	Mix_PlayMusic(music, 0);
 
-	sound_active = TRUE;
-	SDL_PauseAudio (0);
 #endif
 }
 
 void sound_play (SoundEvent event)
 {
-	char *file;
-	SoundEvent prev_event = -1;
+	gchar *sound_file;
+	gchar *file;
 	switch (event)
 	{
 		case SOUND_PROGRAM_START:
 			file = NULL;
 			break;
 		case SOUND_ILLEGAL_MOVE:
-			file = "/usr/share/sounds/error.wav";
+			file = "illegal_move.ogg";
 			break;
 		case SOUND_HIGHSCORE:
-			file = "/usr/lib/openoffice/share/gallery/sounds/applause.wav";
+			file = "highscore.ogg";
 			break;
 		case SOUND_WON:
-			file = "/usr/share/sounds/KDE_Window_Open.wav";
+			file = "won.ogg";
 			break;
 		case SOUND_USER_MOVE:
-			file = "/usr/share/sounds/KDE_Click.wav";
+			file = "user_move.ogg";
 			break;
 		case SOUND_MACHINE_MOVE:
-			file = "/usr/share/sounds/email.wav";
+			file = "machine_move.ogg";
 			break;
 		default:
 			file = NULL;
 	}
-	if (event == prev_event)
-	{
-		sound_init ();
-		sound_play_real (file, FALSE);
-	}
-	if (file)
-	{
-		sound_init ();
-		sound_play_real (file, TRUE);
-	}
+	if (!file) return;
+	sound_init ();
+	if (!sound_dir) return;
+	sound_file = g_strdup_printf ("%s/%s", sound_dir, file);
+	sound_play_real (sound_file);
+	g_free (sound_file);
 }

@@ -83,7 +83,7 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-AM_CFLAGS = -Wall -Wno-unused
+AM_CFLAGS = -Wall -Wno-unused -DDATADIR=\"$(datadir)\"
 
 INCLUDES = @GTK_CFLAGS@
 

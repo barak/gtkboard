@@ -1,4 +1,4 @@
-AM_CFLAGS = -Wall -Wno-unused
+AM_CFLAGS = -Wall -Wno-unused -DDATADIR=\"$(datadir)\"
 
 INCLUDES = @GTK_CFLAGS@
 

@@ -17,7 +17,7 @@ typedef enum
 }SoundEvent;
 
 void sound_init();
-void sound_exit ();
+void sound_stop ();
 void sound_play (SoundEvent event);
 
 #endif
