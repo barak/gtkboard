@@ -278,12 +278,6 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 }
 #endif 
 
-static void catch_USR1 (int sig)
-{
-	engine_stop_search = 1;
-	signal (SIGUSR1, catch_USR1);
-}
-
 byte * ab_dfid (Pos *pos, int player)
 {
 	static byte best_move[4096];
@@ -296,7 +290,6 @@ byte * ab_dfid (Pos *pos, int player)
 	engine_stop_search = 0;
 	if (!game_movegen || !game_eval)
 		return NULL;
-	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
 
 	move_list = game_movegen (pos);

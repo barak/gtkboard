@@ -30,6 +30,12 @@
 #include "prefs.h"
 #include "sound.h"
 
+#ifdef HAVE_GNOME
+#include "libgnome/libgnome.h"
+#include "libgnomeui/libgnomeui.h"
+#include "../pixmaps/logo48.xpm"
+#endif
+
 GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
 	*menu_main, *menu_info_bar, *menu_info_separator, *menu_warning_bar;
@@ -337,6 +343,18 @@ void menu_show_pause_dialog ()
 
 void menu_show_about_dialog (gpointer data)
 {
+#ifdef HAVE_GNOME
+	GtkWidget *about;
+	GdkPixmap *logo_pixmap = gdk_pixmap_create_from_xpm_d (main_window->window, NULL, NULL, logo48_xpm);
+	GdkPixbuf *logo_pixbuf = gdk_pixbuf_get_from_drawable (NULL, logo_pixmap, 
+			gdk_colormap_get_system (), 0, 0, 0, 0, -1, -1);
+	const gchar *authors[] = {"Arvind Narayanan <arvindn@users.sourceforge.net>", "Ron Hale-Evans <rwhe@ludism.org>", NULL};
+	about = gnome_about_new (PACKAGE, VERSION, 
+			"Copyright (C) 2003 Arvind Narayanan",
+			NULL, authors, NULL, NULL, logo_pixbuf);
+	gtk_widget_show (about);
+	gdk_pixmap_unref (logo_pixmap);
+#else
 	menu_show_dialog ("About gtkboard", 
 			"gtkboard " VERSION "\n"
 			"http://gtkboard.sourceforge.net/\n"
@@ -350,6 +368,7 @@ void menu_show_about_dialog (gpointer data)
 			"The latest documentation will always be available at\n"
 			"http://gtkboard.sourceforge.net/doc/"
 			);
+#endif
 }
 
 void menu_show_begging_dialog (gpointer data)
@@ -360,6 +379,17 @@ void menu_show_begging_dialog (gpointer data)
 			"They call it an \"inaccuracy\", but the fact of the matter is that it's firmly stuck at zero, which means that I have no idea how many people are downloading/using the software. So you see, I'm as lonely as a lark (or whatever it is that's supposed to be very lonely.) So if you have any comments or suggestions, or even just some kind words, it would be nice if you can mail them me. My email is arvindn@users.sourceforge.net. Thanks."
 			);
 }
+
+void menu_help_home_page (gpointer data)
+{
+#ifdef HAVE_GNOME
+	if (!gnome_url_show ("http://gtkboard.sourceforge.net/", NULL))
+		sb_error ("Couldn't launch home page", TRUE);
+#else
+	fprintf (stderr, "warning: menu_show_home_page() called even though gnome integration not compiled in\n");
+#endif
+}
+
 
 	
 void menu_put_player ();
@@ -712,6 +742,7 @@ static void menu_recent_game_cb (GtkWidget *widget, gpointer gamename)
 {
 	int i;
 	gchar *name = gamename;
+	Game *old_game = opt_game;
 	for (i=0; i<num_games; i++)
 	{
 		if (!strcasecmp (games[i]->name, name))
@@ -720,8 +751,8 @@ static void menu_recent_game_cb (GtkWidget *widget, gpointer gamename)
 			if (opt_game)
 				ui_terminate_game ();
 			opt_game = games[i];
-			menu_start_game ();
-			menu_put_game ();
+			if (old_game == opt_game) menu_start_game ();
+			else menu_put_game ();
 		}
 	}
 }

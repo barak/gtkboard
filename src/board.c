@@ -137,6 +137,7 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 	int parity = (board_wid * board_heit + x + y + 1) % 2;
 	int thepiece;
 	if (opt_quiet) return;
+	if (!cur_pos.board) return;
 	gc = board_area->style->bg_gc[GTK_STATE_NORMAL];
 	gdk_gc_set_clip_mask (gc, NULL);
 	gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);

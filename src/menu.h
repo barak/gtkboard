@@ -53,6 +53,7 @@ void sb_update ();
 gboolean sb_update_periodic ();
 void sb_reset_human_time ();
 int sb_get_human_time ();
+void menu_help_home_page (gpointer);
 void menu_show_about_dialog (gpointer);
 void menu_show_begging_dialog (gpointer);
 void menu_show_dialog (gchar *, gchar *);

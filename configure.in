@@ -5,7 +5,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gtkboard,0.10.9)
+AM_INIT_AUTOMAKE(gtkboard,0.11)
 AC_PROG_CC
 
 AC_ARG_ENABLE(gtk2,
@@ -41,6 +41,30 @@ if test $enable_sdl = "yes" ; then
 	LIBS="$LIBS $SDL_LIBS -lSDL_mixer"
 fi
 
+gnome=false
+
+GNOME_CFLAGS=""
+GNOME_LIBS=""
+
+AC_ARG_ENABLE(gnome,[  --enable-gnome    Turn on gnome ],[
+	if test "x$enableval" = "xyes"; then
+		gnome=true
+	fi
+])
+
+if test "$gnome" = true ; then
+	PKG_CHECK_MODULES(GNOME, [
+			libgnome-2.0 >= 2.0.0
+			libgnomeui-2.0 >= 2.0.0
+	])
+	GNOME_CFLAGS="$GNOME_CFLAGS -DHAVE_GNOME=1"
+fi
+
+AC_SUBST(GNOME_CFLAGS)
+AC_SUBST(GNOME_LIBS)
+	
+AM_CONDITIONAL(WITH_GNOME, test "x$gnome" = "xtrue")
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h)
@@ -58,3 +82,23 @@ AC_OUTPUT([
 		src/Makefile
 		sounds/Makefile
 		])
+
+echo " "
+
+if test $enable_gtk2 = "yes" ; then
+	AC_MSG_RESULT([GTK2 enabled.])
+else
+	AC_MSG_RESULT([GTK2 disabled.])
+fi
+
+if test $enable_sdl = "yes" ; then
+	AC_MSG_RESULT([SDL enabled.])
+else
+	AC_MSG_RESULT([SDL disabled.])
+fi
+if test $enable_gnome = "yes" ; then
+	AC_MSG_RESULT([GNOME enabled.])
+else
+	AC_MSG_RESULT([GNOME disabled.])
+fi
+

@@ -1,5 +1,5 @@
 %define name	gtkboard
-%define ver	0.10.9
+%define ver	0.11
 %define rel	1
 
 Summary: Board games suite

@@ -1,8 +1,8 @@
 AM_CFLAGS = -Wall -Wno-unused -DDATADIR=\"$(datadir)\"
 
-INCLUDES = @GTK_CFLAGS@
+INCLUDES = @GTK_CFLAGS@ @GNOME_CFLAGS@
 
-LDADD = @GTK_LIBS@
+LDADD = @GTK_LIBS@ @GNOME_LIBS@
 
 bin_PROGRAMS = gtkboard
 

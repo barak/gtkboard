@@ -399,6 +399,7 @@ void engine_main (int infd, int outfd)
 	char *line;
 	engine_flag = TRUE;
 	signal (SIGHUP, ignore);
+	signal (SIGINT, ignore);
 	engine_fin = fdopen (infd, "r");
 	engine_fout = fdopen (outfd, "w");
 	assert (engine_fin);

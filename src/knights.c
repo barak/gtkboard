@@ -91,11 +91,8 @@ void knights_init ()
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about_status = STATUS_COMPLETE;
-	game_doc_about = 
-		"Knights\n"
-		"Two player game\n"
-		"Status: Fully implemented\n"
-		"URL: "GAME_DEFAULT_URL ("baljoust");
+	game_doc_rules = "Two players take turns in moving their respective knights on a 7x7 chessboard. Squares that have been visited are considered \"eaten\" and cannot be revisited. When the knights are attacking each other, the player to move can pass by hitting Space. If both players pass in the same position, the game is a draw. The goal is to be the last player to make a move.";
+	game_doc_strategy = "As the game progresses, there will eventually appear a single square, which, if eaten, will partition the board into two, such that a knight cannot move from one part to the other. The player who eats this square is often at an advantage because they can choose which part to move to.";
 }
 
 static int incx[] = { -2, -2, -1, -1, 1, 1, 2, 2};

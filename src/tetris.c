@@ -129,6 +129,8 @@ void tetris_init ()
 		"Single player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("tetris");
+	game_doc_rules =
+		"This is a game of falling bricks. Your objective is to rotate the pieces as they fall in order to make complete rows of bricks. Use the arrow keys to move left or right, Up to rotate, and Space to fall. Completing a row gives you 40 points, two rows simultaneously 100 points, three rows 300 points, and four rows (a tetris) 1200 points.";
 }
 
 void tetris_free ()

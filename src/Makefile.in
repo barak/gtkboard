@@ -69,6 +69,8 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+GNOME_CFLAGS = @GNOME_CFLAGS@
+GNOME_LIBS = @GNOME_LIBS@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
@@ -85,9 +87,9 @@ am__quote = @am__quote@
 install_sh = @install_sh@
 AM_CFLAGS = -Wall -Wno-unused -DDATADIR=\"$(datadir)\"
 
-INCLUDES = @GTK_CFLAGS@
+INCLUDES = @GTK_CFLAGS@ @GNOME_CFLAGS@
 
-LDADD = @GTK_LIBS@
+LDADD = @GTK_LIBS@ @GNOME_LIBS@
 
 bin_PROGRAMS = gtkboard
 

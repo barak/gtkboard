@@ -69,6 +69,8 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+GNOME_CFLAGS = @GNOME_CFLAGS@
+GNOME_LIBS = @GNOME_LIBS@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
@@ -83,7 +85,7 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-gtkboard_SOUNDS = highscore.ogg illegal_move.ogg machine_move.ogg user_move.ogg won.ogg
+gtkboard_SOUNDS = highscore.ogg illegal_move.ogg machine_move.ogg user_move.ogg won.ogg lost.ogg
 
 EXTRA_DIST = $(gtkboard_SOUNDS)
 

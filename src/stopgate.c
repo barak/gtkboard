@@ -257,14 +257,11 @@ void stopgate_init ()
 	game_who_won = stopgate_who_won;
 	game_eval = stopgate_eval;
 	game_movegen = stopgate_movegen;
-	game_white_string = "White";
-	game_black_string = "Black";
+	game_white_string = "Vertical";
+	game_black_string = "Horizontally";
 	game_doc_about_status = STATUS_COMPLETE;
-	game_doc_about = 
-		"Stopgate\n"
-		"Two player game\n"
-		"Status: Fully implemented\n"
-		"URL: "GAME_DEFAULT_URL ("stopgate");
+	game_doc_rules = "Two players take turns in placing dominoes on the board. The first player places them vertically and the second horizontally. To place a domino, press the mouse button on a square, drag the mouse to the adjacent square and release the mouse button. The goal is to be the last player to place a domino; the game ends when it becomes obvious who the winner is.";
+	game_doc_strategy = "Make parallel columns of dominoes such that you will be able to play in between the columns but the opponent won't.";
 }
 
 static int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};

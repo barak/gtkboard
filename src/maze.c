@@ -41,6 +41,8 @@ static int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
 #define MAZE_WALL 2
 #define MAZE_CUR 1
 
+#define CORNER_SIZE 3
+
 void maze_init ();
 
 SCORE_FIELD maze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
@@ -83,7 +85,13 @@ void maze_init ()
 ResultType maze_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
-	gboolean over = (pos->board [board_wid * board_heit - 1] == MAZE_CUR);
+	int i, j;
+	gboolean over = FALSE;
+	for (i=0; i<CORNER_SIZE; i++)
+	for (j=0; j<CORNER_SIZE; j++)
+		if (pos->board [(board_heit - 1 - j) * board_wid + (board_wid - 1 - i)] == MAZE_CUR)
+			over = TRUE;
+//	gboolean over = (pos->board [board_wid * board_heit - 1] == MAZE_CUR);
 	snprintf (comment, 32, "%sMoves: %d", 
 			over ? "You won. " : "",
 			pos->num_moves);
@@ -231,11 +239,11 @@ void maze_set_init_pos (Pos *pos)
 		for (i=0; i<board_wid; i++)
 		for (j=0; j<board_heit; j++)
 			pos->board [j * board_wid + i] = maze_maze[i][j];
-		for (i=0; i<3; i++)
-		for (j=0; j<3; j++)
+		for (i=0; i<CORNER_SIZE; i++)
+		for (j=0; j<CORNER_SIZE; j++)
 			pos->board [j * board_wid + i] = 0;
-		for (i=board_wid-3; i<board_wid; i++)
-		for (j=board_heit-3; j<board_heit; j++)
+		for (i=board_wid-CORNER_SIZE; i<board_wid; i++)
+		for (j=board_heit-CORNER_SIZE; j<board_heit; j++)
 			pos->board [j * board_wid + i] = 0;
 		recursive_pathgen (pos->board, 0, 0, -1);
 	}

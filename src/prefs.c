@@ -28,6 +28,10 @@
 #include "ui_common.h"
 #include "sound.h"
 
+#ifdef HAVE_GNOME
+#include <libgnome/libgnome.h>
+#endif
+
 static Score scores[MAX_HIGHSCORES];
 static int num_highscores = 0;
 static gchar *gamename; // ugly
@@ -284,6 +288,7 @@ gboolean prefs_save_scores (gchar *name)
 		sb_error (tempstr = g_strdup_printf 
 				("couldn't write to %s", scorefile),
 				FALSE);
+		fprintf (stderr, "%s\n", tempstr);
 		g_free (tempstr);
 		g_free (scorefile);		
 		return FALSE;

@@ -37,6 +37,11 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+#ifdef HAVE_GNOME
+#include <libgnome/libgnome.h>
+#include <libgnomeui/libgnomeui.h>
+#endif
+
 #include "config.h"
 #include "ui.h"
 #include "prefs.h"
@@ -242,10 +247,13 @@ void ui_child_cleanup ()
 {
 	int status;
 	waitpid (engine_pid, &status, WNOHANG | WUNTRACED);
-	if (WIFSTOPPED (status))
+	if (!WIFSIGNALED (status))
 		return;
-	fprintf (stderr, "gtkboard: engine appears to have died, exiting.\n");
-	exit (1);
+	if (WTERMSIG (status) == SIGSEGV)
+	{
+		fprintf (stderr, "gtkboard: engine appears to have died, exiting.\n");
+		exit (1);
+	}
 }
 
 
@@ -994,7 +1002,9 @@ void gui_init ()
 			menu_set_delay_cb, 600000, "/Settings/Time per move/Default" },
 		{ "/_Help", NULL, NULL, 0, "<Branch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
-//		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
+#ifdef HAVE_GNOME
+		{ "/Help/_Home Page", NULL, menu_help_home_page, 0, ""},
+#endif
 		// TODO: implement context help
 //		{ "/Help/_Context help", NULL, ui_set_context_help, 0, ""},
 	};
@@ -1320,6 +1330,9 @@ gboolean ui_sound_init (gpointer data)
 
 int main (int argc, char **argv)
 {
+#ifdef HAVE_GNOME
+	GnomeProgram *app;
+#endif
 	srandom (get_seed());
 	reset_game_params ();
 	prefs_read_config_file ();
@@ -1334,6 +1347,9 @@ int main (int argc, char **argv)
 	{
 		gtk_init(&argc,&argv);    
 		gdk_rgb_init();
+#ifdef HAVE_GNOME
+		app = gnome_program_init (PACKAGE, VERSION, LIBGNOME_MODULE, argc, argv, GNOME_PARAM_NONE);
+#endif
 		gui_init ();
 		g_idle_add ((GSourceFunc) ui_sound_init, NULL);
 		gtk_main ();
