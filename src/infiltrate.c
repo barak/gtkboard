@@ -55,7 +55,7 @@ static int infiltrate_max_moves = 200;
 void infiltrate_init ();
 int infiltrate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 //ResultType infiltrate_who_won (byte *, int, char **);
-byte *infiltrate_movegen (Pos *, Player );
+byte *infiltrate_movegen (Pos *);
 ResultType infiltrate_eval (Pos *, Player, float *);
 char ** infiltrate_get_pixmap (int idx, int color);
 void infiltrate_reset_uistate ();
@@ -85,12 +85,13 @@ void infiltrate_init ()
 		"The pieces move diagonally, one square at a time. The objective is to get all your pieces to the starting squares of your opponent's pieces.\n";
 }
 
-byte * infiltrate_movegen (Pos *pos, Player player)
+byte * infiltrate_movegen (Pos *pos)
 {
 	int i, j, diffx, diffy;
 	byte movbuf [256];
 	byte *movlist, *mp = movbuf;
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{

@@ -129,8 +129,6 @@ typedef struct
 static int hiq_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType hiq_who_won (Pos *, Player , char **);
 char ** hiq_get_pixmap (int , int); 
-byte * hiq_movegen (char *, int);
-float hiq_eval (byte *, int);
 void hiq_reset_uistate ();
 
 void hiq_init ()

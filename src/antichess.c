@@ -90,7 +90,7 @@ static char ** antichess_pixmaps[] =
 void antichess_init ();
 int antichess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType antichess_who_won (Pos *, Player, char **);
-byte *antichess_movegen (Pos *, Player );
+byte *antichess_movegen (Pos *);
 ResultType antichess_eval (Pos *, Player, float *);
 ResultType antichess_eval_incr (Pos *, Player, byte *, float *);
 	
@@ -456,7 +456,7 @@ static void antichess_movegen_promote (byte *board, byte **movp, int player,
 	}
 }
 
-byte *antichess_movegen (Pos *pos, Player player)
+byte *antichess_movegen (Pos *pos)
 {
 	byte realbuf[4096];
 	byte *realp = realbuf;
@@ -470,6 +470,7 @@ byte *antichess_movegen (Pos *pos, Player player)
 	int incxn[] = {2, 2, -2, -2, 1, 1, -1, -1};
 	int incyn[] = {1, -1, 1, -1, 2, -2, 2, -2};
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{

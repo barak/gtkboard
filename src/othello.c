@@ -56,7 +56,7 @@ void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 ResultType othello_eval (Pos *, Player, float *);
 ResultType othello_eval_incr (Pos *, Player, byte *, float *);
-byte * othello_movegen (Pos *, Player);
+byte * othello_movegen (Pos *);
 char ** othello_get_pixmap (int, int);
 guchar *othello_get_rgbmap (int, int);
 gboolean othello_use_incr_eval (Pos *pos, Player player);
@@ -248,11 +248,12 @@ ResultType othello_who_won (Pos *pos, Player to_play, char **commp)
 	return RESULT_TIE;
 }
 
-byte * othello_movegen (Pos *pos, Player player)
+byte * othello_movegen (Pos *pos)
 {
 	int i, j, x, y, sw_len;
 	byte movbuf [4096];
 	byte *movlist, *movp = movbuf;
+	Player player = pos->player;
 	byte our = player == WHITE ? OTHELLO_WP : OTHELLO_BP;
 	gboolean game_over = TRUE;
 	for (x=0; x<board_wid; x++)

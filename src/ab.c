@@ -66,7 +66,7 @@ float ab_with_tt (Pos *pos, int player, int level,
 	engine_poll ();
 	if (engine_stop_search) { ab_tree_exhausted = FALSE; return 0; }
 
-	movlist = game_movegen (pos, player);
+	movlist = game_movegen (pos);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
 		free (movlist);
@@ -109,6 +109,7 @@ float ab_with_tt (Pos *pos, int player, int level,
 			}
 			move_apply (newpos.board, move);
 			newpos.num_moves = pos->num_moves + 1;
+			newpos.player = pos->player == WHITE ? BLACK : WHITE;
 			retval = 0;
 			if (game_use_hash && level > 0)
 				retval = hash_get_eval (newpos.board, board_wid * board_heit, 
@@ -191,7 +192,7 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 		oldstate = (void *) malloc (game_state_size);
 		assert (oldstate);
 	}
-	movlist = game_movegen (pos, player);
+	movlist = game_movegen (pos);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
 		free (movlist);
@@ -231,6 +232,7 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 				memcpy (pos->state, newstate, game_state_size);
 			}
 			pos->num_moves++;
+			pos->player = pos->player == WHITE ? BLACK : WHITE;
 			val = 0; // stop compiler warning
 			if (level >= 1)
 			{
@@ -250,6 +252,7 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 			free (movinv);
 			memcpy (pos->state, oldstate, game_state_size);
 			pos->num_moves--;
+			pos->player = pos->player == WHITE ? BLACK : WHITE;
 		}
 		if (first)
 		{
@@ -293,7 +296,7 @@ byte * ab_dfid (Pos *pos, int player)
 	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
 
-	move_list = game_movegen (pos, player);
+	move_list = game_movegen (pos);
 	if (move_list[0] == -2)
 	{
 		free (move_list);

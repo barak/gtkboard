@@ -63,7 +63,7 @@ Game Quarto = { QUARTO_CELL_SIZE, QUARTO_BOARD_WID, QUARTO_BOARD_HEIT,
 static int quarto_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType quarto_who_won (Pos *, Player, char **);
 void quarto_init (void);
-static byte * quarto_movegen (Pos *, Player);
+static byte * quarto_movegen (Pos *);
 static ResultType quarto_eval (Pos *, Player, float *eval);
 static void quarto_reset_uistate (Pos *pos);
 static unsigned char * quarto_get_rgbmap (int idx, int color);
@@ -236,11 +236,12 @@ void quarto_reset_uistate (Pos *pos)
 	cur_piece = curx = cury = -1;
 }
 
-byte *quarto_movegen (Pos *pos, Player player)
+byte *quarto_movegen (Pos *pos)
 {
 	byte movbuf[2048];
 	byte *movlist, *movp = movbuf;
 	int from_x, from_y, to_x, to_y;
+	Player player = pos->player;
 
 	int count = 0;
 	for (to_x=0; to_x<4; to_x++)

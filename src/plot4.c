@@ -56,7 +56,7 @@ static int plot4_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, i
 static ResultType plot4_who_won (Pos *, Player , char **);
 static void plot4_set_init_pos (Pos *pos);
 static char ** plot4_get_pixmap (int, int);
-static byte * plot4_movegen (Pos *, Player);
+static byte * plot4_movegen (Pos *);
 static ResultType plot4_eval (Pos *, Player, float *);
 
 
@@ -266,7 +266,7 @@ byte * plot4_movegen_single (char *pos, int player, int reset)
 }
 
 //! movegen function
-byte *plot4_movegen (Pos *pos, Player player)
+byte *plot4_movegen (Pos *pos)
 {
 	byte movbuf[256];
 	byte *movp = movbuf;
@@ -279,7 +279,7 @@ byte *plot4_movegen (Pos *pos, Player player)
 			{
 				*movp++ = i;
 				*movp++ = j;
-				*movp++ = (player == WHITE ? PLOT4_WP : PLOT4_BP);
+				*movp++ = (pos->player == WHITE ? PLOT4_WP : PLOT4_BP);
 				*movp++ = -1;
 				break;
 			}

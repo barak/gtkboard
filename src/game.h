@@ -286,7 +286,7 @@ extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float 
 extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
 
 //! A function to search and return the best move - for games for which minimax is not appropriate
-extern void (*game_search) (Pos *pos, Player player, byte **move);
+extern void (*game_search) (Pos *pos, byte **move);
 
 //! A pointer to the game's move generation function.
 /** Only for two player games. It <b>must</b> be implemented if you want
@@ -299,7 +299,7 @@ extern void (*game_search) (Pos *pos, Player player, byte **move);
  The move list (array) should be malloc'd inside this function 
  and will be freed by the caller.
  */
-extern byte * (*game_movegen) (Pos *, Player);
+extern byte * (*game_movegen) (Pos *);
 
 
 //! This takes a mouse click and returns the move that it corresponds to.

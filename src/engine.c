@@ -403,7 +403,7 @@ byte * engine_search (Pos *pos/*, int player*/)
 	byte *move;
 	engine_stop_search = FALSE;
 	if (game_search)
-		game_search (pos, pos->player, &move);
+		game_search (pos, &move);
 	else if (game_single_player)
 		move = NULL;
 	else

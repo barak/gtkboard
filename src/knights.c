@@ -69,7 +69,7 @@ void knights_init ();
 static ResultType knights_who_won (Pos *, Player, char **);
 static ResultType knights_eval (Pos *, Player, float *eval);
 static ResultType knights_eval_real (Pos *, Player, float *eval, gboolean);
-static byte * knights_movegen (Pos *, Player);
+static byte * knights_movegen (Pos *);
 static void *knights_newstate (Pos *, byte *);
 
 Game Knights = { KNIGHTS_CELL_SIZE, KNIGHTS_BOARD_WID, KNIGHTS_BOARD_HEIT, 
@@ -188,11 +188,12 @@ int knights_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player play
 }
 
 
-byte * knights_movegen (Pos *pos, Player player)
+byte * knights_movegen (Pos *pos)
 {
 	int i, j, k;
 	byte movbuf [64];
 	byte *movlist, *movp = movbuf;
+	Player player = pos->player;
 	get_cur_pos (pos->board, player, &i, &j);
 	for (k=0; k<8; k++)
 	{

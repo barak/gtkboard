@@ -53,7 +53,7 @@ static ResultType pentaline_who_won (Pos *, Player , char **);
 static void pentaline_set_init_pos (Pos *pos);
 unsigned char * pentaline_get_rgbmap (int idx, int color);
 ResultType pentaline_eval_incr (Pos *, Player, byte *, float *);
-byte * pentaline_movegen (Pos *, Player);
+byte * pentaline_movegen (Pos *);
 ResultType pentaline_eval (Pos *, Player, float *);
 void *pentaline_newstate (Pos *pos, byte *move);
 
@@ -91,7 +91,7 @@ void pentaline_init ()
 		"This game is the same as the free-style variant of GoMoku.\n";
 }
 
-byte * pentaline_movegen (Pos *pos, Player player)
+byte * pentaline_movegen (Pos *pos)
 {
 	int i, j, k, l, x, y;
 	byte movbuf [1024];
@@ -102,6 +102,7 @@ byte * pentaline_movegen (Pos *pos, Player player)
 	int nbrx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
 	int nbry[] = { -1, 0, 1, -1, 1, -1, 0, 1};
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{

@@ -139,8 +139,6 @@ static char ** pacman_get_pixmap (int idx, int color);
 static int pacman_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move, int **);
 static int pacman_animate (Pos *pos, byte **movp);
-byte * pacman_movegen (char *, int);
-float pacman_eval (byte *, int);
 
 
 void pacman_init ()

@@ -50,7 +50,7 @@ static int rgb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int
 static ResultType rgb_who_won (Pos *, Player, char **);
 static void rgb_set_init_pos (Pos *pos);
 void rgb_init (void);
-static byte * rgb_movegen (Pos *, Player);
+static byte * rgb_movegen (Pos *);
 static ResultType rgb_eval (Pos *, Player, float *eval);
 
 static unsigned char * rgb_get_rgbmap (int idx, int color);
@@ -83,7 +83,7 @@ static void rgb_set_init_pos (Pos *pos)
 		pos->board [i] = RGB_EMPTY;
 }
 
-static byte * rgb_movegen (Pos *pos, Player player)
+static byte * rgb_movegen (Pos *pos)
 {
 	int i, j;
 	byte movbuf [64];

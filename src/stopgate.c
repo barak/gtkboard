@@ -242,7 +242,7 @@ int stopgate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int *
 void stopgate_init ();
 ResultType stopgate_who_won (Pos *, Player, char **);
 ResultType stopgate_eval (Pos *, Player, float *eval);
-byte * stopgate_movegen (Pos *, Player);
+byte * stopgate_movegen (Pos *);
 
 Game Stopgate = { STOPGATE_CELL_SIZE, STOPGATE_BOARD_WID, STOPGATE_BOARD_HEIT, 
 	STOPGATE_NUM_PIECES, 
@@ -362,11 +362,12 @@ static void find_regions (byte *board)
 }
 
 
-byte * stopgate_movegen (Pos *pos, Player player)
+byte * stopgate_movegen (Pos *pos)
 {
 	int i, j;
 	byte movbuf [512], *movp = movbuf, *movlist;
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{

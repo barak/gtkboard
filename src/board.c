@@ -406,7 +406,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 		{
 			gchar *tmpstr = minfo.help_message ? 
 				g_strdup_printf ("Illegal move: %s", minfo.help_message) 
-				: "Illegal move";
+				: g_strdup_printf ("Illegal move");
 			sb_error (tmpstr, FALSE);
 			g_free (tmpstr);
 		}

@@ -178,8 +178,6 @@ static void mastermind_set_init_pos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
 int mastermind_getmove_kb (Pos *, int , Player, byte **, int **);
 void mastermind_reset_uistate ();
-byte * mastermind_movegen (Pos *, int);
-float mastermind_eval (Pos *, int);
 int mastermind_get_cur_row (byte *);
 void mastermind_set_init_render (Pos *);
 void mastermind_free ();

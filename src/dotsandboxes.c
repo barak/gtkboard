@@ -176,7 +176,7 @@ static char * dnb_horizontal_24_xpm [] =
 #define abs(x) ((x) < 0 ? -(x) : (x))
 
 int dnb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-void dnb_search (Pos *pos, Player player, byte **movp);
+void dnb_search (Pos *pos, byte **movp);
 void dnb_init ();
 ResultType dnb_who_won (Pos *, Player, char **);
 void dnb_set_init_pos (Pos *pos);
@@ -207,7 +207,7 @@ void dnb_init ()
 	game_search = dnb_search;
 	game_allow_flip = TRUE;
 	game_doc_about = 
-		"Dnb\n"
+		"Dots and boxes\n"
 		"Two player game\n"
 		"Status: partially implemented (the AI is totally dumb)\n"
 		"URL: "GAME_DEFAULT_URL ("dnb");
@@ -390,7 +390,7 @@ static void dnb_get_render (Pos *pos, byte *move, int **rmovp)
 }
 
 
-void dnb_search (Pos *pos, Player player, byte **movp)
+void dnb_search (Pos *pos, byte **movp)
 {
 	/* first greedily close all possible squares, then choose some edge arbitrarily */
 	// TODO: this AI needs MAJOR improvement
@@ -399,6 +399,7 @@ void dnb_search (Pos *pos, Player player, byte **movp)
 	int i, j;
 	gboolean found;
 	static byte newboard[DNB_BOARD_WID * DNB_BOARD_HEIT];
+	Player player = pos->player;
 	memcpy (newboard, pos->board, board_wid * board_heit);
 	
 	do // very slow, but speed probably doesn't matter here

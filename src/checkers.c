@@ -63,7 +63,7 @@ static int checkers_max_moves = 200;
 void checkers_init ();
 int checkers_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType checkers_who_won (Pos *, Player, char **);
-byte *checkers_movegen (Pos *, Player );
+byte *checkers_movegen (Pos *);
 ResultType checkers_eval (Pos *, Player, float *);
 char ** checkers_get_pixmap (int idx, int color);
 void checkers_reset_uistate ();
@@ -116,12 +116,13 @@ ResultType checkers_who_won (Pos *pos, Player player, char **commp)
 	return RESULT_NOTYET;
 }
 
-byte * checkers_movegen (Pos *pos, Player player)
+byte * checkers_movegen (Pos *pos)
 {
 	int i, j, diffx, diffy;
 	byte movbuf [256];
 	byte *movlist, *mp = movbuf;
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{

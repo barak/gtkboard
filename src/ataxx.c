@@ -56,7 +56,7 @@ Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT,
 	ataxx_colors, ataxx_init_pos, NULL, "Ataxx", ataxx_init};
 
 ResultType ataxx_eval (Pos *, Player, float *);
-byte *ataxx_movegen (Pos *, Player);
+byte *ataxx_movegen (Pos *);
 
 static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType ataxx_who_won (Pos *, Player , char **);
@@ -100,7 +100,7 @@ ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
 	static char comment[32];
 	int i, wscore = 0, bscore = 0, who_idx;
 	char *who_str [3] = { "Red won", "Blue won", "its a tie" };
-	byte *move = ataxx_movegen (pos, to_play);
+	byte *move = ataxx_movegen (pos);
 	for (i=0; i<board_wid * board_heit; i++)
 		if (pos->board[i] == ATAXX_WP)
 			wscore++;
@@ -153,7 +153,7 @@ ResultType ataxx_eval (Pos *pos, Player to_play, float *eval)
 	return RESULT_NOTYET;
 }
 
-byte *ataxx_movegen (Pos *pos, Player player)
+byte *ataxx_movegen (Pos *pos)
 	/* to keep things from getting out of hand, we'll generate only 
 	   _plausible_ moves: find the max #flips possible and generate
 	   only those moves that lead to at least max-1 flips */
@@ -163,6 +163,7 @@ byte *ataxx_movegen (Pos *pos, Player player)
 	int incx2[] = { -2, -2, -2, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 2, 2, 2};
 	int incy2[] = { -2, -1, 0, 1, 2, -2, 2, -2, 2, -2, 2, -2, -1, 0, 1, 2};
 	int x, y, i, j, newx, newy;
+	Player player = pos->player;
 	byte our = (player == WHITE ? ATAXX_WP : ATAXX_BP);
 	byte other = (player == WHITE ? ATAXX_BP : ATAXX_WP);
 	byte *board = pos->board;

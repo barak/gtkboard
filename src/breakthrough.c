@@ -64,7 +64,7 @@ void breakthrough_init ();
 static ResultType breakthrough_who_won (Pos *, Player, char **);
 static ResultType breakthrough_eval (Pos *, Player, float *eval);
 static ResultType breakthrough_eval_incr (Pos *, Player, byte *, float *);
-static byte * breakthrough_movegen (Pos *, Player);
+static byte * breakthrough_movegen (Pos *);
 static void *breakthrough_newstate (Pos *, byte *);
 
 Game Breakthrough = { BREAKTHROUGH_CELL_SIZE, BREAKTHROUGH_BOARD_WID, BREAKTHROUGH_BOARD_HEIT, 
@@ -231,7 +231,7 @@ static ResultType breakthrough_eval_incr (Pos *pos, Player player, byte *move, f
 	return RESULT_NOTYET;
 }
 
-static byte * breakthrough_movegen (Pos *pos, Player player)
+static byte * breakthrough_movegen (Pos *pos)
 {
 	int i, j, m, n, xoff, yoff;
 	byte movbuf [256];
@@ -247,7 +247,8 @@ static byte * breakthrough_movegen (Pos *pos, Player player)
 		int incx, incy;
 		i = (m + xoff) % board_wid;
 		j = (n + yoff) % board_heit;
-		if (board [j * board_wid + i] != (player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP))
+		if (board [j * board_wid + i] != 
+				(pos->player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP))
 			continue;
 		incy = board [j * board_wid + i] == BREAKTHROUGH_WP ? 1 : -1;
 		for (incx = -1; incx <= 1; incx += 1)
@@ -262,7 +263,7 @@ static byte * breakthrough_movegen (Pos *pos, Player player)
 			if (val != BREAKTHROUGH_EMPTY && incx == 0) continue;
 			*movp++ = i + incx;
 			*movp++ = j + incy;
-			*movp++ = (player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP);
+			*movp++ = (pos->player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP);
 			*movp++ = i;
 			*movp++ = j;
 			*movp++ = 0;

@@ -65,7 +65,7 @@ static int samegame_getmove (Pos *, int, int, GtkboardEventType, Player, byte **
 static char **samegame_get_pixmap (int , int);
 static void *samegame_newstate (Pos *, byte *);
 static ResultType samegame_who_won (Pos *, Player, char **);
-static void samegame_search (Pos *pos, Player player, byte **movp);
+static void samegame_search (Pos *pos, byte **movp);
 static void samegame_getxy (byte *board, int *x, int *y);
 
 static int anim_curx=-1, anim_cury=-1;
@@ -382,7 +382,7 @@ char ** samegame_get_pixmap (int idx, int color)
 	return pixmap_header_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg);
 }
 
-void samegame_search (Pos *pos, Player player, byte **movp)
+void samegame_search (Pos *pos, byte **movp)
 {
 	int x, y;
 	int retval;

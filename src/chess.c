@@ -109,7 +109,7 @@ char ** chess_pixmaps[] =
 void chess_init ();
 int chess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType chess_who_won (Pos *, Player, char **);
-byte *chess_movegen (Pos *, Player );
+byte *chess_movegen (Pos *);
 ResultType chess_eval (Pos *, Player, float *);
 void *chess_newstate (Pos *, byte *);
 void chess_reset_uistate ();
@@ -495,7 +495,7 @@ ResultType chess_who_won (Pos *pos, Player player, char **commp)
 	char *who_str [3] = { "White won", "Black won", "Draw" };
 	byte *move_list;
 	*commp = NULL;
-	move_list = chess_movegen (pos, player);
+	move_list = chess_movegen (pos);
 	if (move_list[0] != -2)
 	{
 		if (pos->num_moves > chess_max_moves)
@@ -720,7 +720,7 @@ static void chess_movegen_castle (Pos *pos, byte **movp, int player)
 	}
 }
 
-byte *chess_movegen (Pos *pos, Player player)
+byte *chess_movegen (Pos *pos)
 {
 	byte realbuf[4096];
 	byte *realp = realbuf;
@@ -734,6 +734,7 @@ byte *chess_movegen (Pos *pos, Player player)
 	int incxn[] = {2, 2, -2, -2, 1, 1, -1, -1};
 	int incyn[] = {1, -1, 1, -1, 2, -2, 2, -2};
 	byte *board = pos->board;
+	Player player = pos->player;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{
