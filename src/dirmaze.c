@@ -52,6 +52,9 @@ int hypermaze_hypermaze[HYPERMAZE_BOARD_WID][HYPERMAZE_BOARD_HEIT] = {{0}};
 
 void hypermaze_init ();
 
+SCORE_FIELD hypermaze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
+char *hypermaze_score_field_names[] = {"User", "Time", "Date", NULL};
+
 Game Hypermaze = { HYPERMAZE_CELL_SIZE, HYPERMAZE_BOARD_WID, HYPERMAZE_BOARD_HEIT, 
 	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", hypermaze_init};
 
@@ -73,6 +76,8 @@ void hypermaze_init ()
 	game_who_won = hypermaze_who_won;
 	game_start_immediately = TRUE;
 	game_scorecmp = game_scorecmp_def_time;
+	game_score_fields = hypermaze_score_fields;
+	game_score_field_names = hypermaze_score_field_names;
 	game_doc_about = 
 		"HyperMaze\n"
 		"Single player game\n"

@@ -26,10 +26,10 @@
 #include "../pixmaps/chess.xpm"
 
 #define KNIGHTS_CELL_SIZE 54
-#define KNIGHTS_NUM_PIECES 4
+#define KNIGHTS_NUM_PIECES 3
 
-#define KNIGHTS_BOARD_WID 8
-#define KNIGHTS_BOARD_HEIT 8
+#define KNIGHTS_BOARD_WID 7
+#define KNIGHTS_BOARD_HEIT 7
 
 #define KNIGHTS_EMPTY 0
 #define KNIGHTS_CLOSED 1
@@ -40,14 +40,13 @@ char knights_colors[] = {200, 200, 130, 0, 140, 0};
 
 int knights_initpos [KNIGHTS_BOARD_WID*KNIGHTS_BOARD_HEIT] = 
 {
-	2 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 3 ,
+	3 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 2 ,
 };
 
 static char * grey_square_54_xpm [] = // TODO: move to a header file or generate in code
@@ -118,28 +117,36 @@ char ** knights_pixmaps [] =
 	chess_bn_54_xpm,
 };
 
+typedef struct
+{
+	int num_pauses;
+}Knights_state;
 
 static int knights_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static int knights_getmove_kb (Pos *, int, Player, byte ** , int **);
 void knights_init ();
-ResultType knights_who_won (Pos *, Player, char **);
-//ResultType knights_eval (Pos *, Player, float *eval);
-//byte * knights_movegen (Pos *, Player);
+static ResultType knights_who_won (Pos *, Player, char **);
+static ResultType knights_eval (Pos *, Player, float *eval);
+static byte * knights_movegen (Pos *, Player);
+static void *knights_newstate (Pos *, byte *);
 
 Game Knights = { KNIGHTS_CELL_SIZE, KNIGHTS_BOARD_WID, KNIGHTS_BOARD_HEIT, 
 	KNIGHTS_NUM_PIECES, 
 	knights_colors, knights_initpos, knights_pixmaps, "Knights", knights_init};
-
-static int knights_curx = - 1, knights_cury = -1;
 
 void knights_init ()
 {
 	game_getmove = knights_getmove;
 	game_getmove_kb = knights_getmove_kb;
 	game_who_won = knights_who_won;
-/*	game_eval = knights_eval;
+	game_eval = knights_eval;
 	game_movegen = knights_movegen;
-*/
+	game_stateful = TRUE;
+	game_state_size = sizeof (Knights_state);
+	game_newstate = knights_newstate;
+	game_draw_cell_boundaries = TRUE;
+	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
+	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
 		"Knights\n"
 		"Two player game\n"
@@ -150,28 +157,47 @@ void knights_init ()
 static int incx[] = { -2, -2, -1, -1, 1, 1, 2, 2};
 static int incy[] = { -1, 1, -2, 2, -2, 2, -1, 1};
 
-ResultType knights_who_won (Pos *pos, Player player, char **commp)
+static void *knights_newstate (Pos *pos, byte *move)
 {
-	int i=0, j=0, k;
+	static Knights_state state;
+	if (!pos->state)
+	{
+		state.num_pauses = 0;
+		return &state;
+	}
+	if (move[0] == -1)
+		state.num_pauses = ((Knights_state *)pos->state)->num_pauses + 1;
+	else state.num_pauses = 0;
+	return &state;
+}
+
+static void get_cur_pos (byte *board, Player player, int *x, int *y)
+{
+	int i=0, j=0;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{
-		if (player == WHITE && pos->board [j * board_wid + i] == KNIGHTS_WN)
-			goto found_knight;
-		if (player == BLACK && pos->board [j * board_wid + i] == KNIGHTS_BN)
-			goto found_knight;
+		if ((player == WHITE && board [j * board_wid + i] == KNIGHTS_WN)
+			|| (player == BLACK && board [j * board_wid + i] == KNIGHTS_BN))
+		{
+			*x = i;
+			*y = j;
+			return;
+		}
 	}
-	// WARNING: goto used here to break out of nested loop
-found_knight:
-	for (k=0; k<8; k++)
-	{
-		int x = i + incx[k], y = j + incy[k];
-		if (!ISINBOARD (x, y)) continue;
-		if (pos->board[y * board_wid + x] != KNIGHTS_CLOSED)
-			return RESULT_NOTYET;
-	}
-	*commp = player == WHITE ? "Black won" : "White won";
-	return player == WHITE ? RESULT_BLACK : RESULT_WHITE;
+}
+
+ResultType knights_who_won (Pos *pos, Player player, char **commp)
+{
+	int i=0, j=0, k;
+	float eval;
+	ResultType result = knights_eval (pos, player, &eval);
+	if (result == RESULT_NOTYET)
+		;
+	else if (result == RESULT_TIE) *commp = "Draw";
+	else if (result == RESULT_WHITE) *commp = "White won";
+	else if (result == RESULT_BLACK) *commp = "Black won";
+	return result;
 }
 
 
@@ -198,40 +224,95 @@ int knights_getmove_kb (Pos *pos, int key, Player to_play, byte ** movp, int **r
 int knights_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player player, 
 		byte **movp, int **rmovp)
 {
+	int curx = -1, cury = -1;
 	static byte move[128];
 	byte *mp = move;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
-	if (knights_curx < 0)
-	{
-		if (player == WHITE && pos->board[y * board_wid + x] != KNIGHTS_WN)
-			return -1;
-		if (player == BLACK && pos->board[y * board_wid + x] != KNIGHTS_BN)
-			return -1;
-		knights_curx = x; knights_cury = y;
-		return 0;
-	}
 	if (pos->board[y * board_wid + x] != KNIGHTS_EMPTY)
-	{
-		knights_curx = knights_cury = -1;
 		return -1;
-	}
-	if (abs ((knights_curx - x) * (knights_cury - y)) != 2)
-	{
-		knights_curx = knights_cury = -1;
+	get_cur_pos (pos->board, player, &curx, &cury);
+	if (abs ((curx - x) * (cury - y)) != 2)
 		return -1;
-	}
 	*mp++ = x;
 	*mp++ = y;
-	*mp++ = player == WHITE ? KNIGHTS_WN : KNIGHTS_BN;
-	*mp++ = knights_curx;
-	*mp++ = knights_cury;
+	*mp++ = (player == WHITE ? KNIGHTS_WN : KNIGHTS_BN);
+	*mp++ = curx;
+	*mp++ = cury;
 	*mp++ = KNIGHTS_CLOSED;
 	*mp++ = -1;
-	knights_curx = knights_cury = -1;
 	*movp = move;
 	return 1;
 }
 
 
+byte * knights_movegen (Pos *pos, Player player)
+{
+	int i, j, k;
+	byte movbuf [64];
+	byte *movlist, *movp = movbuf;
+	get_cur_pos (pos->board, player, &i, &j);
+	for (k=0; k<8; k++)
+	{
+		int x = i + incx[k], y = j + incy[k];
+		int val;
+		if (!ISINBOARD (x, y)) continue;
+		if ((val = pos->board[y * board_wid + x]) == KNIGHTS_EMPTY)
+		{
+			*movp++ = i;
+			*movp++ = j;
+			*movp++ = KNIGHTS_CLOSED;
+			*movp++ = x;
+			*movp++ = y;
+			*movp++ = (player == WHITE ? KNIGHTS_WN : KNIGHTS_BN);
+			*movp++ = -1;
+		}
+		else if (val == KNIGHTS_WN || val == KNIGHTS_BN)
+		{
+			*movp++ = -1;
+		}
+	}
+	*movp++ = -2;
+	movlist = (byte *) (malloc (movp - movbuf));
+	memcpy (movlist, movbuf, (movp - movbuf));
+	return movlist;
+}
 
+ResultType knights_eval (Pos *pos, Player player, float *eval)
+{
+	int i, j, k;
+	int wcnt = 0, bcnt = 0;
+	if (pos->state && ((Knights_state *)pos->state)->num_pauses >= 2)
+	{
+		*eval = 0;
+		return RESULT_TIE;
+	}
+	get_cur_pos (pos->board, WHITE, &i, &j);
+	for (k=0; k<8; k++)
+	{
+		int x = i + incx[k], y = j + incy[k];
+		if (!ISINBOARD (x, y)) continue;
+		if (pos->board[y * board_wid + x] == KNIGHTS_EMPTY)
+			wcnt++;
+	}
+	get_cur_pos (pos->board, BLACK, &i, &j);
+	for (k=0; k<8; k++)
+	{
+		int x = i + incx[k], y = j + incy[k];
+		if (!ISINBOARD (x, y)) continue;
+		if (pos->board[y * board_wid + x] == KNIGHTS_EMPTY)
+			bcnt++;
+	}
+	*eval = wcnt - bcnt;
+	if (player == WHITE && wcnt == 0)
+	{
+		if (*eval == 0) *eval = -1;
+		return RESULT_BLACK;
+	}
+	if (player == BLACK && bcnt == 0)
+	{
+		if (*eval == 0) *eval = 1;
+		return RESULT_WHITE;
+	}
+	return RESULT_NOTYET;
+}

@@ -447,15 +447,15 @@ int chess_movegen_line (byte *pos, byte **movp, int player,
 		int x, int y, int incx, int incy)
 {
 	int oldx = x, oldy = y;
-	int val;
+	int capture = 0, val;
 	do
 	{
 		x += incx;
 		y += incy;
 		val = pos [y * board_heit + x];
 		if (ISINBOARD (x, y) && oppcolor (pos, oldx, oldy, x, y))
-			break;
-	} while (chess_movegen_square (pos, movp, player, oldx, oldy, x, y));
+			capture = 1;
+	} while (chess_movegen_square (pos, movp, player, oldx, oldy, x, y) && !capture);
 	return 0;
 }
 
@@ -617,38 +617,6 @@ byte *chess_movegen (Pos *pos, Player player)
 	movlist = (byte *) malloc (movp - movbuf);
 	memcpy (movlist, movbuf, movp - movbuf);
 	return movlist;
-
-	/*movp = movbuf;
-	realp = realbuf;
-	while (1)
-	{
-		byte *tmp;
-		int w = 0, b = 0;
-		if (*movp == -2)
-			break;
-		for (tmp = movp; *tmp != -1; tmp += 3)
-		{
-			if (CHESS_ISWHITE (board [tmp[1] * board_heit + tmp[0]]))	w = 1;
-			if (CHESS_ISBLACK (board [tmp[1] * board_heit + tmp[0]]))	b = 1;
-		}
-		if (w && b)
-		{
-			while (*movp != -1)
-			{
-				*realp++ = *movp++;
-				*realp++ = *movp++;
-				*realp++ = *movp++;
-			}
-			*realp++ = *movp++;
-		}
-		else 
-			movp = tmp+1;
-	}
-	*realp++ = -2;
-	movlist = (byte *) malloc (realp - realbuf);
-	memcpy (movlist, realbuf, realp - realbuf);
-	return movlist;
-	*/
 }
 
 float getweight (byte val)

@@ -44,14 +44,14 @@ extern Game
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
-	Ninemm, Stopgate, Knights
+	Ninemm, Stopgate, Knights, Breakthrough, CapturePento
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
-	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Flw, &Hiq, 
-	&Hypermaze, &Infiltrate, &Knights, &Mastermind, &Maze, &Memory,
-	&Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Rgb, &Samegame,
+	&Antichess, &Ataxx, &Breakthrough, &Checkers, &Chess, &CapturePento, &Fifteen,
+	&Flw, &Hiq, &Hypermaze, &Infiltrate, &Knights, &Mastermind, &Maze,
+	&Memory, &Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Rgb, &Samegame,
 	&Stopgate, &Tetris, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
@@ -206,7 +206,8 @@ void game_set_init_pos_def (Pos *pos)
 	for (x=0; x<board_wid; x++)
 		for (y=0; y<board_heit; y++)
 			pos->board[y * board_wid + x] = 
-				opt_game->init_pos [(board_heit -1 - y) * board_wid + x];
+				opt_game->init_pos ? 
+				opt_game->init_pos [(board_heit -1 - y) * board_wid + x] : 0;
 }
 
 

@@ -63,6 +63,9 @@ gboolean board_suspended = FALSE;
 //! Is the board flipped (rotated 180 deg)
 gboolean state_board_flipped = FALSE;
 
+//! default background
+char board_default_colors [9] = {215, 215, 215, 215, 215, 215, 0, 0, 0};
+
 static int cell_size, num_pieces;
 
 extern void ui_make_human_move (byte *move, int *rmove);
@@ -404,9 +407,9 @@ static gchar *board_get_rank_label_str (int label, int idx)
 
 static void board_color_init (char *color, GdkColor *gdkcolor, GdkGC **gc, GdkColormap *cmap, GtkWidget *board_area)
 {
-	gdkcolor->red = 256 * color[0];
-	gdkcolor->green = 256 * color[1];
-	gdkcolor->blue = 256 * color[2];
+	gdkcolor->red = 256 * (color ? color[0] : 215);
+	gdkcolor->green = 256 * (color ? color[1] : 215);
+	gdkcolor->blue = 256 * (color ? color[2] : 215);
 	gdk_color_alloc (cmap, gdkcolor);
 	if (*gc) 
 		gdk_gc_unref (*gc);
@@ -414,16 +417,6 @@ static void board_color_init (char *color, GdkColor *gdkcolor, GdkGC **gc, GdkCo
 	gdk_gc_set_foreground (*gc, gdkcolor);
 
 }
-/*{		board_colors[i].red = 256 * game->colors[i*3 + 0];
-		board_colors[i].green = 256 * game->colors[i*3 + 1];
-		board_colors[i].blue = 256 * game->colors[i*3 + 2];
-		gdk_color_alloc (board_colormap, &board_colors[i]);
-		if (board_gcs[i]) 
-			gdk_gc_unref (board_gcs[i]);
-		board_gcs[i] = gdk_gc_new(board_area->window);
-		gdk_gc_set_foreground (board_gcs[i], &board_colors[i]);
-
-}*/
 
 //! initialization of the board
 void board_init ()
@@ -494,12 +487,16 @@ void board_init ()
 	}
 	
 	
+	if (game->colors == NULL) game->colors = board_default_colors;
 	board_colormap = gdk_colormap_get_system ();
 
-	board_color_init (&game->colors[0], &board_colors[0], &board_gcs[0], board_colormap, board_area);
-	board_color_init (&game->colors[3], &board_colors[1], &board_gcs[1], board_colormap, board_area);
+	board_color_init (&game->colors[0], 
+			&board_colors[0], &board_gcs[0], board_colormap, board_area);
+	board_color_init (&game->colors[3], 
+			&board_colors[1], &board_gcs[1], board_colormap, board_area);
 	if (game_draw_cell_boundaries)
-		board_color_init (&game->colors[6], &board_colors[2], &board_gcs[2], board_colormap, board_area);
+		board_color_init (&game->colors[6], 
+				&board_colors[2], &board_gcs[2], board_colormap, board_area);
 	if (game_highlight_colors)
 		for (i=0; i<3; i++)
 			board_color_init (&game_highlight_colors[3*i],

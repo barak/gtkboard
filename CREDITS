@@ -1,6 +1,9 @@
 * Prof. D. Khemani
 	The idea behind the generic game tree search engine
 
+* Arthur J. O'Dwyer <ajo@andrew.cmu.edu>
+	Capture pentominoes
+
 * Thomas Klausner <wiz@danbala.ifoer.tuwien.ac.at>
 	Ideas, lots of bug reports and fixes
 

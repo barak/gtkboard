@@ -81,7 +81,6 @@ static int anim_time_def = 0;
 void tetris_init ()
 {
 	game_single_player = TRUE;
-	game_set_init_pos = tetris_set_init_pos;
 	game_get_pixmap = tetris_get_pixmap;
 	game_getmove_kb = tetris_getmove_kb;
 	game_animation_time = 50;
@@ -430,14 +429,6 @@ int tetris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int 
 	*mp++ = -1;
 	*movp = move;
 	return 1;
-}
-
-void tetris_set_init_pos (Pos *pos)
-{
-	int i, j;
-	for (i=0; i<board_wid; i++)
-	for (j=0; j<board_heit; j++)
-		pos->board [j * board_wid + i] = 0;
 }
 
 

@@ -27,8 +27,10 @@ gtkboard_SOURCES = 	\
 	\
 	antichess.c\
 	ataxx.c\
+	breakthrough.c\
 	checkers.c\
 	chess.c\
+	cpento.c\
 	dirmaze.c\
 	fifteen.c\
 	flw.c\

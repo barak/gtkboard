@@ -32,19 +32,6 @@
 
 char stopgate_colors[6] = {180, 200, 180, 200, 140, 140};
 
-int stopgate_initpos [STOPGATE_BOARD_WID*STOPGATE_BOARD_HEIT] = 
-{
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
-};
-
 static char * blue_gate_north_40_xpm [] =
 {
 "40 40 2 1",
@@ -259,7 +246,7 @@ byte * stopgate_movegen (Pos *, Player);
 
 Game Stopgate = { STOPGATE_CELL_SIZE, STOPGATE_BOARD_WID, STOPGATE_BOARD_HEIT, 
 	STOPGATE_NUM_PIECES, 
-	stopgate_colors, stopgate_initpos, stopgate_pixmaps, "Stopgate", stopgate_init};
+	stopgate_colors, NULL, stopgate_pixmaps, "Stopgate", stopgate_init};
 
 static int stopgate_curx = - 1, stopgate_cury = -1;
 

@@ -40,14 +40,12 @@
 
 char pentaline_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 
-int * pentaline_init_pos = NULL;
-
 
 void pentaline_init ();
 
 Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEIT, 
 	PENTALINE_NUM_PIECES,
-	pentaline_colors,  NULL, NULL, "Pentaline", pentaline_init};
+	NULL,  NULL, NULL, "Pentaline", pentaline_init};
 
 
 static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
@@ -65,7 +63,6 @@ void pentaline_init ()
 	game_movegen = pentaline_movegen;
 	game_getmove = pentaline_getmove;
 	game_who_won = pentaline_who_won;
-	game_set_init_pos = pentaline_set_init_pos;
 	game_get_pixmap = pentaline_get_pixmap;
 	game_draw_cell_boundaries = TRUE;
 	game_eval_incr = pentaline_eval_incr;
@@ -80,13 +77,6 @@ void pentaline_init ()
 		"Pentaline rules\n"
 		"\n"
 		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n";
-}
-
-void pentaline_set_init_pos (Pos *pos)
-{
-	int i;
-	for (i=0; i<board_wid * board_heit; i++)
-		pos->board [i] = PENTALINE_EMPTY;
 }
 
 byte * pentaline_movegen (Pos *pos, Player player)

@@ -43,6 +43,10 @@ static int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
 
 void maze_init ();
 
+SCORE_FIELD maze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
+char *maze_score_field_names[] = {"User", "Time", "Date", NULL};
+
+
 Game Maze = { MAZE_CELL_SIZE, MAZE_BOARD_WID, MAZE_BOARD_HEIT, 
 	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", maze_init};
 
@@ -62,6 +66,8 @@ void maze_init ()
 	game_who_won = maze_who_won;
 	game_start_immediately = TRUE;
 	game_scorecmp = game_scorecmp_def_time;
+	game_score_fields = maze_score_fields;
+	game_score_field_names = maze_score_field_names;
 	game_doc_about = 
 		"Maze\n"
 		"Single player game\n"

@@ -105,3 +105,12 @@
 
 2003-08-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* knights.c: partially implemented knights
+
+2003-08-24	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: fully implemented
+
+2003-08-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* breakthrough.c: partially implemented
+
+2003-08-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* cpento.c: Capture pentominoes by Arthur O'Dwyer
