@@ -79,7 +79,7 @@ bin_PROGRAMS = gtkboard
 #gtkboardinclude_HEADERS =   \
 #    game.h
 
-gtkboard_SOURCES =  	board.c 	menu.c 	prefs.c 	ui.c 		aaball.c 	ab.c 	engine.c 	hash.c 	move.c 	stack.c 		antichess.c 	ataxx.c 	breakthrough.c 	checkers.c 	chess.c 	cpento.c 	dirmaze.c 	fifteen.c 	flw.c 	hiq.c 	infiltrate.c 	knights.c 	mastermind.c 	maze.c 	memory.c 	ninemm.c 	othello.c 	pacman.c 	pentaline.c 	plot4.c 	rgb.c 	samegame.c 	stopgate.c 	tetris.c 	wordtris.c
+gtkboard_SOURCES =  	board.c 	menu.c 	prefs.c 	ui.c 		aaball.c 	ab.c 	engine.c 	hash.c 	move.c 	stack.c 		antichess.c 	ataxx.c 	breakthrough.c 	checkers.c 	chess.c 	cpento.c 	dirmaze.c 	fifteen.c 	flw.c 	hiq.c 	infiltrate.c 	knights.c 	kttour.c 	mastermind.c 	maze.c 	memory.c 	ninemm.c 	othello.c 	pacman.c 	pentaline.c 	plot4.c 	quarto.c 	rgb.c 	samegame.c 	stopgate.c 	tetris.c 	towers.c 	wordtris.c
 
 
 noinst_HEADERS =  	aaball.h 	board.h 	engine.h 	game.h 	menu.h 	move.h 	prefs.h 	stack.h 	ui_common.h 	ui.h 		flwords.h
@@ -97,8 +97,9 @@ LIBS = @LIBS@
 gtkboard_OBJECTS =  board.o menu.o prefs.o ui.o aaball.o ab.o engine.o \
 hash.o move.o stack.o antichess.o ataxx.o breakthrough.o checkers.o \
 chess.o cpento.o dirmaze.o fifteen.o flw.o hiq.o infiltrate.o knights.o \
-mastermind.o maze.o memory.o ninemm.o othello.o pacman.o pentaline.o \
-plot4.o rgb.o samegame.o stopgate.o tetris.o wordtris.o
+kttour.o mastermind.o maze.o memory.o ninemm.o othello.o pacman.o \
+pentaline.o plot4.o quarto.o rgb.o samegame.o stopgate.o tetris.o \
+towers.o wordtris.o
 gtkboard_LDADD = $(LDADD)
 gtkboard_DEPENDENCIES = 
 gtkboard_LDFLAGS = 
@@ -119,11 +120,11 @@ DEP_FILES =  .deps/aaball.P .deps/ab.P .deps/antichess.P .deps/ataxx.P \
 .deps/board.P .deps/breakthrough.P .deps/checkers.P .deps/chess.P \
 .deps/cpento.P .deps/dirmaze.P .deps/engine.P .deps/fifteen.P \
 .deps/flw.P .deps/hash.P .deps/hiq.P .deps/infiltrate.P .deps/knights.P \
-.deps/mastermind.P .deps/maze.P .deps/memory.P .deps/menu.P \
-.deps/move.P .deps/ninemm.P .deps/othello.P .deps/pacman.P \
-.deps/pentaline.P .deps/plot4.P .deps/prefs.P .deps/rgb.P \
-.deps/samegame.P .deps/stack.P .deps/stopgate.P .deps/tetris.P \
-.deps/ui.P .deps/wordtris.P
+.deps/kttour.P .deps/mastermind.P .deps/maze.P .deps/memory.P \
+.deps/menu.P .deps/move.P .deps/ninemm.P .deps/othello.P .deps/pacman.P \
+.deps/pentaline.P .deps/plot4.P .deps/prefs.P .deps/quarto.P \
+.deps/rgb.P .deps/samegame.P .deps/stack.P .deps/stopgate.P \
+.deps/tetris.P .deps/towers.P .deps/ui.P .deps/wordtris.P
 SOURCES = $(gtkboard_SOURCES)
 OBJECTS = $(gtkboard_OBJECTS)
 

@@ -128,3 +128,19 @@
 	* board.c: implemented RENDER_SHADE1
 	* aaball.c: implemented shadow in ball_gen MWAHAHAHAHA
 	* board.c: implemented RENDER_BUTTONIZE
+
+2003-09-03	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* breakthrough.c: lots of improvements to eval
+
+2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* othello.c: mapped space key to passing
+	* towers.c: started Towers of Hanoi
+
+2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* towers.c: tower of Hanoi almost finished, but some decent looking pixmaps badly needed!
+	
+2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* towers.c: improved graphics
+	* quarto.c: new game implemented
+	* board.c: fixed some bugs in RENDER_SHADE etc
+	* ataxx.c: implemented highlight

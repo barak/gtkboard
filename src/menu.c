@@ -670,7 +670,8 @@ void menu_back_forw (gpointer data, guint what)
 		case MENU_BACK:
 			if (!game_allow_back_forw) break;
 			if (!opt_game) break;
-			ui_stopped = TRUE;
+			if (!game_allow_undo)
+				ui_stopped = TRUE;
 			if (move_fout)
 			{
 				fprintf (move_fout, "BACK_MOVE \n");
@@ -682,11 +683,11 @@ void menu_back_forw (gpointer data, guint what)
 				sb_error ("Initial position. Can't go back.", FALSE);
 				break;
 			}
-			board_apply_refresh (cur_pos.board, move, NULL);
+			board_apply_refresh (move, NULL);
 			if (!game_single_player)
 				state_player = (state_player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves --;
-			if (game_single_player)
+			if (game_single_player && !game_allow_undo)
 			{
 				if (!ui_cheated && game_scorecmp)
 					sb_message ("You cheated! No highscore for this game.", FALSE);
@@ -712,7 +713,7 @@ void menu_back_forw (gpointer data, guint what)
 				sb_error ("Final position. Can't go forward.", FALSE);
 				break;
 			}
-			board_apply_refresh (cur_pos.board, move, NULL);
+			board_apply_refresh (move, NULL);
 			if (!game_single_player)
 				state_player = (state_player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves ++;

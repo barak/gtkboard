@@ -199,12 +199,15 @@ float game_ab_hash (Pos *pos, int player, int level,
 			}
 		}
 		hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
-		if (first || 
-			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
+		if (first) 
+		{
+			if (ret_movep)	movcpy (best_move, move);
+			first = 0;
+		}
+		if((player == WHITE && val > alpha) || (player == BLACK && val < beta))
 		{
 			if (ret_movep)	movcpy (best_move, move);
 			if (player == WHITE) alpha = val; else beta = val;
-			first = 0;
 		}
 		if (alpha >= beta)
 			break;
@@ -290,7 +293,7 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			}
 			pos->num_moves++;
 			val = 0; // stop compiler warning
-			if (level > 1)
+			if (level >= 1)
 			{
 				retval = hash_get_eval (pos->board, board_wid * board_heit, 
 						pos->num_moves, level, &cacheval);
@@ -301,8 +304,7 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 				val = game_ab_hash_incr
 					(pos, player == WHITE ? BLACK : WHITE, 
 						level-1, neweval, alpha, beta, NULL, depth+1);
-			// FIXME: bug is due to hash
-			if (level > 1)
+			if (level >= 1)
 				hash_insert (pos->board, board_wid * board_heit, 
 						pos->num_moves, level, val);
 			move_apply (pos->board, movinv);
@@ -310,12 +312,15 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			memcpy (pos->state, oldstate, game_state_size);
 			pos->num_moves--;
 		}
-		if (first || 
-			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
+		if (first)
+		{
+			if (ret_movep)	movcpy (best_move, move);
+			first = 0;
+		}
+		if ((player == WHITE && val > alpha) || (player == BLACK && val < beta))
 		{
 			if (ret_movep)	movcpy (best_move, move);
 			if (player == WHITE) alpha = val; else beta = val;
-			first = 0;
 		}
 		if (alpha >= beta)
 			break;

@@ -222,6 +222,9 @@ extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
  It returns a list of moves possible in a given position. See move.h
  for documentation of the MOVLIST format. Plot4's movegen function 
  (plot4_movegen()) is a good example of a simple movegen function.
+
+ The move list (array) should be malloc'd inside this function 
+ and will be freed by the caller.
  */
 extern byte * (*game_movegen) (Pos *, Player);
 
@@ -262,6 +265,9 @@ extern void (*game_set_init_pos) (Pos *pos);
 //! Sets the initial state of the rendering hints
 extern void (*game_set_init_render) (Pos *pos);
 
+//! The rendering hints associated with the move
+extern void (*game_get_render) (Pos *pos, byte *move, int **rmovp);
+
 //! Returns the pixmap for a piece.
 /** In many games, the pixmaps are generated at runtime (see aaball.c). Such games use this function. The second argument color is 0 or 1 depending on whether the piece will be shown on a light square or a dark square. If your pixmap is antialiased you need this.*/
 extern char ** (*game_get_pixmap) (int piece, int color);
@@ -291,6 +297,9 @@ extern int board_wid, board_heit, cell_size, num_pieces;
 
 //! Are we a single player game or a two-player game? DEFAULT: FALSE.
 extern int game_single_player;
+
+//! Is the user allowed to undo move and still get on the highscores (only for single player games; default: FALSE)
+extern gboolean game_allow_undo;
 
 //! Determines how frequently to call the game's animation callback function (game_animate()). Default: 0.
 extern int game_animation_time;

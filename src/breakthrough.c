@@ -77,7 +77,7 @@ void breakthrough_init ()
 	game_getmove = breakthrough_getmove;
 //	game_who_won = breakthrough_who_won;
 	game_eval = breakthrough_eval;
-	game_eval_incr = breakthrough_eval_incr;
+//	game_eval_incr = breakthrough_eval_incr;
 	game_movegen = breakthrough_movegen;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
@@ -88,20 +88,137 @@ void breakthrough_init ()
 		"URL: "GAME_DEFAULT_URL ("breakthrough");
 }
 
+static gboolean eval_is_backward (byte *board, int x, int y)
+{
+	int incy, other, j;
+	int val = board[y * board_wid + x];
+	assert (val != BREAKTHROUGH_EMPTY);
+	incy = val == BREAKTHROUGH_WP ? 1 : -1;
+	other = val == BREAKTHROUGH_WP ? BREAKTHROUGH_BP : BREAKTHROUGH_WP;
+
+	for (j = y; j < board_heit && j >= 0; j -= incy)
+	{
+		if (x - 1 >= 0 && board[j * board_wid + x - 1] == val) return FALSE;
+		if (x + 1 < board_wid && board[j * board_wid + x + 1] == val) return FALSE;
+	}
+	
+	for (j = y + incy; j < board_heit && j >= 0; j += incy)
+	{
+		if (board[j * board_wid + x] != BREAKTHROUGH_EMPTY) return FALSE;
+		if (x - 1 >= 0 && j + incy >= 0 && j + incy < board_heit &&
+				board[j * board_wid + x - 1] == val &&
+				board[(j + incy) * board_wid + x - 1] == other) return TRUE;
+		if (x + 1 >= 0 && j + incy >= 0 && j + incy < board_heit &&
+				board[j * board_wid + x + 1] == val &&
+				board[(j + incy) * board_wid + x + 1] == other) return TRUE;
+	}
+	return FALSE;
+}
+
+// Is this pawn a passer?
+static gboolean eval_is_passer (byte *board, int x, int y)
+{
+	int incy, other;
+	int val = board[y * board_wid + x];
+	assert (val != BREAKTHROUGH_EMPTY);
+	incy = val == BREAKTHROUGH_WP ? 1 : -1;
+	other = val == BREAKTHROUGH_WP ? BREAKTHROUGH_BP : BREAKTHROUGH_WP;
+	for (y += incy; y < board_heit && y >= 0; y += incy)
+	{
+		if (board[y * board_wid + x] != BREAKTHROUGH_EMPTY) return FALSE;
+		if (x - 1 >= 0 && board[y * board_wid + x - 1] == other) return FALSE;
+		if (x + 1 < board_wid && board[y * board_wid + x + 1] == other) return FALSE;
+	}
+	return TRUE;
+}
+
+static gboolean eval_is_blocked (byte *board, int x, int y)
+{
+	// TODO
+	return FALSE;
+}
+
 static ResultType breakthrough_eval (Pos *pos, Player player, float *eval)
 {
-	int material = 0;
+	float wtsum = 0;
 	int i, j;
+	int wcount[BREAKTHROUGH_BOARD_WID], bcount[BREAKTHROUGH_BOARD_WID];
+	float doubled_pawn_penalty = 0.2;
+	float edge_pawn_bonus = 0.1;
+	float backward_pawn_penalty = 0.5;
+	float blocked_pawn_penalty = 0.1;
+
+	int passer_min_white = board_heit, passer_min_black = board_heit;
+	
+	for (i=0; i<board_wid; i++)
+	{
+		// cheap optimization trick 
+		if (pos->board [0 * board_wid + i] == BREAKTHROUGH_WP && 
+				pos->board [(board_heit - 1) * board_wid + i] == BREAKTHROUGH_BP)
+			continue;
+		for (j=0; j<board_heit; j++)
+		{
+			int val = pos->board[j * board_wid + i];
+			if (val == BREAKTHROUGH_EMPTY) continue;
+			if (eval_is_passer (pos->board, i, j))
+			{
+				if (val == BREAKTHROUGH_WP && (board_wid -1 - j < passer_min_white))
+					passer_min_white = board_wid -1 - j;
+				if (val == BREAKTHROUGH_BP && (j < passer_min_black))
+					passer_min_black = j;
+			}
+		}
+	}
+	if (passer_min_white < board_heit || passer_min_black < board_heit)
+	{
+		int diff = passer_min_white - passer_min_black;
+		if (diff < 0 || (diff == 0 && player == WHITE))
+		{
+			*eval = -diff + 1;
+			return RESULT_WHITE;
+		}
+		if (diff > 0 || (diff == 0 && player == BLACK))
+		{
+			*eval = -diff - 1;
+			return RESULT_BLACK;
+		}
+	}
+	
+	for (i=0; i<board_wid; i++)
+		wcount[i] = bcount[i] = 0;
+
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{
 		int val = pos->board [j * board_wid + i];
+		if (val == BREAKTHROUGH_EMPTY) continue;
 		if (val == BREAKTHROUGH_WP)
-			material++;
+		{
+			wtsum += (1 + 0.1 * j);
+			if (i == 0 || i == board_wid - 1)
+				wtsum += edge_pawn_bonus;
+			if (eval_is_backward (pos->board, i, j))
+				wtsum -= backward_pawn_penalty;
+			wcount[i]++;
+		}
 		else if (val == BREAKTHROUGH_BP)
-			material--;
+		{
+			wtsum -= (1 + 0.1 * (board_wid - 1 - j));
+			if (i == 0 || i == board_wid - 1)
+				wtsum -= edge_pawn_bonus;
+			if (eval_is_backward (pos->board, i, j))
+				wtsum += backward_pawn_penalty;
+			bcount[i]++;
+		}
 	}
-	*eval = material + 0.01 * random() / RAND_MAX;
+	
+	for (i=0; i<board_wid; i++)
+	{
+		wtsum -= (wcount[i] > 1 ? wcount[i] - 1 : 0);
+		wtsum += (bcount[i] > 1 ? bcount[i] - 1 : 0);
+	}
+	
+	*eval = wtsum;
 	return RESULT_NOTYET;
 }
 
@@ -116,14 +233,20 @@ static ResultType breakthrough_eval_incr (Pos *pos, Player player, byte *move, f
 
 static byte * breakthrough_movegen (Pos *pos, Player player)
 {
-	int i, j;
+	int i, j, m, n, xoff, yoff;
 	byte movbuf [256];
 	byte *movlist, *movp = movbuf;
 	byte *board = pos->board;
-	for (i=0; i<board_wid; i++)
-	for (j=0; j<board_heit; j++)
+
+	// generate a random permutation of the moves
+	xoff = random() % board_wid;
+	yoff = random() % board_heit;
+	for (m=0; m<board_wid; m++)
+	for (n=0; n<board_heit; n++)
 	{
 		int incx, incy;
+		i = (m + xoff) % board_wid;
+		j = (n + yoff) % board_heit;
 		if (board [j * board_wid + i] != (player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP))
 			continue;
 		incy = board [j * board_wid + i] == BREAKTHROUGH_WP ? 1 : -1;
@@ -165,8 +288,32 @@ int breakthrough_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player
 		if ((player == WHITE && pos->board [y * board_wid + x] == BREAKTHROUGH_WP)
 				|| (player == BLACK && pos->board [y * board_wid + x] == BREAKTHROUGH_BP))
 		{
-			breakthrough_curx = x;
-			breakthrough_cury = y;
+			int incy = player == WHITE ? 1 : -1;
+			int other = player == WHITE ? BREAKTHROUGH_BP : BREAKTHROUGH_WP;
+			if ((x == 0 || pos->board [(y + incy) * board_wid + x - 1] != other) &&
+				(x == board_wid - 1 || 
+				 pos->board [(y + incy) * board_wid + x + 1] != other))
+			{
+				if (pos->board [(y + incy) * board_wid + x] != BREAKTHROUGH_EMPTY)
+					return -1;
+				else
+				{
+					*mp++ = x;
+					*mp++ = y;
+					*mp++ = 0;
+					*mp++ = x;
+					*mp++ = y + incy;
+					*mp++ = pos->board [y * board_wid + x];
+					*mp++ = -1;
+					*movp = move;
+					return 1;
+				}
+			}
+			else
+			{
+				breakthrough_curx = x;
+				breakthrough_cury = y;
+			}
 			return 0;
 		}
 		return -1;

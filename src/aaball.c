@@ -132,11 +132,10 @@ char ** pixmap_ball_gen(int len, char *pixbuf, int fg, int bg, float rad, float 
 	return map;
 }
 
-// FIXME: mild variations from bg color occur even well outside the rad of the ball
-static void rgbmap_ball_gen_real (int len, unsigned char *pixbuf, int fg, float rad, float grad, float midx, float midy)
+static void rgbmap_ball_gen_real (int len, unsigned char *rgbbuf, int fg, float rad, float grad, float midx, float midy)
 {
 	int i, j;
-	unsigned char *bufp = pixbuf;
+	unsigned char *bufp = rgbbuf;
 	for (i=0; i<len; i++)
 	for (j=0; j<len; j++)
 	{
@@ -150,24 +149,28 @@ static void rgbmap_ball_gen_real (int len, unsigned char *pixbuf, int fg, float 
 	}
 }
 
-void rgbmap_ball_gen (int len, unsigned char *pixbuf, int fg, int bg, float rad, float grad)
+void rgbmap_square_gen (int len, unsigned char *rgbbuf, int fg, int bg, float side)
 {
 	int i, j;
-	unsigned char *bufp = pixbuf;
+	unsigned char *bufp = rgbbuf;
 	for (i=0; i<len; i++)
 	for (j=0; j<len; j++)
 	{
-		*bufp++ = bg >> 16;
-		*bufp++ = (bg >> 8) & 0xFF;
-		*bufp++ = bg & 0xFF;
+		float x = 2*i - len, y = 2*j - len;
+		int color;
+		if (x < 0) x = -x;
+		if (y < 0) y = -y;
+		color =  x < side && y < side ? fg : bg;
+		*bufp++ = color >> 16;
+		*bufp++ = (color >> 8) & 0xFF;
+		*bufp++ = color & 0xFF;
 	}
-	rgbmap_ball_gen_real (len, pixbuf, fg, rad, grad, len/2, len/2);
 }
 
-void rgbmap_ball_shadow_gen (int len, unsigned char *pixbuf, int fg, int bg, float rad, float grad, int shadowlen)
+void rgbmap_ball_gen (int len, unsigned char *rgbbuf, int fg, int bg, float rad, float grad)
 {
 	int i, j;
-	unsigned char *bufp = pixbuf;
+	unsigned char *bufp = rgbbuf;
 	for (i=0; i<len; i++)
 	for (j=0; j<len; j++)
 	{
@@ -175,9 +178,29 @@ void rgbmap_ball_shadow_gen (int len, unsigned char *pixbuf, int fg, int bg, flo
 		*bufp++ = (bg >> 8) & 0xFF;
 		*bufp++ = bg & 0xFF;
 	}
-	rgbmap_ball_gen_real (len, pixbuf, 0, rad, grad, 
+	rgbmap_ball_gen_real (len, rgbbuf, fg, rad, grad, len/2, len/2);
+}
+
+//! Same as rgbmap_ball_gen but don't generate the background - i.e, overlay the ball on the existing image
+void rgbmap_ball_gen_nobg (int len, unsigned char *rgbbuf, int fg, int bg, float rad, float grad)
+{
+	rgbmap_ball_gen_real (len, rgbbuf, fg, rad, grad, len/2, len/2);
+}
+
+void rgbmap_ball_shadow_gen (int len, unsigned char *rgbbuf, int fg, int bg, float rad, float grad, int shadowlen)
+{
+	int i, j;
+	unsigned char *bufp = rgbbuf;
+	for (i=0; i<len; i++)
+	for (j=0; j<len; j++)
+	{
+		*bufp++ = bg >> 16;
+		*bufp++ = (bg >> 8) & 0xFF;
+		*bufp++ = bg & 0xFF;
+	}
+	rgbmap_ball_gen_real (len, rgbbuf, 0, rad, grad, 
 			(len + shadowlen)/2, (len + shadowlen)/2);
-	rgbmap_ball_gen_real (len, pixbuf, fg, rad, grad, 
+	rgbmap_ball_gen_real (len, rgbbuf, fg, rad, grad, 
 			(len - shadowlen)/2, (len - shadowlen)/2);
 }
 

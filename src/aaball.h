@@ -24,6 +24,8 @@ char ** pixmap_header_gen(int, char *, int, int);
 char ** pixmap_die_gen(int, char *, int, int, float, float, int);
 
 void rgbmap_ball_gen(int, unsigned char *, int, int, float, float);
+void rgbmap_ball_gen_nobg(int, unsigned char *, int, int, float, float);
 void rgbmap_ball_shadow_gen(int, unsigned char *, int, int, float, float, int);
+void rgbmap_square_gen (int, unsigned char *, int, int, float);
 
 #endif

@@ -42,6 +42,6 @@ void board_free ();
 gboolean board_redraw (GtkWidget *, GdkEventExpose *);
 void board_redraw_all ();
 gint board_clicked (GtkWidget *, GdkEventButton *, gpointer);
-void board_apply_refresh (byte *, byte *, int *);
+void board_apply_refresh (byte *, int *);
 
 #endif

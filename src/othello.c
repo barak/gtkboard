@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "game.h"
 #include "aaball.h"
@@ -50,6 +51,7 @@ int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] =
 
 
 int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
+int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp);
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 ResultType othello_eval (Pos *, Player, float *);
@@ -67,12 +69,12 @@ Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT,
 void othello_init ()
 {
 	game_getmove = othello_getmove;
+	game_getmove_kb = othello_getmove_kb;
 	game_who_won = othello_who_won;
 	game_eval = othello_eval;
 	game_eval_incr = othello_eval_incr;
 	game_use_incr_eval = othello_use_incr_eval;
 	game_movegen = othello_movegen;
-	//game_get_pixmap = othello_get_pixmap;
 	game_get_rgbmap = othello_get_rgbmap;
 	game_white_string = "Red";
 	game_black_string = "Blue";
@@ -90,7 +92,7 @@ void othello_init ()
 		"\n"
 		"When you place a ball in such a way that two of your balls sandwich one or more of the opponent's balls along a line (horizontal, vertical, or diagonal), then the sandwiched balls change to your color. You must move in such a way that at least one switch happens.\n"
 		"\n"
-		"If you don't have a move, you pass by clicking on an empty square."
+		"If you don't have a move, you pass by hitting space or clicking on an empty square."
 		;
 	game_doc_strategy = 
 		"Othello tips\n"
@@ -147,6 +149,38 @@ static int get_sandwich_len (Pos *pos, int x0, int y0, int dx, int dy, byte play
 	return -1;
 }
 
+// does player have a move in this position
+static gboolean hasmove (Pos *pos, Player player)
+{
+	int i, x, y, found = FALSE;
+	for (x=0; x<board_wid && !found; x++)
+		for (y=0; y<board_heit && !found; y++)
+		{
+			if (pos->board [y * board_wid + x] != OTHELLO_EMPTY)
+				continue;
+			for (i=0; i<8; i++)
+			{
+				if (get_sandwich_len (pos, x, y ,incx[i], incy[i], 
+						player == WHITE ? OTHELLO_WP : OTHELLO_BP) > 0)
+				{
+					found = TRUE;
+					break;
+				}
+			}
+		}
+	return found;
+}
+
+int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp)
+{
+	static byte move[1];
+	if (key != GDK_space) return -1;
+	if (hasmove (pos, player)) return -1;
+	move[0] = -1;
+	*movp = move;
+	return 1;	
+}
+	
 int othello_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp, int ** rmovep)
 {
@@ -172,25 +206,7 @@ int othello_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_p
 	}
 	if (!found)
 	{
-		int x, y, found=0;
-		/* check if human is making a pass */
-		for (x=0; x<board_wid && !found; x++)
-			for (y=0; y<board_heit && !found; y++)
-			{
-				if (pos->board [y * board_wid + x] != OTHELLO_EMPTY)
-					continue;
-				for (i=0; i<8; i++)
-				{
-					if (get_sandwich_len (pos, x, y ,incx[i], incy[i], 
-							to_play == WHITE ? OTHELLO_WP : OTHELLO_BP) > 0)
-					{
-						found = 1;
-						break;
-					}
-				}
-			}
-		if (found)
-			return -1;
+		if (hasmove (pos, to_play)) return -1;
 		*temp++ = -1;
 		*movp = move;
 	}

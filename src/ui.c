@@ -44,15 +44,16 @@ extern Game
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
-	Ninemm, Stopgate, Knights, Breakthrough, CapturePento
+	Ninemm, Stopgate, Knights, Breakthrough, 
+	CapturePento, Towers, Quarto, Kttour
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Antichess, &Ataxx, &Breakthrough, &Checkers, &Chess, &CapturePento, &Fifteen,
-	&Flw, &Hiq, &Hypermaze, &Infiltrate, &Knights, &Mastermind, &Maze,
-	&Memory, &Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Rgb, &Samegame,
-	&Stopgate, &Tetris, &Wordtris};
+	&Flw, &Hiq, &Hypermaze, &Infiltrate, &Knights, &Kttour, &Mastermind, &Maze,
+	&Memory, &Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Quarto,
+	&Rgb, &Samegame, &Stopgate, &Tetris, &Towers, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
 
@@ -70,6 +71,8 @@ static int engine_pid = -1;
 static gint animate_tag = -1;
 
 int state_player = WHITE;
+
+gboolean game_allow_undo = FALSE;
 
 gboolean game_single_player = FALSE;
 gboolean game_animation_use_movstack = TRUE;
@@ -92,6 +95,7 @@ gboolean game_start_immediately = FALSE;
 gboolean game_file_label = 0,  game_rank_label = 0;
 
 char *game_highlight_colors = NULL;
+char game_highlight_colors_def[9] = {0xff, 0xff, 0, 0, 0, 0, 0, 0, 0};
 
 HeurTab *game_htab = NULL;
 int game_state_size = 0;
@@ -139,6 +143,7 @@ void (*game_free) () = NULL;
 void * (*game_newstate) (Pos *, byte *) = NULL;
 void (*game_set_init_pos) (Pos *) = game_set_init_pos_def;
 void (*game_set_init_render) (Pos *) = NULL;
+void (*game_get_render) (Pos *, byte *, int **) = NULL;
 void (*game_reset_uistate) () = NULL;
 int (*game_scorecmp) (gchar *, int, gchar*, int) = NULL;
 int (*game_scorecmp_def_dscore) (gchar *, int, gchar*, int) = prefs_scorecmp_dscore;
@@ -194,7 +199,7 @@ int ui_animate_cb ()
 		if (game_animation_use_movstack)
 			ui_make_human_move (move, NULL);
 		else
-			board_apply_refresh (cur_pos.board, move, NULL);
+			board_apply_refresh (move, NULL);
 	}
 	return TRUE;
 }
@@ -230,6 +235,7 @@ void reset_game_params ()
 	game_get_rgbmap = NULL;
 	game_set_init_pos = game_set_init_pos_def;
 	game_set_init_render = NULL;
+	game_get_render = NULL;
 	game_animate = NULL;
 	game_free = NULL;
 	game_scorecmp = NULL;
@@ -237,6 +243,7 @@ void reset_game_params ()
 	game_animation_use_movstack = TRUE;
 	game_allow_back_forw = TRUE;
 	game_single_player = FALSE;
+	game_allow_undo = FALSE;
 	game_doc_about = NULL;
 	game_doc_rules = NULL;
 	game_doc_strategy = NULL;
@@ -246,7 +253,7 @@ void reset_game_params ()
 	game_state_size = 0;
 	game_newstate = NULL;
 	game_reset_uistate = NULL;
-	game_highlight_colors = NULL;
+	game_highlight_colors = game_highlight_colors_def;
 	game_draw_cell_boundaries = FALSE;
 	game_start_immediately = FALSE;
 	game_file_label = FILERANK_LABEL_TYPE_NONE;
@@ -419,7 +426,7 @@ void ui_send_make_move ()
 
 void ui_make_human_move (byte *move, int *rmove)
 {
-	board_apply_refresh (cur_pos.board, move, rmove);
+	board_apply_refresh (move, rmove);
 	if (!move) return;
 	if (move_fout)
 	{
@@ -460,7 +467,7 @@ int ui_get_machine_move ()
 		if (opt_logfile)
 			move_fwrite (move, opt_logfile);
 	}
-	board_apply_refresh (cur_pos.board, move, NULL);
+	board_apply_refresh (move, NULL);
 	state_player = (state_player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
 	ui_check_who_won ();

@@ -91,7 +91,7 @@ void ataxx_init ()
 	   "   - The new square should be at a distance of at most 2 from the first square (a diagonal counts as one unit).\n"
 	   "   - If the distance is two the first square becomes empty, but not if the distance is 1.\n"
 	   "   - In either case all balls adjacent to the new square, if they are the opponent's color, get converted to your color.\n"
-	   "   - If you have no move you pass to the opponent.\n";
+	   "   - If one player has no moves the player with more balls wins.\n";
 }
 
 ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
@@ -325,7 +325,9 @@ void ataxx_reset_uistate ()
 int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int **rmovep)
 {
 	static byte move[32];
+	static int rmove[4];
 	byte *mptr = move;
+	int *rp = rmove;
 	int diffx, diffy;
 	int other, i;
 	int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
@@ -337,6 +339,11 @@ int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pla
 		if (pos->board [y * board_wid + x] != (to_play == WHITE ? ATAXX_WP : ATAXX_BP))
 			return -1;
 		oldx = x; oldy = y;
+		*rp++ = x;
+		*rp++ = y;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovep = rmove;
 		return 0;
 	}
 
@@ -366,9 +373,14 @@ int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pla
 	{ *mptr++ = x; *mptr++ = y; *mptr++ = 
 		(to_play == WHITE ? ATAXX_WP : ATAXX_BP); }
 	*mptr = -1;
-	oldx = -1; oldy = -1;
 	if (movp)
 		*movp = move;	
+	*rp++ = oldx;
+	*rp++ = oldy;
+	*rp++ = RENDER_NONE;
+	*rp++ = -1;
+	*rmovep = rmove;
+	oldx = -1; oldy = -1;
 	return 1;
 }
 

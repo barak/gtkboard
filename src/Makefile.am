@@ -37,6 +37,7 @@ gtkboard_SOURCES = 	\
 	hiq.c\
 	infiltrate.c\
 	knights.c\
+	kttour.c\
 	mastermind.c\
 	maze.c\
 	memory.c\
@@ -45,10 +46,12 @@ gtkboard_SOURCES = 	\
 	pacman.c\
 	pentaline.c\
 	plot4.c\
+	quarto.c\
 	rgb.c\
 	samegame.c\
 	stopgate.c\
 	tetris.c\
+	towers.c\
 	wordtris.c
 
 noinst_HEADERS =  \

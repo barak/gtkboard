@@ -87,9 +87,15 @@ void board_set_cell (int x, int y, byte val)
 	cur_pos.board[y * board_wid + x] = val;
 }
 
-void board_apply_refresh (byte *board, byte *move, int *rmove)
+void board_apply_refresh (byte *move, int *rmove)
 {
 	int i, x, y;
+	byte *board = cur_pos.board;
+	int *rmove_tmp = NULL;
+	
+	if (move && game_get_render)
+		game_get_render (&cur_pos, move, &rmove);
+	
 	if (move)
 	{
 		for (i=0; move[3*i] != -1; i++)
@@ -99,6 +105,7 @@ void board_apply_refresh (byte *board, byte *move, int *rmove)
 			board_refresh_cell (x, y);
 		}
 	}
+	
 	if (rmove)
 	{
 		for (i=0; rmove[3*i] != -1; i++)
@@ -108,6 +115,17 @@ void board_apply_refresh (byte *board, byte *move, int *rmove)
 			board_refresh_cell (x, y);
 		}
 	}
+
+	if (rmove_tmp)
+	{
+		for (i=0; rmove[3*i] != -1; i++)
+		{
+			x = rmove_tmp[3*i]; y = rmove_tmp[3*i+1];
+			cur_pos.render[y * board_wid + x] = rmove_tmp[3*i+2];
+			board_refresh_cell (x, y);
+		}
+	}
+
 }
 
 //! Draws the square (x, y). On the board it is shown at (real_x, real_y)
@@ -160,6 +178,32 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 					real_x * cell_size, real_y * cell_size,
 					cell_size, cell_size);
 	}
+
+	if (cur_pos.render[y * board_wid + x] == RENDER_SHADE1			
+			&& cur_pos.board[y * board_wid + x] != 0
+		   	&& !board_suspended)
+	{
+#if GTK_MAJOR_VERSION > 1
+		GdkPixbuf *pixbuf;
+		int i;
+		guchar *pixels;
+		pixbuf = gdk_pixbuf_get_from_drawable (NULL, pieces[thepiece], NULL,
+				0, 0, 0, 0, cell_size, cell_size);
+		pixels = gdk_pixbuf_get_pixels (pixbuf);
+		for (i=0; i<3*cell_size*cell_size; i++)
+			pixels[i] = (pixels[i] + 127)/2;
+		gdk_pixbuf_render_to_drawable (pixbuf, board_area->window, gc, 0, 0,
+				real_x * cell_size, real_y * cell_size, cell_size, cell_size,
+				GDK_RGB_DITHER_NONE, 0, 0);
+		// FIXME: find out the  correct way to free it
+		g_free (pixels);
+		g_free (pixbuf);
+#else
+		fprintf (stderr, "Warning: RENDER_SHADE currently unimplemented in gtk1 version\n");
+#endif
+	}
+
+	
 	if (game_draw_cell_boundaries)
 	{
 		if (real_x > 0)
@@ -207,25 +251,6 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
 	}
 	
-	if (cur_pos.render[y * board_wid + x] == RENDER_SHADE1			
-			&& cur_pos.board[y * board_wid + x] != 0
-		   	&& !board_suspended)
-	{
-		GdkPixbuf *pixbuf;
-		int i;
-		guchar *pixels;
-		pixbuf = gdk_pixbuf_get_from_drawable (NULL, pieces[thepiece], NULL,
-				0, 0, 0, 0, cell_size, cell_size);
-		pixels = gdk_pixbuf_get_pixels (pixbuf);
-		for (i=0; i<3*cell_size*cell_size; i++)
-			pixels[i] = (pixels[i] + 127)/2;
-		gdk_pixbuf_render_to_drawable (pixbuf, board_area->window, gc, 0, 0,
-				real_x * cell_size, real_y * cell_size, cell_size, cell_size,
-				GDK_RGB_DITHER_NONE, 0, 0);
-		// FIXME: find out the  correct way to free it
-		g_free (pixels);
-		g_free (pixbuf);
-	}
 }
 
 //! A wrapper around board_refresh_cell_real() to take care of whether the board is flipped
@@ -362,10 +387,9 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 		if (status < 0)
 		{
 			sb_error ("Illegal Move", FALSE);
-			return FALSE;
 		}
 	}
-	if (status == 0)
+	if (status <= 0)
 	{
 		ui_make_human_move (NULL, rmove);
 		if (rmove)
