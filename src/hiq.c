@@ -202,7 +202,7 @@ ResultType hiq_who_won (Pos *pos, Player player, char **commp)
 				count == 1 ? "Congrats!" : "Game over.", 
 				count, count == 1 ? "ball" : "balls");
 		*commp = comment;
-		return RESULT_WHITE;
+		return RESULT_WON;
 	}
 	snprintf (comment, 32, "%d balls left", 32 - pos->num_moves);
 	*commp = comment;

@@ -96,6 +96,7 @@ gboolean prefs_load_scores (gchar *name)
 	if (!in) 
 	{ 
 		g_free (scorefile);		
+		num_highscores = 0;
 		return FALSE;
 	}
 	for (i=0; !feof (in) && i < MAX_HIGHSCORES;)

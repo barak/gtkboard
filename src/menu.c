@@ -139,7 +139,7 @@ void menu_sensitize (int which, gboolean sens)
 			num_paths = sizeof (menu_paths_sens_single_player) / 
 				sizeof (menu_paths_sens_single_player[0]);
 			break;
-		case MENU_SENS_TWO_PlayerS: 
+		case MENU_SENS_TWO_PLAYERS: 
 			menu_des_paths = menu_paths_sens_two_players;
 			num_paths = sizeof (menu_paths_sens_two_players) / 
 				sizeof (menu_paths_sens_two_players[0]);
@@ -585,6 +585,10 @@ void menu_show_game_doc (gpointer data, guint which)
 			snprintf (titlestr, 64, "%s strategy - gtkboard", menu_get_game_name());
 			if (game_doc_strategy) msgstr = game_doc_strategy;
 			break;
+		case MENU_DOC_HISTORY:
+			snprintf (titlestr, 64, "%s history - gtkboard", menu_get_game_name());
+			if (game_doc_history) msgstr = game_doc_history;
+			break;
 		default:
 			assert (0);
 	}
@@ -694,14 +698,16 @@ void menu_start_game ()
 	help_items[1].callback_action = MENU_DOC_RULES;
 	help_items[2].path = g_strdup_printf ("/Help/%s/_Strategy", opt_game->name); 
 	help_items[2].callback_action = MENU_DOC_STRATEGY;
-	for (i=0; i<3; i++)
+	help_items[3].path = g_strdup_printf ("/Help/%s/_History", opt_game->name); 
+	help_items[3].callback_action = MENU_DOC_HISTORY;
+	for (i=0; i<4; i++)
 	{
 		help_items[i].accelerator = NULL;
 		help_items[i].callback = menu_show_game_doc;
 		help_items[i].item_type = "";
 	}
 	gtk_item_factory_create_items (menu_factory, 
-			3, help_items, NULL);
+			4, help_items, NULL);
 	}
 	
 		gtk_label_set_text (GTK_LABEL (sb_game_label), 
@@ -963,7 +969,7 @@ void menu_update ()
 	if (!machine_not_thinking) menu_sensitize (MENU_SENS_MACHINE_NOT_THINKING, TRUE);
 	if (!no_game) menu_sensitize (MENU_SENS_NO_GAME, TRUE);
 	if (!single_player) menu_sensitize (MENU_SENS_SINGLE_PLAYER, TRUE);
-	if (!two_players) menu_sensitize (MENU_SENS_TWO_PlayerS, TRUE);
+	if (!two_players) menu_sensitize (MENU_SENS_TWO_PLAYERS, TRUE);
 	if (!no_back_forw) menu_sensitize (MENU_SENS_NO_BACK_FORW, TRUE);
 	if (!ui_stopped) menu_sensitize (MENU_SENS_UI_STOPPED, TRUE);
 	if (!eval_fn) menu_sensitize (MENU_SENS_EVAL_FUNCTION, TRUE);
@@ -972,7 +978,7 @@ void menu_update ()
 	if (machine_not_thinking) menu_sensitize (MENU_SENS_MACHINE_NOT_THINKING, FALSE);
 	if (no_game) menu_sensitize (MENU_SENS_NO_GAME, FALSE);
 	if (single_player) menu_sensitize (MENU_SENS_SINGLE_PLAYER, FALSE);
-	if (two_players) menu_sensitize (MENU_SENS_TWO_PlayerS, FALSE);
+	if (two_players) menu_sensitize (MENU_SENS_TWO_PLAYERS, FALSE);
 	if (no_back_forw) menu_sensitize (MENU_SENS_NO_BACK_FORW, FALSE);
 	if (ui_stopped) menu_sensitize (MENU_SENS_UI_STOPPED, FALSE);
 	if (eval_fn) menu_sensitize (MENU_SENS_EVAL_FUNCTION, FALSE);

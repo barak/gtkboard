@@ -452,6 +452,8 @@ extern gchar *game_doc_about;
 extern gchar *game_doc_rules;
 //! The text to be shown in the Strategy dialog for the game (Help->GameName->Strategy).
 extern gchar *game_doc_strategy;
+//! The text to be shown in the History dialog for the game (Help->GameName->History).
+extern gchar *game_doc_history;
 
 //! User visible labels for white and black
 extern gchar *game_white_string, *game_black_string;
