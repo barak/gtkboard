@@ -131,6 +131,7 @@ ResultType hiq_who_won (Pos *, Player , char **);
 char ** hiq_get_pixmap (int , int); 
 byte * hiq_movegen (char *, int);
 float hiq_eval (byte *, int);
+void hiq_reset_uistate ();
 
 void hiq_init ()
 {
@@ -140,6 +141,7 @@ void hiq_init ()
 	game_get_pixmap = hiq_get_pixmap;
 	game_who_won = hiq_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
+	game_reset_uistate = hiq_reset_uistate;
 	game_doc_about = 
 		"Hiq\n"
 		"Single player game\n"
@@ -211,12 +213,18 @@ ResultType hiq_who_won (Pos *pos, Player player, char **commp)
 	return RESULT_NOTYET;
 }
 
+static int  oldx = -1, oldy = -1;
+
+void hiq_reset_uistate ()
+{
+	oldx = oldy = -1;
+}
 
 int hiq_getmove 
 	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
 {
 	static byte move[10];
-	static int  oldx = -1, oldy = -1;
+	static int rmove[10];
 	int diffx, diffy;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
@@ -227,8 +235,19 @@ int hiq_getmove
 		if (pos->board [y * board_wid + x] == HIQ_HOLE)
 			return -1;
 		oldx = x; oldy = y;
+		rmove[0] = x;
+		rmove[1] = y;
+		rmove[2] = RENDER_HIGHLIGHT1;
+		rmove[3] = -1;
+		*rmovep = rmove;
 		return 0;
 	}
+
+	rmove[0] = oldx;
+	rmove[1] = oldy;
+	rmove[2] = RENDER_NONE;
+	rmove[3] = -1;
+	*rmovep = rmove;
 
 	if (x == oldx && y == oldy)
 	{

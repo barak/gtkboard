@@ -55,7 +55,6 @@ char ** breakthrough_pixmaps [] =
 
 int breakthrough_curx = -1, breakthrough_cury = -1;
 
-
 static char breakthrough_colors[] = 
 	{200, 200, 130, 
 	0, 140, 0};

@@ -32,6 +32,7 @@ gtkboard_SOURCES = 	\
 	chess.c\
 	cpento.c\
 	dirmaze.c\
+	eightqueens.c\
 	fifteen.c\
 	flw.c\
 	hiq.c\

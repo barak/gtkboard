@@ -45,14 +45,15 @@ extern Game
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
 	Ninemm, Stopgate, Knights, Breakthrough, 
-	CapturePento, Towers, Quarto, Kttour
+	CapturePento, Towers, Quarto, Kttour, Eightqueens
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
-	&Antichess, &Ataxx, &Breakthrough, &Checkers, &Chess, &CapturePento, &Fifteen,
-	&Flw, &Hiq, &Hypermaze, &Infiltrate, &Knights, &Kttour, &Mastermind, &Maze,
-	&Memory, &Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Quarto,
+	&Antichess, &Ataxx, &Breakthrough, &Checkers, &Chess, &CapturePento, 
+	&Eightqueens, &Fifteen, &Flw, &Hiq, &Hypermaze, &Infiltrate, 
+	&Knights, &Kttour, &Mastermind, &Maze, &Memory, &Ninemm, &Othello, 
+	&Pacman, &Pentaline, &Plot4, &Quarto,
 	&Rgb, &Samegame, &Stopgate, &Tetris, &Towers, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
