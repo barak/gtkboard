@@ -118,7 +118,7 @@ void hiq_init ();
 
 Game Hiq = { HIQ_CELL_SIZE, HIQ_BOARD_WID, HIQ_BOARD_HEIT, 
 	HIQ_NUM_PIECES, 
-	hiq_colors, hiq_init_pos, NULL, "Hiq", 
+	hiq_colors, hiq_init_pos, NULL, "Hiq", "Logic puzzles",
 	hiq_init};
 
 typedef struct

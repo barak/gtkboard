@@ -46,7 +46,7 @@ void plot4_init ();
 
 Game Plot4 = { PLOT4_CELL_SIZE, PLOT4_BOARD_WID, PLOT4_BOARD_HEIT, 
 	PLOT4_NUM_PIECES,
-	plot4_colors,  NULL, NULL, "Plot4", plot4_init};
+	plot4_colors,  NULL, NULL, "Plot 4", "k-in-a-row", plot4_init};
 
 
 

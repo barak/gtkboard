@@ -45,7 +45,7 @@ void samegame_init ();
 Game Samegame = { SAMEGAME_CELL_SIZE, SAMEGAME_BOARD_WID, SAMEGAME_BOARD_HEIT, 
 	SAMEGAME_NUM_PIECES, 
 	samegame_colors, NULL, /*samegame_pixmaps*/ NULL, 
-	"Samegame", 
+	"Samegame", "Arcade",
 	samegame_init};
 
 typedef struct

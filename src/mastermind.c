@@ -170,7 +170,7 @@ char ** mastermind_get_pixmap (int idx, int color);
 Game Mastermind = { MASTERMIND_CELL_SIZE, 
 	MASTERMIND_BOARD_WID, MASTERMIND_BOARD_HEIT, 
 	MASTERMIND_NUM_PIECES,	mastermind_colors,  
-	NULL, 	NULL, "Mastermind", mastermind_init};
+	NULL, 	NULL, "Mastermind", NULL, mastermind_init};
 
 
 static ResultType mastermind_who_won (Pos *, Player, char **);

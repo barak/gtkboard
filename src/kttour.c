@@ -45,7 +45,7 @@ void kttour_init ();
 
 Game Kttour = { KTTOUR_CELL_SIZE, KTTOUR_BOARD_WID, KTTOUR_BOARD_HEIT, 
 	KTTOUR_NUM_PIECES, 
-	kttour_colors, NULL, /*kttour_pixmaps,*/ NULL, "Knight's tour", 
+	kttour_colors, NULL, /*kttour_pixmaps,*/ NULL, "Knight's tour", NULL,
 	kttour_init};
 
 SCORE_FIELD kttour_score_fields[] = {SCORE_FIELD_RANK, SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};

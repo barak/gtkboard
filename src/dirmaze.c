@@ -56,7 +56,7 @@ SCORE_FIELD hypermaze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCOR
 char *hypermaze_score_field_names[] = {"User", "Time", "Date", NULL};
 
 Game Hypermaze = { HYPERMAZE_CELL_SIZE, HYPERMAZE_BOARD_WID, HYPERMAZE_BOARD_HEIT, 
-	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", hypermaze_init};
+	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", "Maze", hypermaze_init};
 
 
 static void hypermaze_set_init_pos (Pos *pos);

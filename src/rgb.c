@@ -43,7 +43,7 @@ void rgb_init ();
 
 Game Rgb = { RGB_CELL_SIZE, RGB_BOARD_WID, RGB_BOARD_HEIT, 
 	RGB_NUM_PIECES,
-	rgb_colors,  NULL, NULL, "Rgb", rgb_init};
+	rgb_colors,  NULL, NULL, "Rgb", "k-in-a-row", rgb_init};
 
 
 static int rgb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);

@@ -40,7 +40,7 @@ void tetris_init ();
 
 Game Tetris = { TETRIS_CELL_SIZE, TETRIS_BOARD_WID, TETRIS_BOARD_HEIT, 
 	TETRIS_NUM_PIECES,
-	tetris_colors,  NULL, NULL, "Tetris", tetris_init};
+	tetris_colors,  NULL, NULL, "Tetris", "Arcade", tetris_init};
 
 SCORE_FIELD tetris_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_SCORE, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
 char *tetris_score_field_names[] = {"User", "Score", "Date", NULL};

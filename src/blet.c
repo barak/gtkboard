@@ -55,7 +55,7 @@ void blet_init ();
 
 Game Blet = { BLET_CELL_SIZE, BLET_BOARD_WID, BLET_BOARD_HEIT, 
 	BLET_NUM_PIECES,
-	blet_colors, blet_init_pos, NULL, "Blet", blet_init};
+	blet_colors, blet_init_pos, NULL, "Blet", "Logic puzzles", blet_init};
 
 static int blet_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType blet_who_won (Pos *, Player , char **);

@@ -53,6 +53,7 @@ Game Eightqueens = { EIGHTQUEENS_CELL_SIZE,
 	EIGHTQUEENS_BOARD_WID, EIGHTQUEENS_BOARD_HEIT, 
 	EIGHTQUEENS_NUM_PIECES, 
 	eightqueens_colors, NULL, eightqueens_pixmaps, "Eight queens puzzle", 
+	"Logic puzzles",
 	eightqueens_init};
 
 SCORE_FIELD eightqueens_score_fields[] = {SCORE_FIELD_RANK, SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};

@@ -69,7 +69,8 @@ static void *breakthrough_newstate (Pos *, byte *);
 
 Game Breakthrough = { BREAKTHROUGH_CELL_SIZE, BREAKTHROUGH_BOARD_WID, BREAKTHROUGH_BOARD_HEIT, 
 	BREAKTHROUGH_NUM_PIECES, 
-	breakthrough_colors, breakthrough_initpos, breakthrough_pixmaps, "Breakthrough", breakthrough_init};
+	breakthrough_colors, breakthrough_initpos, breakthrough_pixmaps, 
+	"Breakthrough", "Chess variants", breakthrough_init};
 
 void breakthrough_init ()
 {

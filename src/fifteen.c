@@ -40,7 +40,8 @@ int * fifteen_init_pos = NULL;
 void fifteen_init ();
 
 Game Fifteen = { FIFTEEN_CELL_SIZE, FIFTEEN_BOARD_WID, FIFTEEN_BOARD_HEIT, 
-	FIFTEEN_NUM_PIECES, fifteen_colors,  NULL, NULL, "Fifteen Puzzle", fifteen_init};
+	FIFTEEN_NUM_PIECES, fifteen_colors,  NULL, NULL, "Fifteen Puzzle", "Arcade",
+	fifteen_init};
 
 static void fifteen_set_init_pos (Pos *pos);
 static char ** fifteen_get_pixmap (int idx, int color);

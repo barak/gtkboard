@@ -127,7 +127,7 @@ void memory_init ();
 
 Game Memory = { MEMORY_CELL_SIZE, MEMORY_BOARD_WID, MEMORY_BOARD_HEIT, 
 	MEMORY_NUM_PIECES, memory_colors,  NULL, memory_pixmaps, 
-	"Memory", memory_init};
+	"Memory", NULL, memory_init};
 
 
 typedef struct

@@ -45,6 +45,7 @@ void menu_start_game ();
 void menu_put_game ();
 void menu_board_flip_cb ();
 void menu_set_game (gpointer, guint, GtkWidget *);
+void menu_put_level (char *);
 void sb_set_score (gchar *score);
 void sb_update ();
 gboolean sb_update_periodic ();
@@ -54,6 +55,8 @@ void menu_show_about_dialog (gpointer);
 void menu_show_begging_dialog (gpointer);
 void menu_show_dialog (gchar *, gchar *);
 void menu_show_game_doc (gpointer, guint);	
+gchar *menu_get_game_name ();
+gchar *menu_get_game_name_with_level ();
 void sb_set_turn_image ();
 
 extern GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,

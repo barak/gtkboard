@@ -444,7 +444,12 @@ void menu_put_player (gboolean first)
 
 void menu_put_game ()
 {
-	gchar path[32] = "/Game/Select Game/";
+	gchar path[128] = "/Game/Select Game/";
+	if (opt_game->group)
+	{
+		strcat (path, opt_game->group);
+		strcat (path, "/");
+	}
 	strcat (path, opt_game->name);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM 
 			(gtk_item_factory_get_widget (menu_factory, path)), TRUE);
@@ -566,16 +571,16 @@ void menu_show_game_doc (gpointer data, guint which)
 	switch (which)
 	{
 		case MENU_DOC_ABOUT:
-			snprintf (titlestr, 64, "About %s - gtkboard", opt_game->name);
+			snprintf (titlestr, 64, "About %s - gtkboard", menu_get_game_name());
 			if (game_doc_about) msgstr = game_doc_about;
 			menu_show_dialog (titlestr, msgstr);
 			return;
 		case MENU_DOC_RULES:
-			snprintf (titlestr, 64, "%s rules - gtkboard", opt_game->name);
+			snprintf (titlestr, 64, "%s rules - gtkboard", menu_get_game_name());
 			if (game_doc_rules) msgstr = game_doc_rules;
 			break;
 		case MENU_DOC_STRATEGY:
-			snprintf (titlestr, 64, "%s strategy - gtkboard", opt_game->name);
+			snprintf (titlestr, 64, "%s strategy - gtkboard", menu_get_game_name());
 			if (game_doc_strategy) msgstr = game_doc_strategy;
 			break;
 		default:
@@ -622,6 +627,52 @@ void menu_show_game_doc (gpointer data, guint which)
 	gtk_widget_show_all (dialog);
 }
 
+void menu_put_level (char *level_name)
+{
+	gchar path[128] = "/Game/Levels/";
+	strcat (path, level_name);
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM 
+			(gtk_item_factory_get_widget (menu_factory, path)), TRUE);
+}
+
+gchar *menu_get_game_name ()
+{
+	if (game_levels) return game_levels[0].game->name;
+	else return opt_game->name;
+}
+
+gchar *menu_get_game_name_with_level ()
+{
+	static gchar name[128];
+	if (game_levels)
+	{
+		gchar *tempstr;
+		GameLevel *level = game_levels;
+		while (level->game != opt_game) { assert (level->name); level++; }
+		tempstr = g_strdup_printf ("%s (%s)", 
+				game_levels[0].game->name, level->name);
+		strncpy (name, tempstr, 127);
+		return name;
+	}
+	else return opt_game->name;
+}
+
+void menu_set_level (gpointer data, guint which, GtkWidget *widget)
+{
+	Game *old_game;
+	if (!GTK_CHECK_MENU_ITEM(widget)->active)
+		return;
+	if (!state_gui_active)
+		return;
+	assert (game_levels);
+	old_game = game_levels[which].game;
+	ui_terminate_game ();
+	opt_game = old_game;
+	gtk_label_set_text (GTK_LABEL (sb_game_label), 
+			menu_get_game_name_with_level ());
+	ui_start_game();
+}
+
 void menu_start_game ()
 {
 	ui_start_game ();
@@ -650,7 +701,37 @@ void menu_start_game ()
 	gtk_item_factory_create_items (menu_factory, 
 			3, help_items, NULL);
 	}
-	gtk_label_set_text (GTK_LABEL (sb_game_label), opt_game->name);
+	
+		gtk_label_set_text (GTK_LABEL (sb_game_label), 
+				menu_get_game_name_with_level());
+
+	if (game_levels)
+	{
+		int cnt, i;
+		GtkItemFactoryEntry *level_items, level_item;
+		for (cnt = 0; game_levels[cnt].name; cnt++)
+			;
+		level_items = g_new0 (GtkItemFactoryEntry, cnt);
+		level_item.path = "/Game/Levels";
+		level_item.accelerator = NULL;
+		level_item.callback = NULL;
+		level_item.item_type = "<Branch>";
+		gtk_item_factory_create_item (menu_factory, &level_item, NULL, 1);
+		
+		for (i=0; i<cnt; i++)
+		{
+			level_items[i].path = g_strdup_printf ("/Game/Levels/%s",
+					game_levels[i].name);
+			level_items[i].callback_action = i;
+			level_items[i].accelerator = NULL;
+			level_items[i].callback = menu_set_level;
+			level_items[i].item_type = i == 0 ? "<RadioItem>":  
+				g_strdup_printf ("/Game/Levels/%s", game_levels[0].name);
+		}
+		gtk_item_factory_create_items (menu_factory, 
+				cnt, level_items, NULL);
+		
+	}
 }
 
 void menu_set_game (gpointer data, guint which, GtkWidget *widget)
@@ -664,11 +745,16 @@ void menu_set_game (gpointer data, guint which, GtkWidget *widget)
 	
 	if (opt_game)
 	{
+		gchar *name = menu_get_game_name();
 		// FIXME: do we need to delete recursively?
 		gtk_item_factory_delete_item (menu_factory, 
-				tempstr = g_strdup_printf ("/Help/%s", opt_game->name));
+				tempstr = g_strdup_printf ("/Help/%s", name));
 		g_free (tempstr);
 	}
+
+	if (game_levels)
+		// FIXME: do we need to delete recursively?
+		gtk_item_factory_delete_item (menu_factory, "/Game/Levels");
 
 	if (opt_game)
 		ui_terminate_game ();

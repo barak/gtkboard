@@ -48,7 +48,7 @@ char *maze_score_field_names[] = {"User", "Time", "Date", NULL};
 
 
 Game Maze = { MAZE_CELL_SIZE, MAZE_BOARD_WID, MAZE_BOARD_HEIT, 
-	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", maze_init};
+	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", "Maze", maze_init};
 
 
 static void maze_set_init_pos (Pos *pos);

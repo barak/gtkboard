@@ -53,7 +53,7 @@ void ataxx_init ();
 
 Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT, 
 	ATAXX_NUM_PIECES,
-	ataxx_colors, ataxx_init_pos, NULL, "Ataxx", ataxx_init};
+	ataxx_colors, ataxx_init_pos, NULL, "Ataxx", NULL, ataxx_init};
 
 ResultType ataxx_eval (Pos *, Player, float *);
 byte *ataxx_movegen (Pos *);

@@ -186,7 +186,7 @@ int dnb_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 static void dnb_get_render (Pos *pos, byte *move, int **rmovp);
 
 Game Dnb = { DNB_CELL_SIZE, DNB_BOARD_WID, DNB_BOARD_HEIT, 
-	DNB_NUM_PIECES, dnb_colors, NULL, NULL, "Dots and boxes", dnb_init};
+	DNB_NUM_PIECES, dnb_colors, NULL, NULL, "Dots and boxes", "Nimlike games", dnb_init};
 
 static int dnb_curx = - 1, dnb_cury = -1;
 

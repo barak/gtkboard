@@ -131,7 +131,7 @@ void pacman_init ();
 
 Game Pacman = { PACMAN_CELL_SIZE, PACMAN_BOARD_WID, PACMAN_BOARD_HEIT, 
 	PACMAN_NUM_PIECES,
-	pacman_colors,  NULL, NULL, "Pacman", pacman_init};
+	pacman_colors,  NULL, NULL, "Pacman", "Arcade", pacman_init};
 
 
 static void pacman_set_init_pos (Pos *pos);

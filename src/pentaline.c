@@ -45,7 +45,7 @@ void pentaline_init ();
 
 Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEIT, 
 	PENTALINE_NUM_PIECES,
-	pentaline_colors,  NULL, NULL, "Pentaline", pentaline_init};
+	pentaline_colors,  NULL, NULL, "Pentaline", "k-in-a-row", pentaline_init};
 
 
 static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);

@@ -133,7 +133,8 @@ void ninemm_reset_uistate ();
 
 Game Ninemm = { NINEMM_CELL_SIZE, NINEMM_BOARD_WID, NINEMM_BOARD_HEIT, 
 	NINEMM_NUM_PIECES, 
-	ninemm_colors, ninemm_init_pos, ninemm_pixmaps, "Nine Men's Morris", ninemm_init};
+	ninemm_colors, ninemm_init_pos, ninemm_pixmaps, "Nine Men's Morris", NULL,
+	ninemm_init};
 
 static int ninemm_allowed [] = 
 {

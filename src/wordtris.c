@@ -447,7 +447,7 @@ static void *wordtris_newstate (Pos *, byte *);
 Game Wordtris = { WORDTRIS_CELL_SIZE, WORDTRIS_BOARD_WID, WORDTRIS_BOARD_HEIT, 
 	WORDTRIS_NUM_PIECES, 
 	wordtris_colors, NULL, wordtris_pixmaps, 
-	"Wordtris", 
+	"Wordtris", "Word games", 
 	wordtris_init};
 
 /* This list was produced using

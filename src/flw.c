@@ -120,6 +120,7 @@ Game Flw = { FLW_CELL_SIZE, FLW_BOARD_WID, FLW_BOARD_HEIT,
 	FLW_NUM_PIECES, 
 	flw_colors, NULL, flw_pixmaps, 
 	"Four Letter Words", 
+	"Word games",
 	flw_init};
 
 

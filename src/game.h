@@ -146,6 +146,8 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
 //! Home page for the game <tt>x</tt>
 #define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/showgame.pl?game="x
 
+struct _Game;
+
 //! The Game struct gives essential information about the game
 /** Only information that <b>must</b> be provided by every game
  is declared here. Of course, there are many other variables and 
@@ -153,7 +155,7 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
  set in the function game_init(). The good thing is that you can
  get your game running first and only use new features as you need
  them.*/
-typedef struct
+typedef struct _Game
 {
 	//! The size of each square on the board in pixels
 	int cell_size;
@@ -183,9 +185,15 @@ typedef struct
 	//! An array of pixmaps representing the pieces
 	char *** pixmaps;
 
+	//! Name of the game
 	char *name;
+
+	//! Which group does this game belong to. 
+	/** In the menu, the game will be nested within this group. Use NULL for no group. */
+	char *group;
+	
 	//! A pointer to the function that will be called when initializing the game
-	void (*game_init) ();
+	void (*game_init) (struct _Game *);
 }Game;
 
 //! How to render a square
@@ -211,6 +219,9 @@ typedef enum
 //! A struct describing a position in a game.
 typedef struct
 {
+	//! Which game is going on
+	Game *game;
+	
 	//! An array representing the pieces of each square.
 	/** The size of the array is #board_wid * #board_heit.
 	  For each pair (x, y), board[y * board_wid + x] is a value between 0
@@ -228,8 +239,6 @@ typedef struct
 	int *render;
 
 	//! Which player has the move. 
-	/** Currently this is unused, and a separate argument gets passed to every
-	  function along with the Pos. This will change soon. */
 	Player player;
 
 	//! State information required to completely describe the position
@@ -241,12 +250,15 @@ typedef struct
 	  game_newstate().*/
 	void *state;
 
+	//! Client-side state information () (currently unused)
+	void *ui_state;
+
 	//! The number of moves that have been made to reach the current position.
 	/** In two-player games, it represents the number of ply.*/
 	int num_moves;
 
-	//! Client-side state information () (currently unused)
-	void *ui_state;
+	//! (engine only) If this position has been generated during search, how deep from the root node is it.
+	int search_depth;
 }Pos;
 
 //! If you have implemented more than one evaluation function then you put them in an array of structs of type HeurTab. Its unlikely that you'll need to know about this. See #game_htab for more details.
@@ -264,6 +276,15 @@ typedef struct
 	//! Currently unused.
 	char *args;
 }HeurTab;
+
+typedef struct
+{
+	//! The name to show in the Levels menu
+	char *name;
+
+	//! Pointer to the Game (Each level is treated as a separate Game)
+	Game *game;
+}GameLevel;
 
 //! A pointer to the game's evaluation function. 
 /** Only for two player games. It <b>must</b> be implemented if you want
@@ -413,6 +434,8 @@ extern gboolean game_file_label, game_rank_label;
 //! Size of the Pos::state structure
 /** For stateful games, you need to specify the size of the state structure (as defined by the sizeof operator.) */
 extern int game_state_size;
+
+extern GameLevel *game_levels;
 
 //! Array of structs representing evaluation functions.
 extern HeurTab *game_htab;

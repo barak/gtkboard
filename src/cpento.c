@@ -67,7 +67,7 @@
 static char cpento_colors[6];
 static int cpento_initpos[CPENTO_BOARD_WID*CPENTO_BOARD_HEIT];
 static char **cpento_pixmaps[CPENTO_NUM_PIECES];
-static void cpento_init(void);
+static void cpento_init();
 
 static int cpento_getmove(Pos *, int, int,
                    GtkboardEventType,
@@ -80,6 +80,7 @@ Game CapturePento = {
     cpento_colors, cpento_initpos,
     cpento_pixmaps,
     "Capture Pentominoes",
+	"Nimlike games",
     cpento_init
 };
 
@@ -179,7 +180,7 @@ static char **cpento_pixmaps[CPENTO_NUM_PIECES] =
 };
 
 
-static void cpento_init(void)
+static void cpento_init()
 {
     game_single_player = 1;
     game_getmove = cpento_getmove;

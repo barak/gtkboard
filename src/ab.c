@@ -109,6 +109,7 @@ float ab_with_tt (Pos *pos, int player, int level,
 			}
 			move_apply (newpos.board, move);
 			newpos.num_moves = pos->num_moves + 1;
+			newpos.search_depth = pos->search_depth + 1;
 			newpos.player = pos->player == WHITE ? BLACK : WHITE;
 			retval = 0;
 			if (game_use_hash && level > 0)
@@ -317,6 +318,7 @@ byte * ab_dfid (Pos *pos, int player)
 	{
 		oldval = val;
 		ab_tree_exhausted = TRUE;
+		pos->search_depth = 0;
 		val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, local_best_move);
 		if (!engine_stop_search)
 		{
@@ -329,6 +331,15 @@ byte * ab_dfid (Pos *pos, int player)
 			if (opt_verbose)
 				printf ("Searched whole tree. Moves=%d;\t Ply=%d\n",
 					pos->num_moves, ply);
+			ply++;
+			break;
+		}
+		
+		if (fabs (val) >= GAME_EVAL_INFTY)
+		{
+			if (opt_verbose)
+				printf ("Solved the game. %s won. Moves=%d;\t Ply=%d\n",
+					val > 0 ? "White" : "Black", pos->num_moves, ply);
 			ply++;
 			break;
 		}

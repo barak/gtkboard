@@ -57,7 +57,7 @@ void quarto_init ();
 
 Game Quarto = { QUARTO_CELL_SIZE, QUARTO_BOARD_WID, QUARTO_BOARD_HEIT, 
 	QUARTO_NUM_PIECES,
-	quarto_colors, quarto_init_pos, NULL, "Quarto", quarto_init};
+	quarto_colors, quarto_init_pos, NULL, "Quarto", "k-in-a-row", quarto_init};
 
 
 static int quarto_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);

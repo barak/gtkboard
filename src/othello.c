@@ -28,12 +28,9 @@
 #define OTHELLO_CELL_SIZE 55
 #define OTHELLO_NUM_PIECES 2
 
-#define OTHELLO_BOARD_WID 8
-#define OTHELLO_BOARD_HEIT 8
-
 char othello_colors[6] = {200, 200, 200, 140, 140, 140};
 
-int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] = 
+int othello_init_pos [8*8] = 
 {
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
@@ -43,6 +40,16 @@ int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] =
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
+};
+
+int othello6x6_init_pos [6*6] = 
+{
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 2 , 1 , 0 , 0  ,
+	0 , 0 , 1 , 2 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
 };
 
 #define OTHELLO_WP 1
@@ -61,12 +68,16 @@ char ** othello_get_pixmap (int, int);
 guchar *othello_get_rgbmap (int, int);
 gboolean othello_use_incr_eval (Pos *pos, Player player);
 
-Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT, 
+Game Othello = { OTHELLO_CELL_SIZE, 8, 8,
 	OTHELLO_NUM_PIECES, 
-	othello_colors, othello_init_pos, NULL, "Othello", othello_init};
+	othello_colors, othello_init_pos, NULL, "Othello", "Othello", othello_init};
+
+Game Othello6x6 = { OTHELLO_CELL_SIZE, 6, 6,
+	OTHELLO_NUM_PIECES, 
+	othello_colors, othello6x6_init_pos, NULL, "Othello 6x6", "Othello", othello_init};
 
 
-void othello_init ()
+void othello_init (Game *game)
 {
 	game_getmove = othello_getmove;
 	game_getmove_kb = othello_getmove_kb;
@@ -80,11 +91,19 @@ void othello_init ()
 	game_black_string = "Blue";
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
-	game_doc_about = 
-		"Othello\n"
-		"Two player game\n"
-		"Status: Fully implemented (but AI needs improvement)\n"
-		"URL: "GAME_DEFAULT_URL ("othello");
+	
+	if (game == &Othello)
+		game_doc_about =
+			"Othello\n"
+			"Two player game\n"
+			"Status: Fully implemented\n"
+			"URL: "GAME_DEFAULT_URL ("othello");
+	else
+		game_doc_about =
+			"Othello 6x6\n"
+			"Two player game\n"
+			"Status: Fully implemented\n"
+			"URL: "GAME_DEFAULT_URL ("othello6x6");
 	game_doc_rules = 
 		"Othello rules\n"
 		"\n"
@@ -127,7 +146,7 @@ guchar *othello_get_rgbmap (int idx, int color)
 	if (color == BLACK) colors += 3;
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
-	rgbmap_ball_shadow_gen(55, rgbbuf, fg, bg, 17.0, 30.0, 3);
+	rgbmap_ball_shadow_gen(OTHELLO_CELL_SIZE, rgbbuf, fg, bg, 17.0, 30.0, 3);
 	return rgbbuf;
 }
 
@@ -398,9 +417,9 @@ static float othello_eval_safe (Pos *pos)
 {
 	int i, x, y, sum=0;
 	if (pos->board [0 * board_wid + 0] == OTHELLO_EMPTY &&
-		pos->board [0 * board_wid + 7] == OTHELLO_EMPTY &&
-		pos->board [7 * board_wid + 0] == OTHELLO_EMPTY &&
-		pos->board [7 * board_wid + 7] == OTHELLO_EMPTY )
+		pos->board [0 * board_wid + board_wid - 1] == OTHELLO_EMPTY &&
+		pos->board [(board_heit - 1) * board_wid + 0] == OTHELLO_EMPTY &&
+		pos->board [(board_heit - 1) * board_wid + board_wid - 1] == OTHELLO_EMPTY )
 		return 0;
 	safe_cached = (byte *) malloc (board_wid * board_heit);
 	assert (safe_cached);
@@ -459,12 +478,20 @@ static float othello_eval_material (Pos *pos)
 
 static float othello_eval_weights (Pos *pos)
 {
-	static int weights [4][4] = 
+	static int weights8 [4][4] = 
 	{
 		{ 500, -240, 85, 69 },
 		{ 0  , -130, 49, 23 },
 		{ 0  ,    0,  1,  9 },
 		{ 0  ,    0,  0, 32 },
+	};
+	
+	// FIXME: find a decent weight set
+	static int weights6 [3][3] = 
+	{
+		{ 500, -200, 80},
+		{ 0  , -300, 50},
+		{ 0  ,    0, 20},
 	};
 
 	int i, j, wtsum = 0;
@@ -476,10 +503,22 @@ static float othello_eval_weights (Pos *pos)
 		int x = i, y = j;
 		if (val == OTHELLO_EMPTY)
 			continue;
-		if (x > 3) x = 7-x;
-		if (y > 3) y = 7-y;
+
+		if (pos->game == &Othello)
+		{
+			if (x > 3) x = 7-x;
+			if (y > 3) y = 7-y;
+		}
+		else //if (pos->game == Othello6x6)
+		{
+			if (x > 2) x = 5-x;
+			if (y > 2) y = 5-y;
+		}
+		
 		if (x > y)  {int tmp = y; y = x; x = tmp;}
-		wtsum += weights [x][y] * (val == OTHELLO_WP ? 1 : -1);
+		
+		wtsum += (pos->game == &Othello ? weights8 [x][y] : weights6[x][y])  
+			* (val == OTHELLO_WP ? 1 : -1);
 	}
 	return wtsum;	
 }
@@ -488,9 +527,8 @@ ResultType othello_eval (Pos *pos, Player player, float *eval)
 {
 	int i;
 	gboolean found;
-	assert (board_wid == 8 && board_heit == 8);
 
-	if (pos->num_moves >= 64)
+	if (pos->num_moves >= board_wid * board_heit)
 	{
 		for (i=0, found=FALSE; i<board_wid*board_heit; i++)
 			if (pos->board [i] == OTHELLO_EMPTY) {found = TRUE; break;}

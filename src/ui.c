@@ -53,7 +53,7 @@ extern Game
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
 	Ninemm, Stopgate, Knights, Breakthrough, 
 	CapturePento, Towers, Quarto, Kttour, Eightqueens, Dnb,
-	Blet
+	Blet, Othello6x6
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
@@ -61,7 +61,7 @@ Game *games[] = {
 	&Antichess, &Ataxx, &Blet, &Breakthrough, &Checkers, &Chess, 
 	&CapturePento, &Dnb, &Eightqueens, &Fifteen, &Flw, &Hiq,
 	&Hypermaze, &Infiltrate, &Knights, &Kttour, &Mastermind,
-	&Maze, &Memory, &Ninemm, &Othello, &Pacman, &Pentaline,
+	&Maze, &Memory, &Ninemm, &Othello, &Othello6x6, &Pacman, &Pentaline,
 	&Plot4, &Quarto, &Rgb, &Samegame, &Stopgate, &Tetris, &Towers,
 	&Wordtris};
 
@@ -74,7 +74,7 @@ FILE *move_fin, *move_fout;
 
 static GIOChannel *ui_in = NULL;
 
-Pos cur_pos = {NULL, NULL, WHITE, NULL, 0, NULL};
+Pos cur_pos = {NULL, NULL, NULL, WHITE, NULL, NULL, 0, 0};
 
 int board_wid, board_heit;
 
@@ -110,6 +110,7 @@ gboolean game_file_label = 0,  game_rank_label = 0;
 char *game_highlight_colors = NULL;
 char game_highlight_colors_def[9] = {0xff, 0xff, 0, 0, 0, 0, 0, 0, 0};
 
+GameLevel *game_levels = NULL;
 HeurTab *game_htab = NULL;
 int game_state_size = 0;
 
@@ -236,6 +237,7 @@ void game_set_init_pos_def (Pos *pos)
 void reset_game_params ()
 {
 	if (game_free) game_free ();
+	game_levels = NULL;
 	game_htab = NULL;
 	game_eval = NULL;
 	game_eval_incr = NULL;
@@ -283,11 +285,13 @@ void reset_game_params ()
 	game_bg_pixmap = NULL;
 	if (cur_pos.board) free (cur_pos.board);
 	if (cur_pos.render) free (cur_pos.render);
+	cur_pos.game = NULL;
 	cur_pos.board = NULL;
 	cur_pos.render = NULL;
 	cur_pos.state = NULL;
 	cur_pos.ui_state = NULL;
 	cur_pos.num_moves = 0;
+	cur_pos.search_depth = 0;
 }
 
 void ui_terminate_game ()
@@ -299,7 +303,7 @@ void ui_terminate_game ()
 		animate_tag = -1;
 	}
 	if (game_single_player)
-		prefs_save_scores (opt_game->name);
+		prefs_save_scores (menu_get_game_name_with_level());
 	board_free ();
 	reset_game_params ();
 	if (opt_infile)
@@ -316,8 +320,9 @@ void ui_terminate_game ()
 
 void ui_start_game ()
 {
+	cur_pos.game = opt_game;
 	if (opt_game->game_init)
-		opt_game->game_init();
+		opt_game->game_init(opt_game);
 	if (game_single_player)
 	{
 		ui_white = HUMAN;
@@ -342,10 +347,16 @@ void ui_start_game ()
 	menu_put_player (FALSE);
 	menu_set_eval_function ();
 	if (game_single_player)
-		prefs_load_scores (opt_game->name);
+		prefs_load_scores (menu_get_game_name_with_level());
 	ui_check_who_won();
 	if (game_single_player && game_start_immediately)
 		ui_stopped = FALSE;
+	if (state_gui_active)
+	{
+		gchar *tempstr = g_strdup_printf ("%s - gtkboard", menu_get_game_name());
+		gtk_window_set_title (GTK_WINDOW (main_window), tempstr);
+		g_free (tempstr);
+	}
 }
 
 
@@ -429,7 +440,22 @@ void ui_check_who_won()
 		ui_cleanup();
 	sb_update ();
 	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "WON", 3))
+	{
 		prefs_add_highscore (line, sb_get_human_time ());
+		if (game_levels)
+		{
+			GameLevel *next_level = game_levels;
+			while (next_level->name)
+			{
+				if (next_level->game == opt_game)
+					break;
+				next_level++;
+			}
+			next_level++;
+			if (next_level->name)
+				menu_put_level (next_level->name);
+		}
+	}
 }
 
 void ui_send_make_move ()
@@ -582,8 +608,8 @@ static void parse_opts (int argc, char **argv)
 					if (!strcasecmp (optarg, games[i]->name))
 					{
 						opt_game = games[i];
-						if (opt_game->game_init)
-							opt_game->game_init();
+//						if (opt_game->game_init)
+//							opt_game->game_init(opt_game);
 						found = 1;
 					}
 				if (!found)
@@ -610,18 +636,16 @@ static void parse_opts (int argc, char **argv)
 				}
 
 				if (!g_module_symbol (module, "plugin_game", (gpointer *) &game))
-				//if ((error = dlerror()) != NULL)
 				{
 					fprintf (stderr, 
 							"Failed to load plugin from file \"%s\": %s\n",
 							optarg, g_module_error ());
 					exit(1);
 				}
-				//dlclose(handle);
 				printf ("Successfully loaded game %s\n", (*game)->name);
 				opt_game = *game;
-				if (opt_game->game_init)
-					opt_game->game_init();
+//				if (opt_game->game_init)
+//					opt_game->game_init(opt_game);
 				}
 				break;
 			/* FIXME : make these long options */
@@ -822,6 +846,8 @@ void gui_init ()
 		{ "/Game/Sep2", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		// FIXME: this separator should go and Game->levels should move up
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, MENU_BACK, "" },
 		{ "/Move/_Forward", "<control>F", menu_back_forw, MENU_FORW, "" },
@@ -849,6 +875,7 @@ void gui_init ()
 		//FIXME: there's a scores stock item but I can't seem to find it
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, 1, 
 				"<StockItem>", GTK_STOCK_GO_BACK },
@@ -905,7 +932,7 @@ void gui_init ()
 	gtk_window_set_policy (GTK_WINDOW (main_window), FALSE, FALSE, TRUE);
 	gtk_signal_connect (GTK_OBJECT (main_window), "delete_event",
 		GTK_SIGNAL_FUNC(ui_cleanup), NULL);
-	gtk_window_set_title (GTK_WINDOW (main_window), "GTKBoard");
+	gtk_window_set_title (GTK_WINDOW (main_window), "Gtkboard");
 
 	ag = gtk_accel_group_new();
 	menu_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", ag);
@@ -915,8 +942,25 @@ void gui_init ()
 			sizeof (items) / sizeof (items[0]), items, NULL);
 	for (i=0; i<=num_games; i++)
 	{
-		game_items[i].path = g_strdup_printf ("/Game/Select Game/%s",  
-				i ? games[i-1]->name : "none");
+		if (i==0) 
+			game_items[i].path = "/Game/Select Game/none";
+		else 
+		{
+			if (games[i-1]->group)
+			{
+				GtkItemFactoryEntry group_item = {NULL, NULL, NULL, 0, "<Branch>"};
+				group_item.path = g_strdup_printf ("/Game/Select Game/%s",
+						games[i-1]->group);
+				// FIXME: this is O(N^2) where N is the number of games
+				if (gtk_item_factory_get_widget (menu_factory, group_item.path) == NULL)
+					gtk_item_factory_create_item (menu_factory, &group_item, NULL, 1);
+				game_items[i].path = g_strdup_printf ("/Game/Select Game/%s/%s",
+					games[i-1]->group ? games[i-1]->group : "", games[i-1]->name);
+			}
+			else
+				game_items[i].path = g_strdup_printf ("/Game/Select Game/%s",
+						games[i-1]->name);
+		}
 		game_items[i].accelerator = NULL;
 		game_items[i].callback = menu_set_game;
 		game_items[i].callback_action = i-1;

@@ -246,7 +246,7 @@ byte * stopgate_movegen (Pos *);
 
 Game Stopgate = { STOPGATE_CELL_SIZE, STOPGATE_BOARD_WID, STOPGATE_BOARD_HEIT, 
 	STOPGATE_NUM_PIECES, 
-	stopgate_colors, NULL, stopgate_pixmaps, "Stopgate", stopgate_init};
+	stopgate_colors, NULL, stopgate_pixmaps, "Stopgate", "Nimlike games", stopgate_init};
 
 static int stopgate_curx = - 1, stopgate_cury = -1;
 
