@@ -55,8 +55,8 @@ static void find_sound_dir ()
 void sound_init()
 {
 #ifdef HAVE_SDL
-	int audio_rate = 44100;
-	Uint16 audio_format = AUDIO_S16; /* 16-bit stereo */
+	int audio_rate = 22050;
+	Uint16 audio_format = AUDIO_S16;
 	int audio_channels = 2;
 	int audio_buffers = 512;
 
@@ -70,7 +70,6 @@ void sound_init()
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers))
 	{
 		fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
-//		exit(1);
 		return;
 	}
 	sound_initialized = TRUE;
