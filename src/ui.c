@@ -541,6 +541,7 @@ int ui_move_now_cb ()
 	fprintf (move_fout, "MOVE_NOW \n");
 	fflush (move_fout);
 	ui_get_machine_move ();
+	return FALSE;
 }
 
 void ui_cancel_move ()
