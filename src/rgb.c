@@ -1,23 +1,25 @@
-#include "rgb.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 
-char rgb_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+#include "game.h"
+#include "aaball.h"
 
-int * rgb_initpos = NULL;
+#define RGB_CELL_SIZE 55
+#define RGB_NUM_PIECES 3
+
+#define RGB_BOARD_WID 3
+#define RGB_BOARD_HEIT 3
 
 #define RGB_RP 1
 #define RGB_GP 2
 #define RGB_BP 3
 #define RGB_EMPTY 0
 
+char rgb_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 
-/*char ** rgb_pixmaps[] = { red_ball_55_xpm, 
-	blue_ball_55_xpm, green_ball_55_xpm };*/
+int * rgb_initpos = NULL;
 
 void rgb_init ();
 

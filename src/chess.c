@@ -3,9 +3,30 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "stack.h"
-#include "chess.h"
+#include "game.h"
 #include "../pixmaps/chess.xpm"
+
+#define CHESS_CELL_SIZE 54
+#define CHESS_NUM_PIECES 12
+
+#define CHESS_BOARD_WID 8
+#define CHESS_BOARD_HEIT 8
+
+#define CHESS_WK 1
+#define CHESS_WQ 2
+#define CHESS_WR 3
+#define CHESS_WB 4
+#define CHESS_WN 5
+#define CHESS_WP 6
+#define CHESS_BK 7
+#define CHESS_BQ 8
+#define CHESS_BR 9
+#define CHESS_BB 10
+#define CHESS_BN 11
+#define CHESS_BP 12
+
+#define CHESS_ISWHITE(x) (x >= 1 && x <= 6)
+#define CHESS_ISBLACK(x) (x >= 7 && x <= 12)
 
 #ifndef abs
 #define abs(x) ((x) < 0 ? -(x) : (x))
@@ -347,8 +368,7 @@ ResultType chess_who_won (Pos *pos, Player player, char **commp)
 	*commp = NULL;
 	if (hasmove (pos, player)) //return RESULT_NOTYET;
 	{
-		// FIXME: implement using state
-		if (movstack_get_num_moves() > chess_max_moves)
+		if (pos->num_moves > chess_max_moves)
 		{
 			fprintf (stderr, "max moves reached\n");
 			snprintf (comment, 32, "%s", who_str[2]);

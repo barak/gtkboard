@@ -3,8 +3,14 @@
 #include <string.h>
 #include <assert.h>
 
-#include "othello.h"
+#include "game.h"
 #include "aaball.h"
+
+#define OTHELLO_CELL_SIZE 55
+#define OTHELLO_NUM_PIECES 2
+
+#define OTHELLO_BOARD_WID 8
+#define OTHELLO_BOARD_HEIT 8
 
 char othello_colors[6] = {200, 200, 200, 140, 140, 140};
 

@@ -205,25 +205,23 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 	byte *movlist, *move;
 	byte best_move [1024];
 	static byte ret_move [1024];
+	void *oldstate = NULL; // use the recursion to implement stack of states
 	engine_poll ();
 	if (engine_stop_search) 
 	{ 
 		ab_tree_exhausted = 0; 
 		return 0; 
 	}
-	//TODO: implement stateful
-/*	if (game_stateful)
+	if (game_stateful)
 	{
-		newpos.state = (void *) malloc (game_state_size);
-		assert (newpos.state);
-		memcpy (newpos.state, pos->state, game_state_size);
-	}*/
+		oldstate = (void *) malloc (game_state_size);
+		assert (oldstate);
+	}
 	movlist = game_movegen (pos, player);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
 		if (ret_movep && !engine_stop_search)
 			*ret_movep = NULL;
-		//if (game_stateful) free (newpos.state);
 		free (movlist);
 		val = game_eval (pos, to_play);
 		//hash_insert (pos->board, board_wid * board_heit, level, val);
@@ -232,11 +230,6 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 	move = movlist;
 	do
 	{
-		/*if (game_stateful)
-		{
-			void *newstate = game_newstate (pos, move);
-			memcpy (newpos.state, newstate, game_state_size);
-		}*/
 		float neweval = 0, incr_eval = game_eval_incr (pos, to_play, move);
 		neweval = eval + incr_eval;
 		
@@ -258,6 +251,12 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			int found = 0;
 			byte *movinv = mov_getinv (pos->board, move);
 			move_apply (pos->board, move);
+			if (game_stateful)
+			{
+				void *newstate = game_newstate (pos, move);
+				memcpy (oldstate, pos->state, game_state_size);
+				memcpy (pos->state, newstate, game_state_size);
+			}
 			val = 0; // stop compiler warning
 			if (level > 1)
 			{
@@ -273,6 +272,7 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 				hash_insert (pos->board, board_wid * board_heit, level, val);
 			move_apply (pos->board, movinv);
 			free (movinv);
+			memcpy (pos->state, oldstate, game_state_size);
 		}
 		if (first || 
 			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
@@ -291,8 +291,9 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 		movcpy (ret_move, best_move);
 		*ret_movep = ret_move;
 	}
-	//if (game_stateful) free (newpos.state);
 	free (movlist);
+	if (game_stateful)
+		free (oldstate);
 	return player == WHITE ? alpha : beta;
 }
 

@@ -1,11 +1,18 @@
-#include "hiq.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "game.h"
+#include "aaball.h"
+
+#define HIQ_CELL_SIZE 54
+#define HIQ_NUM_PIECES 5
+
+#define HIQ_BOARD_WID 7
+#define HIQ_BOARD_HEIT 7
+
 
 #define abs(x) ((x) < 0 ? -(x):(x))
 
@@ -105,6 +112,8 @@ typedef struct
 static int hiq_getmove (Pos *, int, int, int, Player, byte **);
 ResultType hiq_who_won (Pos *, Player , char **);
 char ** hiq_get_pixmap (int , int); 
+byte * hiq_movegen (char *, int);
+float hiq_eval (byte *, int);
 
 void hiq_init ()
 {

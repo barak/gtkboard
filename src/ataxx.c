@@ -1,18 +1,26 @@
-#include "stack.h"
-#include "game.h"
-#include "ataxx.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 
-char ataxx_colors[6] = {120, 120, 120, 200, 200, 200};
+#include "game.h"
+#include "aaball.h"
+
+#define ATAXX_CELL_SIZE 55
+#define ATAXX_NUM_PIECES 2
+
+#define ATAXX_BOARD_WID 7
+#define ATAXX_BOARD_HEIT 7
+
+#define ATAXX_EMPTY 0
+#define ATAXX_WP 1
+#define ATAXX_BP 2
 
 #define ATAXX_MOVEGEN_PLAUSIBLE 0
 
-int ataxx_initpos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
+static char ataxx_colors[6] = {120, 120, 120, 200, 200, 200};
+
+static int ataxx_initpos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
 {
 	1 , 0 , 0 , 0 , 0 , 0 , 2 ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
@@ -75,9 +83,7 @@ ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
 	if (move[0] != -2)
 	{
 		free (move);
-		/* FIXME: ugly hack to determine if we have exceeded the
-	   move limit */	   
-		if (movstack_get_num_moves() > ataxx_max_moves)
+		if (pos->num_moves > ataxx_max_moves)
 		{
 			fprintf (stderr, "max moves reached\n");
 			snprintf (comment, 32, "%s", who_str[2]);
@@ -342,7 +348,6 @@ int ataxx_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp
 	oldx = -1; oldy = -1;
 	if (movp)
 		*movp = move;	
-	move_fwrite (move, stdout);
 	return 1;
 }
 

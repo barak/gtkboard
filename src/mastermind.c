@@ -4,12 +4,15 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "mastermind.h"
+#include "game.h"
 #include "aaball.h"
 #include "../pixmaps/misc.xpm"
 
+#define MASTERMIND_CELL_SIZE 40
+#define MASTERMIND_NUM_PIECES 26
 
-char mastermind_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+#define MASTERMIND_BOARD_WID 8
+#define MASTERMIND_BOARD_HEIT 11
 
 #define MASTERMIND_EMPTY 0
 #define MASTERMIND_MAIN_COL_START 2
@@ -18,7 +21,7 @@ char mastermind_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 #define MASTERMIND_GET_SELECTION(x,y) (((x)==7&&(y)>1&&(y)<8)?(y)-1:-1)
 #define MASTERMIND_IS_MAIN_COL(x) ((x)>1&&(x)<6)
 
-//#define MASTERMIND_COLOR_MASK 7
+char mastermind_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 
 int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] = 
 {
@@ -49,6 +52,9 @@ static void mastermind_setinitpos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, int, Player, byte**);
 int mastermind_getmove_kb (Pos *, int , Player, byte **);
 void mastermind_reset_uistate ();
+byte * mastermind_movegen (Pos *, int);
+float mastermind_eval (Pos *, int);
+
 
 void mastermind_init ()
 {

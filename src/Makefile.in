@@ -63,6 +63,7 @@ GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
+PKG_CONFIG = @PKG_CONFIG@
 VERSION = @VERSION@
 
 CFLAGS = -Wall -g -O3 -Wno-unused 
@@ -77,7 +78,7 @@ gtkboard_SOURCES = othello.c 	ui.c 	board.c 	prefs.c 	menu.c 	hash.c 	move.c 	st
 
 
 #NOTE: we want to install game.h
-noinst_HEADERS = othello.h 	board.h 	ui_common.h 	move.h 	stack.h 	engine.h 	aaball.h 	menu.h 	memory.h 	ui.h 	prefs.h 	samegame.h 	fifteen.h 	tetris.h 	chess.h 	antichess.h 	hiq.h 	checkers.h 	plot4.h 	maze.h 	dirmaze.h 	infiltrate.h 	ataxx.h 	pentaline.h 	rgb.h 	mastermind.h 	pacman.h
+noinst_HEADERS = board.h 	ui_common.h 	move.h 	stack.h 	engine.h 	aaball.h 	menu.h 	ui.h 	prefs.h
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h

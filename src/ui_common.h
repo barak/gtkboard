@@ -21,4 +21,6 @@ void sb_error (char *msg, gboolean serious);
 //! Converts a time in milliseconds into human-parsable format
 gchar *sb_ftime(int temps);
 	
+//! Shows a dialog with given title and message
+void menu_show_dialog (gchar *title, gchar *message);
 #endif

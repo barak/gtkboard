@@ -1,12 +1,19 @@
-#include "fifteen.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
+
+
+#include "game.h"
+#include "aaball.h"
+
+#define FIFTEEN_CELL_SIZE 60
+#define FIFTEEN_NUM_PIECES 16
+
+#define FIFTEEN_BOARD_WID 4
+#define FIFTEEN_BOARD_HEIT 4
 
 char fifteen_colors[6] = {220, 220, 220, 220, 220, 220};
 
@@ -24,8 +31,8 @@ int fifteen_getmove (Pos *pos, int x, int y, int type, Player, byte **);
 static int fifteen_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move);
 void fifteen_free ();
+void fifteen_init ();
 ResultType fifteen_who_won (Pos *, Player, char **);
-//static int fifteen_animate (byte *pos, byte **movp);
 
 int fifteen_done (byte *board)
 {

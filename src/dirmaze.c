@@ -1,13 +1,19 @@
-#include "dirmaze.h"
-#include "../pixmaps/arrows.xpm"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
+
+#include "game.h"
+#include "../pixmaps/arrows.xpm"
+#include "aaball.h"
+
+#define HYPERMAZE_CELL_SIZE 20
+#define HYPERMAZE_NUM_PIECES 10
+
+#define HYPERMAZE_BOARD_WID 25
+#define HYPERMAZE_BOARD_HEIT 25
 
 char hypermaze_colors[6] = {100, 150, 200, 100, 150, 200};
 

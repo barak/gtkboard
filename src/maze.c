@@ -1,6 +1,3 @@
-#include "maze.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -8,11 +5,20 @@
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
 
+#include "game.h"
+#include "aaball.h"
+
+#define MAZE_CELL_SIZE 8
+#define MAZE_NUM_PIECES 127
+
+#define MAZE_BOARD_WID 60
+#define MAZE_BOARD_HEIT 60
+
 char maze_colors[6] = {100, 150, 200, 100, 150, 200};
 
 int * maze_initpos = NULL;
 
-int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
+static int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
 
 #define MAZE_WALL 2
 #define MAZE_CUR 1

@@ -1,19 +1,25 @@
-#include "pentaline.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-char pentaline_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+#include "game.h"
+#include "aaball.h"
 
-int * pentaline_initpos = NULL;
+#define PENTALINE_CELL_SIZE 40
+#define PENTALINE_NUM_PIECES 2
+
+#define PENTALINE_BOARD_WID 12
+#define PENTALINE_BOARD_HEIT 12
 
 #define PENTALINE_RP 1
 #define PENTALINE_BP 2
 #define PENTALINE_EMPTY 0
+
+char pentaline_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+
+int * pentaline_initpos = NULL;
 
 
 void pentaline_init ();
@@ -28,6 +34,9 @@ static ResultType pentaline_who_won (Pos *, Player , char **);
 static void pentaline_setinitpos (Pos *pos);
 char ** pentaline_get_pixmap (int idx, int color);
 float pentaline_eval_incr (Pos *, Player, byte *);
+byte * pentaline_movegen (Pos *, Player);
+float pentaline_eval (Pos *, Player);
+
 
 void pentaline_init ()
 {

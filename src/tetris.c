@@ -1,12 +1,18 @@
-#include "tetris.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
+
+#include "game.h"
+#include "aaball.h"
+
+#define TETRIS_CELL_SIZE 20
+#define TETRIS_NUM_PIECES 31
+
+#define TETRIS_BOARD_WID 10
+#define TETRIS_BOARD_HEIT 22
 
 char tetris_colors[6] = {50, 50, 50, 50, 50, 50};
 

@@ -1,11 +1,20 @@
-#include "infiltrate.h"
-#include "move.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+
+#include "game.h"
+#include "move.h"
+#include "aaball.h"
+
+#define INFILTRATE_CELL_SIZE 40
+#define INFILTRATE_NUM_PIECES 2
+
+#define INFILTRATE_BOARD_WID 7
+#define INFILTRATE_BOARD_HEIT 7
+
+#define INFILTRATE_WP 1
+#define INFILTRATE_BP 2
 
 char infiltrate_colors[] = 
 	{180, 180, 180, 

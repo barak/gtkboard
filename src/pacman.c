@@ -1,12 +1,18 @@
-#include "pacman.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
+
+#include "game.h"
+#include "aaball.h"
+
+#define PACMAN_CELL_SIZE 25
+#define PACMAN_NUM_PIECES 48
+
+#define PACMAN_BOARD_WID 26
+#define PACMAN_BOARD_HEIT 25
 
 char pacman_colors[6] = {100, 150, 200, 100, 150, 200};
 
@@ -115,6 +121,9 @@ static char ** pacman_get_pixmap (int idx, int color);
 static int pacman_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move);
 static int pacman_animate (Pos *pos, byte **movp);
+byte * pacman_movegen (char *, int);
+float pacman_eval (byte *, int);
+
 
 void pacman_init ()
 {

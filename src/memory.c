@@ -1,6 +1,3 @@
-#include "memory.h"
-#include "../pixmaps/memory.xpm"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -8,11 +5,14 @@
 #include <math.h>
 #include <gdk/gdkkeysyms.h>
 
-char memory_colors[9] = {220, 220, 180, 220, 220, 180, 0, 0, 0};
+#include "game.h"
+#include "../pixmaps/memory.xpm"
 
-int * memory_initpos = NULL;
+#define MEMORY_CELL_SIZE 48
+#define MEMORY_NUM_PIECES 72
 
-void memory_init ();
+#define MEMORY_BOARD_WID 9
+#define MEMORY_BOARD_HEIT 8
 
 
 #define MEMORY_EMPTY 0
@@ -100,6 +100,12 @@ memory40_xpm,
 memory41_xpm,
 memory42_xpm,
 };
+
+char memory_colors[9] = {220, 220, 180, 220, 220, 180, 0, 0, 0};
+
+int * memory_initpos = NULL;
+
+void memory_init ();
 
 Game Memory = { MEMORY_CELL_SIZE, MEMORY_BOARD_WID, MEMORY_BOARD_HEIT, 
 	MEMORY_NUM_PIECES, memory_colors,  NULL, memory_pixmaps, 

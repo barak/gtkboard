@@ -1,21 +1,42 @@
-#include "stack.h"
-#include "antichess.h"
-#include "../pixmaps/chess.xpm"
-#include "move.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "game.h"
+#include "../pixmaps/chess.xpm"
+
+
+#define ANTICHESS_CELL_SIZE 54
+#define ANTICHESS_NUM_PIECES 12
+
+#define ANTICHESS_BOARD_WID 8
+#define ANTICHESS_BOARD_HEIT 8
+
+#define ANTICHESS_WK 1
+#define ANTICHESS_WQ 2
+#define ANTICHESS_WR 3
+#define ANTICHESS_WB 4
+#define ANTICHESS_WN 5
+#define ANTICHESS_WP 6
+#define ANTICHESS_BK 7
+#define ANTICHESS_BQ 8
+#define ANTICHESS_BR 9
+#define ANTICHESS_BB 10
+#define ANTICHESS_BN 11
+#define ANTICHESS_BP 12
+
+#define ANTICHESS_ISWHITE(x) (x >= 1 && x <= 6)
+#define ANTICHESS_ISBLACK(x) (x >= 7 && x <= 12)
 
 #ifndef abs
 #define abs(x) ((x) < 0 ? -(x) : (x))
 #endif
 
-char antichess_colors[] = 
+static char antichess_colors[] = 
 	{200, 200, 130, 
 	0, 140, 0};
 
-int	antichess_initpos[] = 
+static int antichess_initpos[] = 
 {
 	 9 , 11, 10, 8 , 7 , 10, 11, 9  ,
 	 12, 12, 12, 12, 12, 12, 12, 12 ,
@@ -28,7 +49,7 @@ int	antichess_initpos[] =
 };
 static int antichess_max_moves = 200;
 
-char ** antichess_pixmaps[] =
+static char ** antichess_pixmaps[] =
 
 {
 	chess_wk_54_xpm, 
@@ -314,7 +335,7 @@ ResultType antichess_who_won (Pos *pos, Player player, char **commp)
 	*commp = NULL;
 	if (hasmove (pos, player)) //return RESULT_NOTYET;
 	{
-		if (movstack_get_num_moves() > antichess_max_moves)
+		if (pos->num_moves > antichess_max_moves)
 		{
 			fprintf (stderr, "max moves reached\n");
 			snprintf (comment, 32, "%s", who_str[2]);

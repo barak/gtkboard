@@ -1,10 +1,16 @@
-#include "plot4.h"
-#include "aaball.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+
+#include "game.h"
+#include "aaball.h"
+
+#define PLOT4_CELL_SIZE 55
+#define PLOT4_NUM_PIECES 3
+
+#define PLOT4_BOARD_WID 7
+#define PLOT4_BOARD_HEIT 6
 
 char plot4_colors[6] = {160, 140, 100, 160, 140, 100};
 
@@ -23,14 +29,15 @@ Game Plot4 = { PLOT4_CELL_SIZE, PLOT4_BOARD_WID, PLOT4_BOARD_HEIT,
 
 
 
-byte * plot4_movegen (Pos *, Player);
-float plot4_eval (Pos *, Player );
 static int eval_runs (Pos *, int);
 static int find_runs (byte *, int, int, int , int, int, int);
 static int plot4_getmove (Pos *, int, int, int, Player, byte **);
 static ResultType plot4_who_won (Pos *, Player , char **);
 static void plot4_setinitpos (Pos *pos);
 static char ** plot4_get_pixmap (int, int);
+static byte * plot4_movegen (Pos *, Player);
+static float plot4_eval (Pos *, Player);
+
 
 static const int RUN_WT = 20;
 
