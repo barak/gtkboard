@@ -976,6 +976,21 @@ void menu_update ()
 	if (no_back_forw) menu_sensitize (MENU_SENS_NO_BACK_FORW, FALSE);
 	if (ui_stopped) menu_sensitize (MENU_SENS_UI_STOPPED, FALSE);
 	if (eval_fn) menu_sensitize (MENU_SENS_EVAL_FUNCTION, FALSE);
+
+	if (ui_stopped) 
+	{
+		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
+			"/Game/Start"));
+		gtk_widget_hide (gtk_item_factory_get_widget (menu_factory,
+			"/Game/Pause"));
+	}
+	else
+	{
+		gtk_widget_hide (gtk_item_factory_get_widget (menu_factory,
+			"/Game/Start"));
+		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
+			"/Game/Pause"));
+	}
 		
 }
 	
