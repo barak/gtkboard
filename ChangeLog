@@ -157,3 +157,6 @@
 2003-09-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* forgot to write changelog for several days.
 	* major changes: implemented move ordering heuristic and completed movegen() for chess
+
+2003-09-24	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* lots of changes, but too lazy to write changelog

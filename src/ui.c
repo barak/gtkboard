@@ -147,6 +147,7 @@ float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 void (*game_search) (Pos *, Player player, byte **) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
+InputType (*game_event_handler) (Pos *, GtkboardEvent *, MoveInfo *) = NULL;
 int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
 int (*game_getmove_kb) (Pos *, int, Player, byte **, int **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
@@ -243,6 +244,7 @@ void reset_game_params ()
 	game_eval_black = NULL;
 	game_search = NULL;
 	game_movegen = NULL;
+	game_event_handler = NULL;
 	game_getmove = NULL;
 	game_getmove_kb = NULL;
 	game_who_won  = NULL;
@@ -558,7 +560,7 @@ gboolean impl_check ()
 				&& (!game_movegen || !game_eval) && !game_search)
 			return FALSE;
 		if ((ui_white == HUMAN || ui_black == HUMAN)
-				&& !game_getmove && !game_getmove_kb)
+				&& !game_getmove && !game_getmove_kb && !game_event_handler)
 			return FALSE;
 	}
 	return TRUE;
@@ -965,17 +967,17 @@ void gui_init ()
 			);
 
 	gtk_signal_connect (GTK_OBJECT (board_area), "leave_notify_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (board_area), "motion_notify_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (board_area), "button_release_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (board_area), "button_press_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (main_window), "key_press_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (main_window), "key_release_event",
-		GTK_SIGNAL_FUNC (board_clicked), NULL);
+		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
 	sb_game_label = gtk_label_new (opt_game ? opt_game->name : NULL);
 	gtk_box_pack_start (GTK_BOX (hbox), sb_game_label, FALSE, FALSE, 3);

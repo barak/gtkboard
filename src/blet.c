@@ -60,16 +60,18 @@ Game Blet = { BLET_CELL_SIZE, BLET_BOARD_WID, BLET_BOARD_HEIT,
 static int blet_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType blet_who_won (Pos *, Player , char **);
 unsigned char * blet_get_rgbmap (int, int);
+InputType blet_event_handler (Pos *pos, GtkboardEvent *event, MoveInfo *move_info_p);
 
 void blet_init ()
 {
-	game_getmove = blet_getmove;
+//	game_getmove = blet_getmove;
 	game_get_rgbmap = blet_get_rgbmap;
 	game_single_player = TRUE;
 	game_who_won = blet_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
 	game_score_fields = blet_score_fields;
 	game_score_field_names = blet_score_field_names;
+	game_event_handler = blet_event_handler;
 	game_doc_about = 
 		"Blet\n"
 		"Single player game\n"
@@ -98,36 +100,44 @@ static ResultType blet_who_won (Pos *pos, Player player, char **commp)
 	return over ? RESULT_WON : RESULT_NOTYET;
 }
 
+static int incx[] = { -1, 1, 0, 0};
+static int incy[] = { 0, 0, 1, -1};
+
 #define FLIP(x) ((x)==BLET_RP?BLET_GP:BLET_RP)
 
-int blet_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int **rmovep)
+InputType blet_event_handler (Pos *pos, GtkboardEvent *event, MoveInfo *move_info_p)
 {
 	static byte move[32];
 	byte *mp = move;
-	int x1 = -1, y1 = -1, x2 = -1, y2 = -1;
-	int wid = board_wid - 1, heit = board_heit - 1;
-	int val;
-	if (type != GTKBOARD_BUTTON_RELEASE)
-		return 0;
-	if (x > 0 && x < wid && y > 0 && y < heit)
-		return -1;
-	// ugly code because board is square not circular
-	if (x == 0 && y == 0) x1 = 1, y1 = 0, x2 = 0, y2 = 1;
-	else if (x == 0 && y == heit) x1 = 1, y1 = heit, x2 = 0, y2 = heit - 1;
-	else if (x == wid && y == 0) x1 = wid - 1, y1 = 0, x2 = wid, y2 = 1;
-	else if (x == wid && y == heit) x1 = wid - 1, y1 = heit, x2 = wid, y2 = heit - 1;
-	else if (x == 0 || x == wid) x1 = x2 = x, y1 = y - 1, y2 = y + 1;
-	else if (y == 0 || y == heit) y1 = y2 = y, x1 = x - 1, x2 = x + 1;
+	int val, k, x, y;
+	if (event->type != GTKBOARD_BUTTON_RELEASE)
+		return INPUT_NOTYET;
+	x = event->x;
+	y = event->y;
+	if (x > 0 && x < board_wid - 1 && y > 0 && y < board_heit - 1)
+	{
+		move_info_p->help_message = "You must click on one of the balls.";
+		return INPUT_ILLEGAL;
+	}
 	val = pos->board [y * board_wid + x];
-	if (pos->board [y1 * board_wid + x1] != FLIP (val)) return -1;
-	if (pos->board [y2 * board_wid + x2] != FLIP (val)) return -1;
-	*mp++ = x; *mp++ = y; *mp++ = FLIP (val);
-	*mp++ = x1; *mp++ = y1; *mp++ = val;
-	*mp++ = x2; *mp++ = y2; *mp++ = val;
+	for (k=0; k < 4; k++)
+	{
+		int newx = x + incx[k], newy = y + incy[k];
+		if (!ISINBOARD(newx, newy)) continue;
+	   	if (pos->board[newy * board_wid + newx] == val)
+		{	
+			move_info_p->help_message = "Both neighbors must be of the opposite color.";
+			return INPUT_ILLEGAL;
+		}
+		if (pos->board[newy * board_wid + newx] == BLET_EMPTY) continue;
+		*mp++ = newx; *mp++ = newy; *mp++ = val;
+	}
+	*mp++ = x; *mp++ = y; *mp++ = FLIP(val);
 	*mp++ = -1;
-	*movp = move;
-	return 1;
+	move_info_p->move = move;
+	return INPUT_LEGAL;
 }
+
 
 unsigned char * blet_get_rgbmap (int idx, int color)
 {

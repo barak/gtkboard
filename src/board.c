@@ -314,44 +314,50 @@ void board_hide ()
 	board_redraw_all();
 }
 
-static void board_get_cell (GdkEventButton *event, int *row, int *col)
+static void board_get_cell (GdkEventButton *event, 
+		int *row, int *col, int *pixel_x, int *pixel_y)
 {
 	*row = ((int)event->x / cell_size);
 	*col = board_heit - 1 - ((int)event->y / cell_size);
+	*pixel_x = (int)event->x;
+	*pixel_y = board_heit * cell_size - 1 - (int)event->y;
 	if (state_board_flipped) 
 	{
 		*row = board_wid - 1 - *row;
 		*col = board_heit - 1 - *col;
+		*pixel_x = board_wid * cell_size - 1 - *pixel_x;
+		*pixel_y = board_heit * cell_size - 1 - *pixel_y;
 	}
 }
 
-gint board_key_pressed (GtkWidget *widget, GdkEventKey *event, 
-		gpointer data, byte **movp, int **rmovep)
-{
-	int status;
-	if (event->type != GDK_KEY_PRESS)
-		return -1;
-	if (!game_getmove_kb) return -1;
-	status = game_getmove_kb (&cur_pos, event->keyval, cur_pos.player, movp, rmovep);
-	return status;
-}
-
 //! handles mouse clicks as well as key presses
-gint board_clicked (GtkWidget *widget, GdkEventButton *event, 
+gint board_signal_handler (GtkWidget *widget, GdkEventButton *event, 
 		gpointer data)
 /* FIXME: clean up this function */
 {
-	int row, col, type;
+	int row, col, pixel_x, pixel_y, type;
 	int status = 0;
 	byte *move = NULL;
 	int *rmove = NULL;
+	GtkboardEvent our_event;
+	MoveInfo minfo = {NULL, NULL, NULL, NULL, NULL};
 	if (!opt_game) return FALSE;
 	if (ui_gameover) return FALSE;
 	if (event->type == GDK_KEY_PRESS && 
 			!(((GdkEventKey *)event)->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
 	{
-		status = board_key_pressed (widget, (GdkEventKey *)event, data, &move, &rmove);
-		if (status < 0) return FALSE;
+		if (!game_getmove_kb && !game_event_handler) return FALSE;
+		if (game_event_handler) 
+		{
+			our_event.type = GTKBOARD_KEY_PRESS;
+			our_event.key = ((GdkEventKey *)event)->keyval;
+			status = game_event_handler (&cur_pos, &our_event, &minfo);
+			move = minfo.move;
+			rmove = minfo.rmove;
+		}
+		else //(if game_getmove_kb)
+			status = game_getmove_kb (&cur_pos, 
+				((GdkEventKey *)event)->keyval, cur_pos.player, &move, &rmove);
 	}
 	else
 	{
@@ -364,10 +370,9 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 			}
 			if (!impl_check()) { sb_error ("Not yet implemented", TRUE); 
 				return FALSE; }
-			if (!game_getmove) {return FALSE;}
 		}
-		if (!game_getmove) {return FALSE;}
-		board_get_cell (event, &row, &col);
+		if (!game_getmove && !game_event_handler) {return FALSE;}
+		board_get_cell (event, &row, &col, &pixel_x, &pixel_y);
 		if (!(row >= 0 && row < board_wid)) return FALSE;
 		if (!(col >= 0 && col < board_heit)) return FALSE;
 		switch (event->type)
@@ -383,10 +388,27 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 			default:
 				return FALSE;
 		}
-		status = game_getmove (&cur_pos, row, col, type, cur_pos.player, &move, &rmove);
+		if (game_event_handler)
+		{
+			our_event.type = type;
+			our_event.x = row;
+			our_event.y = col;
+			our_event.pixel_x = pixel_x;
+			our_event.pixel_y = pixel_y;
+			status = game_event_handler (&cur_pos, &our_event, &minfo);
+			move = minfo.move;
+			rmove = minfo.rmove;
+		}
+		else
+			status = game_getmove (&cur_pos, row, col, 
+					type, cur_pos.player, &move, &rmove);
 		if (status < 0)
 		{
-			sb_error ("Illegal Move", FALSE);
+			gchar *tmpstr = minfo.help_message ? 
+				g_strdup_printf ("Illegal move: %s", minfo.help_message) 
+				: "Illegal move";
+			sb_error (tmpstr, FALSE);
+			g_free (tmpstr);
 		}
 	}
 	if (status <= 0)

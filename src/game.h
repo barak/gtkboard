@@ -40,12 +40,44 @@ typedef enum {WHITE, BLACK} Player;
 
 //! Used for representing the type of user input in game_getmove() and game_getmove_kb()
 /** This layer of abstraction exists so that to write a game it will not be necessary to have the g[dt]k headers */
-typedef enum {
+typedef enum 
+{
 	GTKBOARD_BUTTON_PRESS = 1, 
 	GTKBOARD_BUTTON_RELEASE, 
 	GTKBOARD_MOTION_NOTIFY,
 	GTKBOARD_LEAVE_NOTIFY,
-	GTKBOARD_KEY_PRESS} GtkboardEventType;
+	GTKBOARD_KEY_PRESS,
+	GTKBOARD_KEY_RELEASE,
+	GTKBOARD_GAME_START,
+	GTKBOARD_HUMAN_MOVE,
+	GTKBOARD_MACHINE_MOVE,
+	GTKBOARD_HISTORY_MOVE
+} GtkboardEventType;
+
+//! Abstraction of a user event
+typedef struct 
+{
+	//! Type of event
+	GtkboardEventType type;
+
+	//! (For mouse events) x coordinate of the *cell* -- ranges from 0 to board_wid
+	int x;
+
+	// y coordinate of the cell
+	int y;
+
+	//! Actual x coordinate
+	int pixel_x;
+
+	//! Actual y coordinate
+	int pixel_y;
+
+	//! The key that was pressed
+	int key;
+
+	//! The move (when type is GTKBOARD_{HUMAN,MACHINE,HISTORY}_MOVE)
+	byte *move;
+} GtkboardEvent;
 
 //! Used for representing the result of game_who_won()
 typedef enum 
@@ -66,6 +98,14 @@ typedef enum
 	//! Anything else
 	RESULT_MISC
 } ResultType;
+
+//! The return type of game_event_handler()
+typedef enum
+{
+	INPUT_ILLEGAL = -1,
+	INPUT_NOTYET = 0,
+	INPUT_LEGAL = 1
+} InputType;
 
 //! The move and all the info. associated with it
 typedef struct
@@ -104,7 +144,7 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
 #define ISINBOARD(x,y) ((x)>=0 && (y)>=0 && (x)<board_wid && (y)< board_heit)
 
 //! Home page for the game <tt>x</tt>
-#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/games/"x"/"
+#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/showgame.pl?game="x
 
 //! The Game struct gives essential information about the game
 /** Only information that <b>must</b> be provided by every game
@@ -276,6 +316,10 @@ extern byte * (*game_movegen) (Pos *, Player);
  */
 extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte ** movp, int **renderp);
 
+//! The all-in-one function that makes game_getmove and game_getmove_kb deprecated
+/** */
+extern InputType (*game_event_handler) (Pos *pos, GtkboardEvent *event, MoveInfo *move_info_p);
+
 //! Takes a keypress and returns the move that it corresponds to.
 /**	@param pos
 	@param key the key that the user pressed
@@ -286,7 +330,7 @@ extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Play
 extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp);
 
 //! Checks if the game is over, and if so, who has won
-/** This function is called after every move, both after single player and two player games. 
+/** This function is called after every move, both for single player and two player games. 
  @param scorep pointer to the "score". If game_who_won sets this, the score will be displayed in the score field of the statusbar.
 */
 extern ResultType (*game_who_won) (Pos *pos, Player player, char ** scorep);
