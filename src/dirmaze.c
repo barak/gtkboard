@@ -35,7 +35,7 @@
 
 char hypermaze_colors[6] = {100, 150, 200, 100, 150, 200};
 
-int * hypermaze_initpos = NULL;
+int * hypermaze_init_pos = NULL;
 
 int hypermaze_hypermaze[HYPERMAZE_BOARD_WID][HYPERMAZE_BOARD_HEIT] = {{0}};
 
@@ -56,7 +56,7 @@ Game Hypermaze = { HYPERMAZE_CELL_SIZE, HYPERMAZE_BOARD_WID, HYPERMAZE_BOARD_HEI
 	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", hypermaze_init};
 
 
-static void hypermaze_setinitpos (Pos *pos);
+static void hypermaze_set_init_pos (Pos *pos);
 static char ** hypermaze_get_pixmap (int idx, int color);
 static int hypermaze_getmove_kb (Pos *, int, Player, byte **, int **);
 int hypermaze_getmove (Pos *pos, int, int, GtkboardEventType, Player, byte **, int **);
@@ -66,7 +66,7 @@ ResultType hypermaze_who_won (Pos *, Player, char **);
 void hypermaze_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = hypermaze_setinitpos;
+	game_set_init_pos = hypermaze_set_init_pos;
 	game_get_pixmap = hypermaze_get_pixmap;
 	game_getmove_kb = hypermaze_getmove_kb;
 	game_getmove = hypermaze_getmove;
@@ -198,7 +198,7 @@ static void recursive_pathgen (byte *board, int x, int y, int val)
 			recursive_pathgen (board, x+incx[i], y+incy [i], val);
 }
 
-void hypermaze_setinitpos (Pos *pos)
+void hypermaze_set_init_pos (Pos *pos)
 {
 	int i, j;
 	int x, y;

@@ -55,7 +55,7 @@ static char antichess_colors[] =
 	0, 140, 0};
 char antichess_highlight_colors[9] = {0xff, 0, 0};
 
-static int antichess_initpos[] = 
+static int antichess_init_pos[] = 
 {
 	 9 , 11, 10, 8 , 7 , 10, 11, 9  ,
 	 12, 12, 12, 12, 12, 12, 12, 12 ,
@@ -91,13 +91,13 @@ void antichess_init ();
 int antichess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType antichess_who_won (Pos *, Player, char **);
 byte *antichess_movegen (Pos *, Player );
-float antichess_eval (Pos *, Player);
-float antichess_eval_incr (Pos *, Player, byte *);
+ResultType antichess_eval (Pos *, Player, float *);
+ResultType antichess_eval_incr (Pos *, Player, byte *, float *);
 	
 Game Antichess = 
 	{ ANTICHESS_CELL_SIZE, ANTICHESS_BOARD_WID, ANTICHESS_BOARD_HEIT, 
 	ANTICHESS_NUM_PIECES,
-	antichess_colors, antichess_initpos, antichess_pixmaps, "Antichess",
+	antichess_colors, antichess_init_pos, antichess_pixmaps, "Antichess",
 	antichess_init};
 
 Game * plugin_game = &Antichess;
@@ -638,7 +638,7 @@ byte *antichess_movegen (Pos *pos, Player player)
 	return movlist;
 }
 
-float antichess_eval (Pos * pos, Player player)
+ResultType antichess_eval (Pos * pos, Player player, float *eval)
 {
 	int sum = 0, i;
 	for (i=0; i < board_wid * board_heit; i++)
@@ -646,22 +646,25 @@ float antichess_eval (Pos * pos, Player player)
 			sum--;
 		else if (ANTICHESS_ISBLACK (pos->board[i]))
 			sum++;
-	return sum + 0.01 * random() / RAND_MAX;
+	*eval = sum + 0.01 * random() / RAND_MAX;
+	return RESULT_NOTYET;
 }
 
-float antichess_eval_incr (Pos *pos, Player player, byte *move)
+ResultType antichess_eval_incr (Pos *pos, Player player, byte *move, float *eval)
 	// check if there's a capture
 {
 	byte *board = pos->board;
 	if (player == WHITE)
 	{
-		if (move[2] && board[move[1] * board_wid + move[0]]) return -1;
-		if (move[5] && board[move[4] * board_wid + move[3]]) return -1;
+		if (move[2] && board[move[1] * board_wid + move[0]]) *eval = -1;
+		else if (move[5] && board[move[4] * board_wid + move[3]]) return -1;
+		else *eval = 0;
 	}
 	else
 	{
-		if (move[2] && board[move[1] * board_wid + move[0]]) return 1;
-		if (move[5] && board[move[4] * board_wid + move[3]]) return 1;
+		if (move[2] && board[move[1] * board_wid + move[0]]) *eval = 1;
+		else if (move[5] && board[move[4] * board_wid + move[3]]) *eval = 1;
+		else *eval = 0;
 	}
-	return 0;
+	return RESULT_NOTYET;
 }

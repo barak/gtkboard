@@ -120,7 +120,7 @@ static char *ninemm_bp_xpm[] =
 
 static char ** ninemm_pixmaps[] = { ninemm_wp_xpm, ninemm_bp_xpm };
 
-int ninemm_initpos [NINEMM_BOARD_WID*NINEMM_BOARD_HEIT] = {0};
+int ninemm_init_pos [NINEMM_BOARD_WID*NINEMM_BOARD_HEIT] = {0};
 
 #define NINEMM_EMPTY 0
 #define NINEMM_WP 1
@@ -132,7 +132,7 @@ int ninemm_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **)
 
 Game Ninemm = { NINEMM_CELL_SIZE, NINEMM_BOARD_WID, NINEMM_BOARD_HEIT, 
 	NINEMM_NUM_PIECES, 
-	ninemm_colors, ninemm_initpos, ninemm_pixmaps, "Nine Men's Morris", ninemm_init};
+	ninemm_colors, ninemm_init_pos, ninemm_pixmaps, "Nine Men's Morris", ninemm_init};
 
 static int ninemm_allowed [] = 
 {

@@ -45,14 +45,14 @@ byte * game_search (Pos *, int);
 static FILE *engine_fin, *engine_fout;
 
 //! Eval fn for white (can be NULL, in which case game_eval will be used for both)
-float (*game_eval_white) (Pos *, int);
+ResultType (*game_eval_white) (Pos *, Player, float *);
 //! Eval fn for black (can be NULL, in which case game_eval will be used for both)
-float (*game_eval_black) (Pos *, int);
+ResultType (*game_eval_black) (Pos *, Player, float *);
 
 // FIXME: following 3 extern decls must be removed by refactoring (i.e, move all fns common to client and server to a new file)
 extern void reset_game_params ();
 extern void set_game_params ();
-extern void game_setinitpos_def (Pos *);
+extern void game_set_init_pos_def (Pos *);
 
 //! The minimax search function (using depth first iterative deepening). SHOULD NOT BE USED.
 extern byte *game_minimax_dfid (Pos *, int);
@@ -80,10 +80,12 @@ gboolean engine_hup_cb ()
 	exit (1);
 }
 
-float engine_eval (Pos *pos, Player player)
+ResultType engine_eval (Pos *pos, Player player, float *eval)
 {
-	return state_player == WHITE ? game_eval_white(pos, player) :
-	game_eval_black (pos, player);
+	ResultType result;
+	result = state_player == WHITE ? game_eval_white(pos, player, eval) :
+	game_eval_black (pos, player, eval);
+	return result;
 }
 
 void engine_set_to_play (char *line)
@@ -154,7 +156,7 @@ void engine_new_game (char *gamename)
 	if (opt_game->game_init)
 		opt_game->game_init();
 	set_game_params ();
-	if (game_setinitpos != game_setinitpos_def) 
+	if (game_set_init_pos != game_set_init_pos_def) 
 	{
 		fwrite (cur_pos.board, board_wid * board_heit, 1, engine_fout);
 		fflush (engine_fout);
@@ -166,7 +168,7 @@ void engine_reset_game ()
 {
 	stack_free ();
 	state_player = WHITE;
-	game_setinitpos (&cur_pos);
+	game_set_init_pos (&cur_pos);
 }
 
 void engine_back_move ()
@@ -348,7 +350,7 @@ static gboolean channel_process_input ()
 void engine_poll ()
 {
 	static int poll_count = 0;
-	if (++poll_count == 1024)
+	if (++poll_count == 100)
 	{
 		poll_count = 0;
 		// listen for input in the pipe

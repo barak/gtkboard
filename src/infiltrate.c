@@ -39,7 +39,7 @@ char infiltrate_colors[] =
 	{180, 180, 180, 
 	200, 200, 200};
 	
-int	infiltrate_initpos[] = 
+int	infiltrate_init_pos[] = 
 {
 	 2 , 0 , 2 , 0 , 2 , 0 , 2 , 
 	 0 , 2 , 0 , 2 , 0 , 2 , 0 , 
@@ -57,14 +57,14 @@ void infiltrate_init ();
 int infiltrate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 //ResultType infiltrate_who_won (byte *, int, char **);
 byte *infiltrate_movegen (Pos *, Player );
-float infiltrate_eval (Pos *, Player);
+ResultType infiltrate_eval (Pos *, Player, float *);
 char ** infiltrate_get_pixmap (int idx, int color);
 void infiltrate_reset_uistate ();
 	
 Game Infiltrate = 
 	{ INFILTRATE_CELL_SIZE, INFILTRATE_BOARD_WID, INFILTRATE_BOARD_HEIT, 
 	INFILTRATE_NUM_PIECES,
-	infiltrate_colors, infiltrate_initpos, NULL, "Infiltrate",
+	infiltrate_colors, infiltrate_init_pos, NULL, "Infiltrate",
 	infiltrate_init};
 
 void infiltrate_init ()
@@ -119,7 +119,7 @@ byte * infiltrate_movegen (Pos *pos, Player player)
 	return movlist;
 }
 
-float infiltrate_eval (Pos *pos, Player to_play)
+ResultType infiltrate_eval (Pos *pos, Player to_play, float *eval)
 {
 	float sum = 0;
 	int i, j;
@@ -127,7 +127,8 @@ float infiltrate_eval (Pos *pos, Player to_play)
 	for (j=0; j<board_heit; j++)
 		if (pos->board [j * board_wid + i])
 			sum += j;
-	return sum;
+	*eval = sum;
+	return RESULT_NOTYET;
 
 }
 

@@ -93,3 +93,15 @@
 
 	* board.c: fixed bug where bgimage wouldn't get drawn on non-empty squares 
 	* wordtris.c: fixed bug where blank would sometimes be chosen in preference to non-blank
+
+2003-08-06	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* flw.c: wrote flw_get_render(). Support in ui.c still not added.
+
+2003-08-10	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* ui.c: beginning to separate out the client side protocol handler module
+
+2003-08-13	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* stopgate.c: implemented stopgate
+
+2003-08-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: partially implemented knights

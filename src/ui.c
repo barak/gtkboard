@@ -44,14 +44,15 @@ extern Game
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
-	Ninemm
+	Ninemm, Stopgate, Knights
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Flw, &Hiq, 
-	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Ninemm, &Othello,
-	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, &Wordtris};
+	&Hypermaze, &Infiltrate, &Knights, &Mastermind, &Maze, &Memory,
+	&Ninemm, &Othello, &Pacman, &Pentaline, &Plot4, &Rgb, &Samegame,
+	&Stopgate, &Tetris, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
 
@@ -112,18 +113,18 @@ int ui_black = NONE;
 int opt_verbose = 0;
 
 extern void engine_main (int, int);
-extern float engine_eval (Pos *, Player);
+extern ResultType engine_eval (Pos *, Player, float *);
 
 gboolean impl_check ();
 
 void ui_check_who_won ();
-void game_setinitpos_def (Pos *);
+void game_set_init_pos_def (Pos *);
 int ui_get_machine_move ();
 void ui_make_human_move (byte *, int *);
 void set_game_params ();
 
-float (*game_eval) (Pos *, Player) = NULL;
-float (*game_eval_incr) (Pos *, Player, byte *) = NULL;
+ResultType (*game_eval) (Pos *, Player, float *) = NULL;
+ResultType (*game_eval_incr) (Pos *, Player, byte *, float *) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
@@ -135,8 +136,8 @@ char **( *game_get_pixmap) (int, int) = NULL;
 guchar *( *game_get_rgbmap) (int, int) = NULL;
 void (*game_free) () = NULL;
 void * (*game_newstate) (Pos *, byte *) = NULL;
-void (*game_setinitpos) (Pos *) = game_setinitpos_def;
-void (*game_setinitrender) (Pos *) = NULL;
+void (*game_set_init_pos) (Pos *) = game_set_init_pos_def;
+void (*game_set_init_render) (Pos *) = NULL;
 void (*game_reset_uistate) () = NULL;
 int (*game_scorecmp) (gchar *, int, gchar*, int) = NULL;
 int (*game_scorecmp_def_dscore) (gchar *, int, gchar*, int) = prefs_scorecmp_dscore;
@@ -198,14 +199,14 @@ int ui_animate_cb ()
 }
 
 // Will be called on both ui and engine
-void game_setinitpos_def (Pos *pos)
+void game_set_init_pos_def (Pos *pos)
 {
 	int x, y;
 
 	for (x=0; x<board_wid; x++)
 		for (y=0; y<board_heit; y++)
 			pos->board[y * board_wid + x] = 
-				opt_game->initpos [(board_heit -1 - y) * board_wid + x];
+				opt_game->init_pos [(board_heit -1 - y) * board_wid + x];
 }
 
 
@@ -224,8 +225,8 @@ void reset_game_params ()
 	game_who_won  = NULL;
 	game_get_pixmap = NULL;
 	game_get_rgbmap = NULL;
-	game_setinitpos = game_setinitpos_def;
-	game_setinitrender = NULL;
+	game_set_init_pos = game_set_init_pos_def;
+	game_set_init_render = NULL;
 	game_animate = NULL;
 	game_free = NULL;
 	game_scorecmp = NULL;
@@ -338,15 +339,15 @@ void set_game_params ()
 	
 	if (engine_flag) 
 		// server always executes this
-		game_setinitpos (&cur_pos);
+		game_set_init_pos (&cur_pos);
 	else
 	{
-		if (game_setinitpos == game_setinitpos_def) 
+		if (game_set_init_pos == game_set_init_pos_def) 
 		// client executes only if it is the default
-		game_setinitpos (&cur_pos);
+		game_set_init_pos (&cur_pos);
 
-		if (game_setinitrender)
-			game_setinitrender (&cur_pos);
+		if (game_set_init_render)
+			game_set_init_render (&cur_pos);
 	}
 	
 	if (!engine_flag)	
@@ -355,7 +356,7 @@ void set_game_params ()
 			fprintf (move_fout, "NEW_GAME %s\n", game->name);
 			fflush (move_fout);
 			// read the initial position
-			if (game_setinitpos != game_setinitpos_def)
+			if (game_set_init_pos != game_set_init_pos_def)
 				fread (cur_pos.board, board_wid * board_heit, 1, move_fin);
 		}
 }

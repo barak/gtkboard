@@ -145,7 +145,7 @@ static char * arrow_blue_left_40_xpm[]=
 };
 
 
-int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] = 
+int mastermind_init_pos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] = 
 {
 	0, 0, 9, 9, 9, 9, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -174,14 +174,14 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 
 
 static ResultType mastermind_who_won (Pos *, Player, char **);
-static void mastermind_setinitpos (Pos *pos);
+static void mastermind_set_init_pos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
 int mastermind_getmove_kb (Pos *, int , Player, byte **, int **);
 void mastermind_reset_uistate ();
 byte * mastermind_movegen (Pos *, int);
 float mastermind_eval (Pos *, int);
 int mastermind_get_cur_row (byte *);
-void mastermind_setinitrender (Pos *);
+void mastermind_set_init_render (Pos *);
 void mastermind_free ();
 
 
@@ -191,7 +191,7 @@ void mastermind_init ()
 	game_getmove = mastermind_getmove;
 	game_getmove_kb = mastermind_getmove_kb;
 	game_who_won = mastermind_who_won;
-	game_setinitpos = mastermind_setinitpos;
+	game_set_init_pos = mastermind_set_init_pos;
 	game_get_pixmap = mastermind_get_pixmap;
 	game_single_player = TRUE;
 	game_reset_uistate = mastermind_reset_uistate;
@@ -200,7 +200,7 @@ void mastermind_init ()
 	game_score_fields = mastermind_score_fields;
 	game_score_field_names = mastermind_score_field_names;
 	game_highlight_colors = mastermind_highlight_colors;
-	game_setinitrender = mastermind_setinitrender;
+	game_set_init_render = mastermind_set_init_render;
 	game_free = mastermind_free;
 	game_doc_about = 
 		"Mastermind\n"
@@ -216,7 +216,7 @@ void mastermind_init ()
 	// TODO: complete this
 }
 
-void mastermind_setinitrender (Pos *pos)
+void mastermind_set_init_render (Pos *pos)
 {
 	pos->render [MASTERMIND_RIGHT_ROW_START * board_wid + board_wid - 1] = RENDER_HIGHLIGHT1;
 }
@@ -255,13 +255,13 @@ int mastermind_get_cur_row (byte *board)
 	return 0;
 }
 
-void mastermind_setinitpos (Pos *pos)
+void mastermind_set_init_pos (Pos *pos)
 {
 	int i, j;
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 		pos->board [j * board_wid + i] = 
-			mastermind_initpos [(board_heit - 1 - j) * board_wid + i];
+			mastermind_init_pos [(board_heit - 1 - j) * board_wid + i];
 	for (i=MASTERMIND_MAIN_COL_START; i<=MASTERMIND_MAIN_COL_END; i++)
 		pos->board [(board_heit - 1) * board_wid + i] = 9 + random() % 6;
 }

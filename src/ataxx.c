@@ -38,7 +38,7 @@
 
 static char ataxx_colors[6] = {120, 120, 120, 200, 200, 200};
 
-static int ataxx_initpos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
+static int ataxx_init_pos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
 {
 	1 , 0 , 0 , 0 , 0 , 0 , 2 ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
@@ -53,9 +53,9 @@ void ataxx_init ();
 
 Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT, 
 	ATAXX_NUM_PIECES,
-	ataxx_colors, ataxx_initpos, NULL, "Ataxx", ataxx_init};
+	ataxx_colors, ataxx_init_pos, NULL, "Ataxx", ataxx_init};
 
-float ataxx_eval (Pos *, Player);
+ResultType ataxx_eval (Pos *, Player, float *);
 byte *ataxx_movegen (Pos *, Player);
 
 static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
@@ -147,10 +147,10 @@ float ataxx_eval_material (byte *pos)
 	return sum;	
 }
 
-float ataxx_eval (Pos *pos, Player to_play)
+ResultType ataxx_eval (Pos *pos, Player to_play, float *eval)
 {
-	return ataxx_eval_material (pos->board);
-	//return 0;
+	*eval = ataxx_eval_material (pos->board);
+	return RESULT_NOTYET;
 }
 
 byte *ataxx_movegen (Pos *pos, Player player)

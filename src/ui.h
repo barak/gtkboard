@@ -66,6 +66,6 @@ void ui_start_game ();
 void start_game_num (int);
 void ui_check_who_won ();
 void ui_cancel_move ();
-void game_setinitpos_def (Pos *);
+void game_set_init_pos_def (Pos *);
 
 #endif

@@ -126,7 +126,7 @@ Game Flw = { FLW_CELL_SIZE, FLW_BOARD_WID, FLW_BOARD_HEIT,
 static char flw_chain[FLW_LEN+1][FLW_LEN+1];
 
 
-static void flw_setinitpos (Pos *pos)
+static void flw_set_init_pos (Pos *pos)
 {
 	int i, j;
 	for (i=0; i<board_wid * board_heit; i++)
@@ -142,7 +142,7 @@ static void flw_setinitpos (Pos *pos)
 static void flw_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = flw_setinitpos;
+	game_set_init_pos = flw_set_init_pos;
 	game_draw_cell_boundaries = TRUE;
 	game_free = flw_free;
 	game_getmove = flw_getmove;
@@ -176,6 +176,39 @@ ResultType flw_who_won (Pos *pos, Player to_play, char **commp)
 	*commp = comment;
 	return RESULT_WON;
 }
+
+static int flw_get_cur_row (byte *board)
+{
+	int j;
+	for (j = board_heit - 1; j>=0 && board[j * board_wid]; j--)
+		;
+	if (j < 0) j = 0;
+	return j+1;
+}
+
+void flw_get_render (Pos *pos, byte *move, int type, int **rmovp)
+{
+	static int rmove[7];
+	int *rp = rmove;
+	int i, j;
+	int oldx = 0;
+	for (i=0; i<board_wid; i++)
+	for (j=0; j<board_heit; j++)
+		if (pos->render [j * board_wid + i] == RENDER_HIGHLIGHT1)
+		{
+			assert (rp == rmove);
+			*rp++ = i;
+			*rp++ = j;
+			*rp++ = 0;
+			oldx = i;
+		}
+	*rp++ = oldx;
+	*rp++ = flw_get_cur_row (pos->board);
+	*rp++ = RENDER_HIGHLIGHT1;
+	*rp++ = -1;
+	*rmovp = rmove;
+}
+
 
 int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp, int ** rmovep)
@@ -212,10 +245,12 @@ int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **r
 		{
 			assert (0);
 			// find the current row
-			for (j = board_heit - 1; j>=0 && pos->board[j * board_wid]; j--)
+			/*for (j = board_heit - 1; j>=0 && pos->board[j * board_wid]; j--)
 				;
 			if (j < 0) j = 0;
 			flw_cury = j+1;
+			flw_curx = 0;*/
+			flw_cury = flw_get_cur_row (pos->board);
 			flw_curx = 0;
 		}
 	}

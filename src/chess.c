@@ -54,7 +54,7 @@ char chess_colors[] =
 	{200, 200, 130, 
 	0, 140, 0};
 
-int	chess_initpos[] = 
+int	chess_init_pos[] = 
 {
 	 9 , 11, 10, 8 , 7 , 10, 11, 9  ,
 	 12, 12, 12, 12, 12, 12, 12, 12 ,
@@ -90,14 +90,14 @@ void chess_init ();
 int chess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType chess_who_won (Pos *, Player, char **);
 byte *chess_movegen (Pos *, Player );
-float chess_eval (Pos *, Player);
+ResultType chess_eval (Pos *, Player, float *);
 void *chess_newstate (Pos *, byte *);
 void chess_reset_uistate ();
 	
 Game Chess = 
 	{ CHESS_CELL_SIZE, CHESS_BOARD_WID, CHESS_BOARD_HEIT, 
 	CHESS_NUM_PIECES,
-	chess_colors, chess_initpos, chess_pixmaps, "Chess",
+	chess_colors, chess_init_pos, chess_pixmaps, "Chess",
 	chess_init};
 
 typedef struct 
@@ -673,11 +673,12 @@ float getweight (byte val)
 	}
 }
 
-float chess_eval (Pos * pos, Player player)
+ResultType chess_eval (Pos * pos, Player player, float *eval)
 {
 	float sum = 0;
 	int i;
 	for (i=0; i<board_wid * board_heit; i++)
 		sum += getweight (pos->board [i]);
-	return sum;
+	*eval = sum;
+	return RESULT_NOTYET;
 }

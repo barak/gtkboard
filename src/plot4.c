@@ -35,7 +35,7 @@
 
 char plot4_colors[6] = {160, 140, 100, 160, 140, 100};
 
-int * plot4_initpos = NULL;
+int * plot4_init_pos = NULL;
 
 #define PLOT4_WP 1
 #define PLOT4_BP 2
@@ -54,10 +54,10 @@ static int eval_runs (Pos *, int);
 static int find_runs (byte *, int, int, int , int, int, int);
 static int plot4_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType plot4_who_won (Pos *, Player , char **);
-static void plot4_setinitpos (Pos *pos);
+static void plot4_set_init_pos (Pos *pos);
 static char ** plot4_get_pixmap (int, int);
 static byte * plot4_movegen (Pos *, Player);
-static float plot4_eval (Pos *, Player);
+static ResultType plot4_eval (Pos *, Player, float *);
 
 
 static const int RUN_WT = 20;
@@ -69,7 +69,7 @@ void plot4_init ()
 	game_movegen = plot4_movegen;
 	game_getmove = plot4_getmove;
 	game_who_won = plot4_who_won;
-	game_setinitpos = plot4_setinitpos;
+	game_set_init_pos = plot4_set_init_pos;
 	game_get_pixmap = plot4_get_pixmap;
 	game_white_string = "Green";
 	game_black_string = "Yellow";
@@ -84,7 +84,7 @@ void plot4_init ()
 		"Two players alternate in placing balls of either color on a 7x6 board. Not exactly placing, because the balls have gravity and fall down to the lowest unoccupied square on the column. The goal is to get as many 4-in-a-row's as possible. A 5-in-a-row counts as two, 6 as 3, and 7 as 4.\n";
 }
 
-void plot4_setinitpos (Pos *pos)
+void plot4_set_init_pos (Pos *pos)
 {
 	int i;
 	for (i=0; i<board_wid * board_heit; i++)
@@ -156,12 +156,12 @@ int plot4_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pla
 	return 1;
 }
 
-float plot4_eval (Pos *pos, Player to_play)
+ResultType plot4_eval (Pos *pos, Player to_play, float *eval)
 	/* always eval from POV of white */
 {
 	/* TODO : add some weights */
-	float runs_val = eval_runs (pos, -1);
-	return runs_val;
+	*eval = eval_runs (pos, -1);
+	return RESULT_NOTYET;
 }
 
 

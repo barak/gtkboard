@@ -513,7 +513,7 @@ static int diffcnt (const char *w1, const char *w2, int len)
 	return cnt;
 }
 
-static void wordtris_setinitpos (Pos *pos)
+static void wordtris_set_init_pos (Pos *pos)
 {
 	int i, j;
 	const char *word;
@@ -531,7 +531,7 @@ static void wordtris_setinitpos (Pos *pos)
 	}
 }
 
-static void wordtris_setinitrender (Pos *pos)
+static void wordtris_set_init_render (Pos *pos)
 {
 	pos->render [0] = RENDER_HIGHLIGHT1;
 }
@@ -542,7 +542,7 @@ static void wordtris_init ()
 	static char emptyline[WORDTRIS_BOARD_WID * WORDTRIS_CELL_SIZE];
 	static char dottedline[WORDTRIS_BOARD_WID * WORDTRIS_CELL_SIZE];
 	game_single_player = TRUE;
-	game_setinitpos = wordtris_setinitpos;
+	game_set_init_pos = wordtris_set_init_pos;
 	game_free = wordtris_free;
 	game_getmove = wordtris_getmove;
 	game_getmove_kb = wordtris_getmove_kb;
@@ -555,7 +555,7 @@ static void wordtris_init ()
 	game_newstate = wordtris_newstate;
 	game_bg_pixmap = wordtris_getbgxpm ();
 	game_highlight_colors = wordtris_highlight_colors;
-	game_setinitrender = wordtris_setinitrender;
+	game_set_init_render = wordtris_set_init_render;
 	game_doc_about = 
 		"Wordtris\n"
 		"Single player game\n"
@@ -634,6 +634,7 @@ int wordtris_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_
 	wordtris_curx = x;
 	return 0;
 }
+
 
 gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 {

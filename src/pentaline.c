@@ -40,7 +40,7 @@
 
 char pentaline_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 
-int * pentaline_initpos = NULL;
+int * pentaline_init_pos = NULL;
 
 
 void pentaline_init ();
@@ -52,11 +52,11 @@ Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEI
 
 static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType pentaline_who_won (Pos *, Player , char **);
-static void pentaline_setinitpos (Pos *pos);
+static void pentaline_set_init_pos (Pos *pos);
 char ** pentaline_get_pixmap (int idx, int color);
-float pentaline_eval_incr (Pos *, Player, byte *);
+ResultType pentaline_eval_incr (Pos *, Player, byte *, float *);
 byte * pentaline_movegen (Pos *, Player);
-float pentaline_eval (Pos *, Player);
+ResultType pentaline_eval (Pos *, Player, float *);
 
 
 void pentaline_init ()
@@ -65,7 +65,7 @@ void pentaline_init ()
 	game_movegen = pentaline_movegen;
 	game_getmove = pentaline_getmove;
 	game_who_won = pentaline_who_won;
-	game_setinitpos = pentaline_setinitpos;
+	game_set_init_pos = pentaline_set_init_pos;
 	game_get_pixmap = pentaline_get_pixmap;
 	game_draw_cell_boundaries = TRUE;
 	game_eval_incr = pentaline_eval_incr;
@@ -82,7 +82,7 @@ void pentaline_init ()
 		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n";
 }
 
-void pentaline_setinitpos (Pos *pos)
+void pentaline_set_init_pos (Pos *pos)
 {
 	int i;
 	for (i=0; i<board_wid * board_heit; i++)
@@ -269,20 +269,22 @@ static float eval_runs (byte *board)
 	return eval + 0.1 * random() / RAND_MAX;
 }
 
-float pentaline_eval_incr (Pos *pos, Player to_play, byte *move)
+ResultType pentaline_eval_incr (Pos *pos, Player to_play, byte *move, float *eval)
 {
 	int  k;
 	int incx[4] = { 0, 1, 1, -1 };
 	int incy[4] = { 1, 0, 1,  1 };
-	float eval = 0;
+	float val = 0;
 	pos->board [move[1] * board_wid + move[0]] = move[2];
 	for (k=0; k<4; k++)
-		eval += eval_line_bidir (pos->board, move[0], move[1], incx[k], incy[k]);
+		val += eval_line_bidir (pos->board, move[0], move[1], incx[k], incy[k]);
 	pos->board [move[1] * board_wid + move[0]] = 0;
-	return eval + 0.01 * random() / RAND_MAX;
+	*eval = val + 0.01 * random() / RAND_MAX;
+	return RESULT_NOTYET;
 }
 
-float pentaline_eval (Pos *pos, Player to_play)
+ResultType pentaline_eval (Pos *pos, Player to_play, float *eval)
 {
-	return eval_runs (pos->board);
+	*eval = eval_runs (pos->board);
+	return RESULT_NOTYET;
 }

@@ -22,7 +22,6 @@ gtkboard_SOURCES = 	\
 	ab.c\
 	engine.c\
 	hash.c\
-	minimax.c\
 	move.c\
 	stack.c\
 	\
@@ -35,6 +34,7 @@ gtkboard_SOURCES = 	\
 	flw.c\
 	hiq.c\
 	infiltrate.c\
+	knights.c\
 	mastermind.c\
 	maze.c\
 	memory.c\
@@ -45,6 +45,7 @@ gtkboard_SOURCES = 	\
 	plot4.c\
 	rgb.c\
 	samegame.c\
+	stopgate.c\
 	tetris.c\
 	wordtris.c
 

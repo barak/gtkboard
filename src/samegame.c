@@ -67,7 +67,7 @@ static ResultType samegame_who_won (Pos *, Player, char **);
 
 static int anim_curx=-1, anim_cury=-1;
 
-void samegame_setinitpos (Pos *pos)
+void samegame_set_init_pos (Pos *pos)
 {
 	int i;
 	for (i=0; i<SAMEGAME_BOARD_WID * SAMEGAME_BOARD_HEIT; i++)
@@ -78,7 +78,7 @@ void samegame_init ()
 {
 	game_single_player = 1;
 	game_getmove = samegame_getmove;
-	game_setinitpos = samegame_setinitpos;
+	game_set_init_pos = samegame_set_init_pos;
 	game_get_pixmap = samegame_get_pixmap;
 	game_animate = samegame_animate;
 	game_animation_time = 80;

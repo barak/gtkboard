@@ -41,6 +41,7 @@ extern void hash_clear ();
 extern gboolean opt_verbose;
 
 	
+// This function is deprecated
 float game_ab (Pos *pos, int player, int level, 
 		float alpha, float beta, byte **ret_movep)
 	/* level is the number of ply to search */
@@ -70,7 +71,8 @@ float game_ab (Pos *pos, int player, int level,
 		free (newpos.board);
 		if (game_stateful) free (newpos.state);
 		free (movlist);
-		return game_eval (pos, to_play);
+		game_eval (pos, to_play, &val);
+		return val;
 	}
 	move = movlist;
 	do
@@ -85,7 +87,7 @@ float game_ab (Pos *pos, int player, int level,
 		if (level == 0)
 		{
 			ab_tree_exhausted = 0;
-			val = game_eval (&newpos, to_play);
+			game_eval (&newpos, to_play, &val);
 		}
 		else 
 		{
@@ -148,13 +150,14 @@ float game_ab_hash (Pos *pos, int player, int level,
 		free (newpos.board);
 		if (game_stateful) free (newpos.state);
 		free (movlist);
-		val = game_eval (pos, to_play);
+		game_eval (pos, to_play, &val);
 		hash_insert (pos->board, board_wid * board_heit, level, val);
 		return val;
 	}
 	move = movlist;
 	do
 	{
+		ResultType result = RESULT_NOTYET;
 		memcpy (newpos.board, pos->board, board_wid * board_heit);
 		if (game_stateful)
 		{
@@ -165,7 +168,7 @@ float game_ab_hash (Pos *pos, int player, int level,
 		retval = hash_get_eval (newpos.board, board_wid * board_heit,
 			   level, &cacheval);
 		if (retval && fabs (cacheval) < GAME_EVAL_INFTY) val = cacheval;
-		else val = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE);
+		else result = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE, &val);
 		if (level == 0)
 		{
 			ab_leaf_cnt ++;
@@ -175,6 +178,10 @@ float game_ab_hash (Pos *pos, int player, int level,
 		{
 			if (fabs (val) >= GAME_EVAL_INFTY)
 				val *= (1 + level);
+			else if (result == RESULT_WHITE || result == RESULT_BLACK)
+				val *= (1 + level);
+			else if (result == RESULT_TIE)
+				;
 			else
 			{
 				if (player == WHITE)
@@ -240,14 +247,16 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 		if (ret_movep && !engine_stop_search)
 			*ret_movep = NULL;
 		free (movlist);
-		val = game_eval (pos, to_play);
+		game_eval (pos, to_play, &val);
 		//hash_insert (pos->board, board_wid * board_heit, level, val);
 		return val;
 	}
 	move = movlist;
 	do
 	{
-		float neweval = 0, incr_eval = game_eval_incr (pos, to_play, move);
+		float neweval = 0, incr_eval;
+		ResultType result;
+		result = game_eval_incr (pos, to_play, move, &incr_eval);
 		neweval = eval + incr_eval;
 		
 		if (level == 0)
@@ -256,7 +265,8 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			ab_tree_exhausted = 0;
 			val = neweval;//game_eval (pos, to_play);
 		}
-		else if (fabs (incr_eval) >= GAME_EVAL_INFTY) 
+		else if (fabs (incr_eval) >= GAME_EVAL_INFTY 
+				|| result != RESULT_NOTYET)
 			// one side has won; search no more
 		{
 			ab_leaf_cnt ++;
@@ -325,14 +335,15 @@ byte * game_ab_dfid (Pos *pos, int player)
 {
 	byte *best_move;
 	int ply;
-	float val, eval = 0;
+	float val = 0, eval = 0, oldval = 0;
 	engine_stop_search = 0;
 	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
 	if (game_eval_incr)
-		eval = game_eval (pos, player);
+		game_eval (pos, player, &eval);
 	for (ply = 0; !engine_stop_search; ply++)
 	{
+		oldval = val;
 		ab_tree_exhausted = 1;
 		if (game_eval_incr)
 			val = game_ab_hash_incr (pos, player, ply, 
@@ -342,12 +353,12 @@ byte * game_ab_dfid (Pos *pos, int player)
 		if (ab_tree_exhausted)
 			break;
 	}
-	if (opt_verbose) 
-		printf ("game_ab_dfid(): leaves=%d \tply=%d\n", ab_leaf_cnt, ply);
 	hash_print_stats ();
 	hash_clear ();
 	if (opt_verbose) 
 	{ 
+		printf ("game_ab_dfid(): leaves=%d \tply=%d\teval=%.1f\n", 
+				ab_leaf_cnt, ply, oldval);
 		printf ("game_ab_dfid(): move= "); 
 		move_fwrite (best_move, stdout); 
 	}

@@ -34,7 +34,7 @@
 
 char pacman_colors[6] = {100, 150, 200, 100, 150, 200};
 
-int * pacman_initpos = NULL;
+int * pacman_init_pos = NULL;
 
 //#define PACMAN_WALL 1
 #define PACMAN_FOOD 1
@@ -134,7 +134,7 @@ Game Pacman = { PACMAN_CELL_SIZE, PACMAN_BOARD_WID, PACMAN_BOARD_HEIT,
 	pacman_colors,  NULL, NULL, "Pacman", pacman_init};
 
 
-static void pacman_setinitpos (Pos *pos);
+static void pacman_set_init_pos (Pos *pos);
 static char ** pacman_get_pixmap (int idx, int color);
 static int pacman_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move, int **);
@@ -146,7 +146,7 @@ float pacman_eval (byte *, int);
 void pacman_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = pacman_setinitpos;
+	game_set_init_pos = pacman_set_init_pos;
 	game_get_pixmap = pacman_get_pixmap;
 	game_getmove_kb = pacman_getmove_kb;
 	game_animation_time = 100;
@@ -299,7 +299,7 @@ int pacman_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int 
 	return 1;
 }
 
-void pacman_setinitpos (Pos *pos)
+void pacman_set_init_pos (Pos *pos)
 {
 	int i, j, k;
 	int incx[4] = {0, 0, 1, -1};

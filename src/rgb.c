@@ -37,7 +37,7 @@
 
 char rgb_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
 
-int * rgb_initpos = NULL;
+int * rgb_init_pos = NULL;
 
 void rgb_init ();
 
@@ -48,10 +48,10 @@ Game Rgb = { RGB_CELL_SIZE, RGB_BOARD_WID, RGB_BOARD_HEIT,
 
 static int rgb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType rgb_who_won (Pos *, Player, char **);
-static void rgb_setinitpos (Pos *pos);
+static void rgb_set_init_pos (Pos *pos);
 void rgb_init (void);
 static byte * rgb_movegen (Pos *, Player);
-static float rgb_eval (Pos *, Player);
+static ResultType rgb_eval (Pos *, Player, float *eval);
 
 static char ** rgb_get_pixmap (int idx, int color);
 
@@ -61,7 +61,7 @@ void rgb_init ()
 	game_movegen = rgb_movegen;
 	game_getmove = rgb_getmove;
 	game_who_won = rgb_who_won;
-	game_setinitpos = rgb_setinitpos;
+	game_set_init_pos = rgb_set_init_pos;
 	game_get_pixmap = rgb_get_pixmap;
 	game_draw_cell_boundaries = TRUE;
 	game_doc_about = 
@@ -75,7 +75,7 @@ void rgb_init ()
 		"Rgb, short for red-green-blue, is a harder version of tic-tac-toe. The goal is to get 3 balls in a line (row, column, or diagonal) of any one color. Clicking on an empty square puts a red ball on it, clicking on a red ball turns it green, and clicking on a green ball turns it blue.";
 }
 
-static void rgb_setinitpos (Pos *pos)
+static void rgb_set_init_pos (Pos *pos)
 {
 	int i;
 	for (i=0; i<board_wid * board_heit; i++)
@@ -128,7 +128,7 @@ static byte * rgb_movegen (Pos *pos, Player player)
 static ResultType rgb_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
-	char *who_str [] = { "white won", "black won"};
+	char *who_str [] = { "White won", "Black won"};
 	int lines[8][2] = 
 	{ 
 		{0, 1}, {3, 1}, {6, 1},
@@ -190,8 +190,7 @@ static char ** rgb_get_pixmap (int idx, int color)
 }
 
 
-static float rgb_eval (Pos *pos, Player to_play)
-	// not working properly
+static ResultType rgb_eval (Pos *pos, Player to_play, float *eval)
 {
 	int i, j;
 	int lines[8][2] = 
@@ -217,8 +216,10 @@ static float rgb_eval (Pos *pos, Player to_play)
 		}
 		if (found)
 		{
-			return (to_play == WHITE ? -2*GAME_EVAL_INFTY : 2*GAME_EVAL_INFTY);
+			*eval = (to_play == WHITE ? -2*GAME_EVAL_INFTY : 2*GAME_EVAL_INFTY);
+			return RESULT_NOTYET;
 		}
 	}
-	return 0;
+	*eval = 0;
+	return RESULT_NOTYET;
 }

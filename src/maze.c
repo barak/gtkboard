@@ -34,7 +34,7 @@
 
 char maze_colors[6] = {100, 150, 200, 100, 150, 200};
 
-int * maze_initpos = NULL;
+int * maze_init_pos = NULL;
 
 static int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
 
@@ -47,7 +47,7 @@ Game Maze = { MAZE_CELL_SIZE, MAZE_BOARD_WID, MAZE_BOARD_HEIT,
 	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", maze_init};
 
 
-static void maze_setinitpos (Pos *pos);
+static void maze_set_init_pos (Pos *pos);
 static char ** maze_get_pixmap (int idx, int color);
 static int maze_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move, int **);
@@ -56,7 +56,7 @@ ResultType maze_who_won (Pos *, Player, char **);
 void maze_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = maze_setinitpos;
+	game_set_init_pos = maze_set_init_pos;
 	game_get_pixmap = maze_get_pixmap;
 	game_getmove_kb = maze_getmove_kb;
 	game_who_won = maze_who_won;
@@ -216,7 +216,7 @@ static void mazegen ()
 	}
 }
 
-void maze_setinitpos (Pos *pos)
+void maze_set_init_pos (Pos *pos)
 {
 	int i, j, k;
 	int incx[4] = {0, 0, 1, -1};

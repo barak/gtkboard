@@ -35,14 +35,14 @@
 
 char fifteen_colors[6] = {220, 220, 220, 220, 220, 220};
 
-int * fifteen_initpos = NULL;
+int * fifteen_init_pos = NULL;
 
 void fifteen_init ();
 
 Game Fifteen = { FIFTEEN_CELL_SIZE, FIFTEEN_BOARD_WID, FIFTEEN_BOARD_HEIT, 
 	FIFTEEN_NUM_PIECES, fifteen_colors,  NULL, NULL, "Fifteen Puzzle", fifteen_init};
 
-static void fifteen_setinitpos (Pos *pos);
+static void fifteen_set_init_pos (Pos *pos);
 static char ** fifteen_get_pixmap (int idx, int color);
 static guchar * fifteen_get_rgbmap (int idx, int color);
 int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player, byte **, int **);
@@ -72,7 +72,7 @@ int fifteen_really_done (byte *board)
 void fifteen_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = fifteen_setinitpos;
+	game_set_init_pos = fifteen_set_init_pos;
 	game_get_pixmap = fifteen_get_pixmap;
 	game_get_rgbmap = fifteen_get_rgbmap;
 	game_getmove = fifteen_getmove;
@@ -146,7 +146,7 @@ int fifteen_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int
 	return -1;
 }
 
-void fifteen_setinitpos (Pos *pos)
+void fifteen_set_init_pos (Pos *pos)
 {
 	int i, j;
 	int size = board_wid * board_heit;

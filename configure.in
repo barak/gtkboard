@@ -1,7 +1,7 @@
 
 AC_INIT(src/)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gtkboard,0.10.4)
+AM_INIT_AUTOMAKE(gtkboard,0.10.5)
 AC_PROG_CC
 
 

@@ -121,7 +121,7 @@ memory42_xpm,
 
 char memory_colors[9] = {220, 220, 180, 220, 220, 180, 0, 0, 0};
 
-int * memory_initpos = NULL;
+int * memory_init_pos = NULL;
 
 void memory_init ();
 
@@ -140,7 +140,7 @@ static Memory_state state = {0, 0};
 
 static int memory_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static int memory_animate (Pos *pos, byte **movp);
-static void memory_setinitpos (Pos *pos);
+static void memory_set_init_pos (Pos *pos);
 void *memory_newstate (Pos *, byte *);
 ResultType memory_who_won (Pos *, Player, char **);
 void memory_free ();
@@ -148,7 +148,7 @@ void memory_free ();
 void memory_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = memory_setinitpos;
+	game_set_init_pos = memory_set_init_pos;
 	game_getmove = memory_getmove;
 	game_animate = memory_animate;
 	game_animation_time = 100;
@@ -253,7 +253,7 @@ int memory_animate (Pos *pos, byte **movp)
 	return 1;
 }
 
-void memory_setinitpos (Pos *pos)
+void memory_set_init_pos (Pos *pos)
 {
 	int i, j, tmp;
 	int size = board_wid * board_heit;

@@ -19,6 +19,8 @@
 #ifndef _ENGINE_H_
 #define _ENGINE_H_
 
+#include "game.h"
+
 //! A struct representing a command that the engine understands.
 typedef struct
 {
@@ -32,7 +34,7 @@ typedef struct
 
 extern Command  commands[];
 
-float engine_eval (Pos *, Player);
+ResultType engine_eval (Pos *, Player, float *);
 
 //! Functions that do the actual thinking must periodically call this function.
 /** It checks if new commands have arrived. */

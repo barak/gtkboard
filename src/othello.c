@@ -32,7 +32,7 @@
 
 char othello_colors[6] = {200, 200, 200, 140, 140, 140};
 
-int othello_initpos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] = 
+int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] = 
 {
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
@@ -52,13 +52,13 @@ int othello_initpos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] =
 int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
-float othello_eval (Pos *, Player);
+ResultType othello_eval (Pos *, Player, float *);
 byte * othello_movegen (Pos *, Player);
 char ** othello_get_pixmap (int, int);
 
 Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT, 
 	OTHELLO_NUM_PIECES, 
-	othello_colors, othello_initpos, NULL, "Othello", othello_init};
+	othello_colors, othello_init_pos, NULL, "Othello", othello_init};
 
 
 void othello_init ()
@@ -368,7 +368,8 @@ static float othello_eval_safe (Pos *pos)
 	return sum;		
 }
 
-float othello_eval (Pos *pos, Player to_play)
+ResultType othello_eval (Pos *pos, Player to_play, float *eval)
 {
-	return othello_eval_mobility (pos) + 10 * othello_eval_safe (pos);
+	*eval = othello_eval_mobility (pos) + 10 * othello_eval_safe (pos);
+	return RESULT_NOTYET;
 }

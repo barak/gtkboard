@@ -45,7 +45,7 @@ char checkers_colors[] =
 	{200, 200, 200, 
 	180, 180, 180};
 	
-int	checkers_initpos[] = 
+int	checkers_init_pos[] = 
 {
 	 0 , 4 , 0 , 4 , 0 , 4 , 0 , 4 ,
 	 4 , 0 , 4 , 0 , 4 , 0 , 4 , 0 ,
@@ -64,14 +64,14 @@ void checkers_init ();
 int checkers_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType checkers_who_won (Pos *, Player, char **);
 byte *checkers_movegen (Pos *, Player );
-float checkers_eval (Pos *, Player);
+ResultType checkers_eval (Pos *, Player, float *);
 char ** checkers_get_pixmap (int idx, int color);
 void checkers_reset_uistate ();
 	
 Game Checkers = 
 	{ CHECKERS_CELL_SIZE, CHECKERS_BOARD_WID, CHECKERS_BOARD_HEIT, 
 	CHECKERS_NUM_PIECES,
-	checkers_colors, checkers_initpos, NULL, "Checkers",
+	checkers_colors, checkers_init_pos, NULL, "Checkers",
 	checkers_init};
 
 void checkers_init ()
@@ -181,7 +181,7 @@ byte * checkers_movegen (Pos *pos, Player player)
 	return movlist;
 }
 
-float checkers_eval (Pos *pos, Player to_play)
+ResultType checkers_eval (Pos *pos, Player to_play, float *eval)
 {
 	float sum = 0;
 	int i, j;
@@ -196,7 +196,8 @@ float checkers_eval (Pos *pos, Player to_play)
 			case CHECKERS_BP: sum -= (1 + (board_heit - 1 - j) / 10.0); break;
 		}
 	}
-	return sum;
+	*eval = sum;
+	return RESULT_NOTYET;
 
 }
 

@@ -34,7 +34,7 @@
 
 char tetris_colors[6] = {50, 50, 50, 50, 50, 50};
 
-int * tetris_initpos = NULL;
+int * tetris_init_pos = NULL;
 
 void tetris_init ();
 
@@ -58,7 +58,7 @@ char *tetris_score_field_names[] = {"User", "Score", "Date", NULL};
 #define TETRIS_BRICK_MASK 15
 #define TETRIS_BRICK_MOTION_MASK 16
 
-static void tetris_setinitpos (Pos *pos);
+static void tetris_set_init_pos (Pos *pos);
 static char ** tetris_get_pixmap (int idx, int color);
 static int tetris_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move, int **);
@@ -81,7 +81,7 @@ static int anim_time_def = 0;
 void tetris_init ()
 {
 	game_single_player = TRUE;
-	game_setinitpos = tetris_setinitpos;
+	game_set_init_pos = tetris_set_init_pos;
 	game_get_pixmap = tetris_get_pixmap;
 	game_getmove_kb = tetris_getmove_kb;
 	game_animation_time = 50;
@@ -432,7 +432,7 @@ int tetris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int 
 	return 1;
 }
 
-void tetris_setinitpos (Pos *pos)
+void tetris_set_init_pos (Pos *pos)
 {
 	int i, j;
 	for (i=0; i<board_wid; i++)

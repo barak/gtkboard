@@ -457,7 +457,7 @@ void menu_load_file (GtkFileSelection *selector, gpointer user_data)
 	ui_white = ui_black = NONE;
 	menu_put_player (FALSE);
 	state_player = WHITE;
-	game_setinitpos (&cur_pos);
+	game_set_init_pos (&cur_pos);
 	board_redraw_all ();
 	sb_message ("Opened file", FALSE);
 }

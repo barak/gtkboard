@@ -116,7 +116,7 @@ typedef struct
 	char *colors;
 
 	//! The initial position
-	int * initpos;
+	int * init_pos;
 
 	//! An array of pixmaps representing the pieces
 	char *** pixmaps;
@@ -191,7 +191,7 @@ typedef struct
 //! A pointer to the game's evaluation function. 
 /** Only for two player games. It <b>must</b> be implemented if you want
   the computer to be able to play the game. */
-extern float (*game_eval) (Pos *, Player);
+extern ResultType (*game_eval) (Pos *pos, Player player, float *eval);
 
 //! A pointer to the game's incremental evaluation function. 
 /** Only for two player games. This is an advanced feature: if you feel
@@ -203,7 +203,7 @@ extern float (*game_eval) (Pos *, Player);
  premature optimization is the root of all evil, it is highly recommended
  that you get your game working and stable before you think of implementing
  this function :)*/
-extern float (*game_eval_incr) (Pos *, Player, byte *);
+extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float *eval);
 
 //! A pointer to the game's move generation function.
 /** Only for two player games. It <b>must</b> be implemented if you want
@@ -246,11 +246,11 @@ extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp, 
 extern ResultType (*game_who_won) (Pos *pos, Player player, char ** scorep);
 
 //! Pointer to function which sets the game's initial position.
-/** In some games such as maze (maze.c), the initial position is not constant but randomly generated. Such functions use game_setinitpos. The function is expected to set the value of pos->board.*/
-extern void (*game_setinitpos) (Pos *pos);
+/** In some games such as maze (maze.c), the initial position is not constant but randomly generated. Such functions use game_set_init_pos. The function is expected to set the value of pos->board.*/
+extern void (*game_set_init_pos) (Pos *pos);
 
 //! Sets the initial state of the rendering hints
-extern void (*game_setinitrender) (Pos *pos);
+extern void (*game_set_init_render) (Pos *pos);
 
 //! Returns the pixmap for a piece.
 /** In many games, the pixmaps are generated at runtime (see aaball.c). Such games use this function. The second argument color is 0 or 1 depending on whether the piece will be shown on a light square or a dark square. If your pixmap is antialiased you need this.*/
@@ -269,8 +269,8 @@ extern void * (*game_newstate) (Pos *pos, byte * move);
 //! Called at the end of every game.
 extern void (*game_free) ();
 
-//! The default value of game_setinitpos()
-//extern void game_setinitpos_def (Pos *);
+//! The default value of game_set_init_pos()
+//extern void game_set_init_pos_def (Pos *);
 
 //! This is called after each move the user completes
 /** The user may have made some clicks which do not complete a move and then
