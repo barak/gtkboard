@@ -85,14 +85,12 @@ void ataxx_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("ataxx");
 	game_doc_rules = 
-		"Ataxx rules\n"
-		"\n"
 		"  - The objective of the game is to get as many balls of your color as possible.\n"
 		"  - In each move you must click an existing ball of your color followed by an empty square.\n"
-	   "   - The new square should be at a distance of at most 2 from the first square (a diagonal counts as one unit).\n"
-	   "   - If the distance is two the first square becomes empty, but not if the distance is 1.\n"
-	   "   - In either case all balls adjacent to the new square, if they are the opponent's color, get converted to your color.\n"
-	   "   - If one player has no moves the player with more balls wins.\n";
+		"  - The new square should be at a distance of at most 2 from the first square (a diagonal counts as one unit).\n"
+		"  - If the distance is two the first square becomes empty, but not if the distance is 1.\n"
+		"  - In either case all balls adjacent to the new square, if they are the opponent's color, get converted to your color.\n"
+		"  - If one player has no moves the player with more balls wins.\n";
 }
 
 ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)

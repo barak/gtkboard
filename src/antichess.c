@@ -121,8 +121,6 @@ void antichess_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("antichess");
 	game_doc_rules = 
-		"Antichess rules\n"
-		"\n"
 		"The objective of the game is to force your opponent to capture all your pieces or to stalemate you. What makes this possible is that if you can capture, then you MUST.\n"
 		"\n"
 		"The pieces move as in chess. However:\n"
