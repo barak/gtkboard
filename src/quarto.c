@@ -80,6 +80,7 @@ void quarto_init ()
 	game_highlight_colors = quarto_highlight_colors;
 	game_reset_uistate = quarto_reset_uistate;
 	game_get_render = quarto_get_render;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Quarto\n"
 		"Two player game\n"
@@ -88,7 +89,7 @@ void quarto_init ()
 	game_doc_rules = 
 		"Quarto rules\n"
 		"\n"
-		"Get 4 in a row of any one type";
+		"Two players take turns in placing the pieces from the right side of the board to the left side. Get 4 in a line (horizontal, vertical, diagonal) of any one type -- big, small, square, circle, hole, no hole, red or blue";
 }
 
 static ResultType quarto_who_won (Pos *pos, Player player, char **commp)

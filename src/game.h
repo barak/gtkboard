@@ -330,6 +330,9 @@ extern gboolean game_allow_back_forw;
 /** Doesn't make a lot of sense for two player games. In games like maze (maze.c), the user can solve the maze without even making a move, so it would be unfair to let them look at the maze without starting the clock. */
 extern gboolean game_start_immediately;
 
+//! (Only for two player games) Is Settings->Flip Board active. For single player games it is always inactive.
+extern gboolean game_allow_flip;
+
 //! How to display names of rows and columns. This should be of type FILERANK_LABEL_TYPE, optionally ORed with FILERANK_LABEL_DESC
 extern gboolean game_file_label, game_rank_label;
 	

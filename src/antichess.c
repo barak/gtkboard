@@ -108,10 +108,11 @@ void antichess_init ()
 	game_who_won = antichess_who_won;
 	game_movegen = antichess_movegen;
 	game_eval = antichess_eval;
-	game_eval_incr = antichess_eval_incr;
+//	game_eval_incr = antichess_eval_incr;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_highlight_colors = antichess_highlight_colors;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"
@@ -242,6 +243,8 @@ int antichess_getmove (Pos *pos, int x, int y,
 	/* Translate mouse clicks into move */
 {
 	static byte move [7];
+	static int rmove [7];
+	int *rp = rmove;
 	int val;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
@@ -250,6 +253,7 @@ int antichess_getmove (Pos *pos, int x, int y,
 
 	if (oldx >= 0 && x == oldx && y == oldy)
 	{
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = -1; oldy = -1; return 0;
 	}
 	
@@ -258,6 +262,7 @@ int antichess_getmove (Pos *pos, int x, int y,
 			!((ANTICHESS_ISWHITE (val) && ANTICHESS_ISBLACK (oldval))
 			 || (ANTICHESS_ISBLACK (val) && ANTICHESS_ISWHITE (oldval))))
 	{
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = oldy = -1;
 		return -1;
 	}
@@ -298,15 +303,18 @@ int antichess_getmove (Pos *pos, int x, int y,
 		if (player == BLACK && !ANTICHESS_ISBLACK (val))
 			return -1;
 		oldx = x; oldy = y, oldval = val;
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_HIGHLIGHT1; *rp++ = -1; *rmovep = rmove;
 		return 0;
 	}
 	if (player == WHITE && ANTICHESS_ISWHITE (val))
 	{
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = -1; oldy = -1;
 		return -1;
 	}
 	if (player == BLACK && ANTICHESS_ISBLACK (val))
 	{
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = -1; oldy = -1;
 		return -1;
 	}
@@ -315,6 +323,7 @@ int antichess_getmove (Pos *pos, int x, int y,
 		// FIXME
 		//|| (can_capture (pos, player) && !oppcolor (pos, oldx, oldy, x, y)))
 	{
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = -1; oldy = -1;
 		return -1;
 	}
@@ -326,6 +335,7 @@ int antichess_getmove (Pos *pos, int x, int y,
 		prom = 1;
 		prom_oldx = oldx;
 		prom_x = x;
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 		oldx = oldy = -1;
 		return 0;
 	}
@@ -334,6 +344,7 @@ int antichess_getmove (Pos *pos, int x, int y,
 	move[3] = x; move[4] = y; move[5] = pos->board [oldy * board_wid + oldx];
 	move[6] = -1;
 
+	*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
 	oldx = -1; oldy = -1;
 	
 	if (movep)
@@ -362,7 +373,7 @@ static int hasmove (Pos *pos, int player)
 ResultType antichess_who_won (Pos *pos, Player player, char **commp)
 {
 	static char comment[32];
-	char *who_str [3] = { "white won", "black won", "draw" };
+	char *who_str [3] = { "White won", "Black won", "Draw" };
 	*commp = NULL;
 	if (hasmove (pos, player)) //return RESULT_NOTYET;
 	{
@@ -639,14 +650,25 @@ byte *antichess_movegen (Pos *pos, Player player)
 }
 
 ResultType antichess_eval (Pos * pos, Player player, float *eval)
+	// TODO: detect end of game by stalemate
 {
-	int sum = 0, i;
+	int wsum = 0, bsum = 0, i;
 	for (i=0; i < board_wid * board_heit; i++)
 		if (ANTICHESS_ISWHITE (pos->board[i]))
-			sum--;
+			wsum++;
 		else if (ANTICHESS_ISBLACK (pos->board[i]))
-			sum++;
-	*eval = sum + 0.01 * random() / RAND_MAX;
+			bsum++;
+	if (wsum == 0)
+	{
+		*eval = GAME_EVAL_INFTY;
+		return RESULT_WHITE;
+	}
+	if (bsum == 0)
+	{
+		*eval = -GAME_EVAL_INFTY;
+		return RESULT_BLACK;
+	}
+	*eval = bsum - wsum;
 	return RESULT_NOTYET;
 }
 

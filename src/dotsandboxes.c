@@ -205,6 +205,7 @@ void dnb_init ()
 	game_black_string = "Blue";
 	game_getmove = dnb_getmove;
 	game_search = dnb_search;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Dnb\n"
 		"Two player game\n"

@@ -143,6 +143,7 @@ void chess_init ()
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_reset_uistate = chess_reset_uistate;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Chess\n"
 		"Two player game\n"

@@ -76,7 +76,8 @@ static char * menu_paths_sens_no_back_forw[] =
 static char *menu_paths_sens_single_player[] =
 {
 	"/Settings/Player",
-	"/Settings/Eval function",
+	"/Settings/Flip Board",
+//	"/Settings/Eval function",
 };
 
 static char *menu_paths_sens_two_players[] =
@@ -97,7 +98,7 @@ static char *menu_paths_sens_machine_not_thinking[] =
 
 static char *menu_paths_sens_eval_function[] = 
 {
-	"/Settings/Eval function",
+//	"/Settings/Eval function",
 };
 
 void sb_set_score (gchar *score)
@@ -223,6 +224,16 @@ static void sb_set_cursor ()
 
 void menu_board_flip_cb ()
 {
+	if (game_single_player)
+	{
+		sb_error ("Can't flip board in single player game", TRUE);
+		return;
+	}
+	if (!game_allow_flip)
+	{
+		sb_error ("This game doesn't allow the board to be flipped", TRUE);
+		return;
+	}
 	state_board_flipped = state_board_flipped ? FALSE : TRUE;
 	board_redraw (NULL, NULL);
 }
@@ -376,18 +387,23 @@ void menu_start_stop_game (gpointer data, guint what)
 			ui_stopped = TRUE;
 			ui_cancel_move ();
 			sb_update();
-			if (game_single_player)
-			{
+			if (game_single_player && ui_white == HUMAN)
 				menu_show_pause_dialog ();
-			}
 			break;
 		case MENU_RESET_GAME:
+			{
+			int saved_white = ui_white;
+			int saved_black = ui_black;
 			if (!opt_game) break;
 			ui_terminate_game ();
 			ui_start_game ();
+			ui_white = saved_white;
+			ui_black = saved_black;
+			menu_put_player(FALSE);
 			sb_reset_human_time ();
 			sb_update();
 			break;
+			}
 		default:
 			printf ("menu_start_stop_game: %d\n", what);
 			assert (0);
@@ -662,6 +678,18 @@ void menu_set_game (gpointer data, guint which, GtkWidget *widget)
 }
 
 
+void menu_set_delay_cb (gpointer data, guint delay, GtkWidget *widget)
+{
+	if (!GTK_CHECK_MENU_ITEM(widget)->active)
+		return;
+	if (move_fout)
+	{
+		fprintf (move_fout, "MSEC_PER_MOVE %d\n", opt_delay = delay);
+		fflush (move_fout);
+	}
+}
+
+
 void menu_back_forw (gpointer data, guint what)
 {
 	byte *move;
@@ -726,6 +754,7 @@ void menu_back_forw (gpointer data, guint what)
 	}
 }
 
+//! This function is no longer used. Eval function should be set only from the command line.
 void menu_set_eval_function ()
 {
 	int i;
@@ -733,6 +762,7 @@ void menu_set_eval_function ()
 	GtkItemFactoryEntry heur_item;
 	static HeurTab *oldtab = NULL;
 	char *colors[2], **color, pathbuf[64];
+	return;
 	colors[0] = game_white_string;
 	colors[1] = game_black_string;
 	for (color = colors; color <= colors+1; color++)

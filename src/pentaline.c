@@ -78,6 +78,7 @@ void pentaline_init ()
 	game_stateful = TRUE;
 	game_state_size = sizeof (Pentaline_state);
 	game_newstate = pentaline_newstate;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
@@ -176,7 +177,7 @@ ResultType pentaline_who_won (Pos *pos, Player to_play, char **commp)
 			return (to_play == WHITE ? RESULT_BLACK : RESULT_WHITE);}
 	}
 	*commp = NULL;
-	{
+/*	{
 		int len, open, color;
 		for (color = 0; color < 2 && pos->state; color++)
 		{
@@ -193,6 +194,7 @@ ResultType pentaline_who_won (Pos *pos, Player to_play, char **commp)
 		}
 		printf ("\n");
 	}
+*/
 	return RESULT_NOTYET;
 }
 

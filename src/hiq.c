@@ -228,10 +228,10 @@ int hiq_getmove
 	int diffx, diffy;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
-	if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED) 
-		{ return oldx = oldy = -1; }
 	if (oldx == -1)
 	{
+		if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED) 
+			{ return oldx = oldy = -1; }
 		if (pos->board [y * board_wid + x] == HIQ_HOLE)
 			return -1;
 		oldx = x; oldy = y;
@@ -248,6 +248,8 @@ int hiq_getmove
 	rmove[2] = RENDER_NONE;
 	rmove[3] = -1;
 	*rmovep = rmove;
+	if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED) 
+		{ return oldx = oldy = -1; }
 
 	if (x == oldx && y == oldy)
 	{

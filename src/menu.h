@@ -37,6 +37,7 @@ void menu_start_stop_game (gpointer , guint );
 void menu_set_eval_function ();
 void menu_load_file_dialog ();
 void menu_save_file_dialog ();
+void menu_set_delay_cb (gpointer data, guint delay, GtkWidget *widget);
 void menu_back_forw (gpointer data, guint what);
 void menu_set_player (gpointer *, guint, GtkWidget *);
 void menu_put_player (gboolean);

@@ -27,6 +27,8 @@
 #include <assert.h>
 #include <math.h>
 
+extern int time_per_move;
+
 extern gboolean engine_stop_search;
 
 static gboolean ab_tree_exhausted = FALSE;
@@ -41,6 +43,9 @@ extern void hash_insert_move (byte *, int, int, byte *);
 extern byte * hash_get_move (byte *, int, int);
 
 extern gboolean opt_verbose;
+
+// FIXME: move this to ui.c
+gboolean game_use_hash = TRUE;
 	
 // FIXME: this function is too complicated
 float ab_with_tt (Pos *pos, int player, int level, 
@@ -66,13 +71,14 @@ float ab_with_tt (Pos *pos, int player, int level,
 	{
 		free (movlist);
 		game_eval (pos, to_play, &val);
-		hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, val, 
+		if (game_use_hash)
+			hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, val, 
 				NULL);
 		return val;
 	}
 	move = NULL;
 	orig_move = NULL;
-	if (level > 0)
+	if (game_use_hash && level > 0)
 		move = hash_get_move (pos->board, board_wid * board_heit, pos->num_moves);
 	if (!move)
 	{
@@ -94,59 +100,60 @@ float ab_with_tt (Pos *pos, int player, int level,
 	{
 		if (!orig_move || hashed_move || !movcmp_literal (orig_move, move))
 		{
-		ResultType result = RESULT_NOTYET;
-		memcpy (newpos.board, pos->board, board_wid * board_heit);
-		if (game_stateful)
-		{
-			void *newstate = game_newstate (pos, move);
-			memcpy (newpos.state, newstate, game_state_size);
-		}
-		move_apply (newpos.board, move);
-		newpos.num_moves = pos->num_moves + 1;
-		retval = hash_get_eval (newpos.board, board_wid * board_heit, pos->num_moves,
-			   level, &cacheval);
-		if (retval && fabs (cacheval) < GAME_EVAL_INFTY) val = cacheval;
-		else result = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE, &val);
-		if (level == 0)
-		{
-			ab_leaf_cnt ++;
-			ab_tree_exhausted = FALSE;
-			hash_insert (newpos.board, board_wid * board_heit, 
-					pos->num_moves, level, val, NULL);
-		}
-		else 
-		{
-			if (fabs (val) >= GAME_EVAL_INFTY)
-				val *= (1 + level);
-			else if (result == RESULT_WHITE || result == RESULT_BLACK)
-				val *= (1 + level);
-			else if (result == RESULT_TIE)
-				;
-			else
+			ResultType result = RESULT_NOTYET;
+			memcpy (newpos.board, pos->board, board_wid * board_heit);
+			if (game_stateful)
 			{
-				val = ab_with_tt (&newpos, player == WHITE ? BLACK : WHITE, 
-							level-1, alpha, beta, best_move);
+				void *newstate = game_newstate (pos, move);
+				memcpy (newpos.state, newstate, game_state_size);
 			}
-		}
-		if((player == WHITE && val > local_alpha) 
-				|| (player == BLACK && val < local_beta))
-		{
-			if (best_movep)	movcpy (best_movep, move);
-			if (player == WHITE) local_alpha = val; else local_beta = val;
-		}
+			move_apply (newpos.board, move);
+			newpos.num_moves = pos->num_moves + 1;
+			retval = 0;
+			if (game_use_hash && level > 0)
+				retval = hash_get_eval (newpos.board, board_wid * board_heit, 
+						newpos.num_moves, level-1, &cacheval);
+			if (retval && fabs (cacheval) < GAME_EVAL_INFTY) val = cacheval;
+			else result = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE, &val);
+			if (level == 0)
+			{
+				ab_leaf_cnt ++;
+				ab_tree_exhausted = FALSE;
+/*				if (game_use_hash)
+					hash_insert (newpos.board, board_wid * board_heit, 
+						pos->num_moves, level, val, NULL);
+*/
+			}
+			else 
+			{
+				if (fabs (val) >= GAME_EVAL_INFTY)
+					val *= (1 + level);
+				else if (result == RESULT_WHITE || result == RESULT_BLACK)
+					val *= (1 + level);
+				else if (result == RESULT_TIE)
+					;
+				else
+				{
+					val = ab_with_tt (&newpos, player == WHITE ? BLACK : WHITE, 
+								level-1, alpha, beta, best_move);
+				}
+			}
+			if((player == WHITE && val > local_alpha) 
+					|| (player == BLACK && val < local_beta))
+			{
+				if (best_movep)	movcpy (best_movep, move);
+				if (player == WHITE) local_alpha = val; else local_beta = val;
+			}
 
-		if((player == WHITE && val > alpha))
-			alpha = val;
-		if ((player == BLACK && val < beta))
-			beta  = val;
-		if (alpha >= beta)
-			break;
+			if((player == WHITE && val > alpha))
+				alpha = val;
+			if ((player == BLACK && val < beta))
+				beta  = val;
+			if (alpha >= beta || alpha >= GAME_EVAL_INFTY || beta <= -GAME_EVAL_INFTY)
+				break;
 		}
 		if (hashed_move)
-		{
-//			free (move);
 			move = movlist;
-		}
 		else
 			move = movlist_next (move);
 		hashed_move = FALSE;
@@ -156,12 +163,13 @@ float ab_with_tt (Pos *pos, int player, int level,
 	if (game_stateful) free (newpos.state);
 	free (movlist);
 	free (orig_move);
-	hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, 
+	if (game_use_hash)
+		hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level,
 			player == WHITE ? alpha : beta, best_movep);
 	return player == WHITE ? alpha : beta;
 }
 
-// TODO: this must be merged with the previous function
+// TODO: this is currently unused, and must be merged with the previous function 
 float ab_with_tt_incr (Pos *pos, int player, int level, 
 		float eval, float alpha, float beta, byte *best_movep)
 	/* level is the number of ply to search */
@@ -272,40 +280,75 @@ static void catch_USR1 (int sig)
 
 byte * ab_dfid (Pos *pos, int player)
 {
-	byte best_move[4096];
+	static byte best_move[4096];
 	byte local_best_move[4096];
 	int ply;
 	float val = 0, eval = 0, oldval = 0;
-	gboolean use_incr_eval = FALSE;
+	static GTimer *timer = NULL;
 	gboolean found = FALSE;
+	byte *move_list;
 	engine_stop_search = 0;
 	if (!game_movegen || !game_eval)
 		return NULL;
 	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
-	if (game_eval_incr && (!game_use_incr_eval || game_use_incr_eval (pos, player)))
-		use_incr_eval = TRUE;
-	if (use_incr_eval)
-		game_eval (pos, player, &eval);
+
+	move_list = game_movegen (pos, player);
+	if (move_list[0] == -2)
+	{
+		free (move_list);
+		if (opt_verbose) printf ("No move\n");
+		return NULL;
+	}
+	if (movlist_next (move_list)[0] == -2)
+	{
+		movcpy (best_move, move_list);
+		if (opt_verbose) printf ("Only one legal move\n");
+		return best_move;
+	}
+
+	if (!timer) timer = g_timer_new ();
+	g_timer_start (timer);
+	
 	for (ply = 0; !engine_stop_search; ply++)
 	{
 		oldval = val;
 		ab_tree_exhausted = TRUE;
-		if (use_incr_eval)
-			val = ab_with_tt_incr (pos, player, ply, 
-					eval, -1e+16, 1e+16, local_best_move);
-		else
-			val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, local_best_move);
+		val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, local_best_move);
 		if (!engine_stop_search)
 		{
 			movcpy (best_move, local_best_move);
 			found = TRUE;
 		}
+		
 		if (ab_tree_exhausted)
+		{
+			if (opt_verbose)
+				printf (" *** Searched whole tree. Moves=%d;\t Ply=%d\n",
+					pos->num_moves, ply);
+			ply++;
 			break;
+		}
+
+		{
+			gulong micro_sec;
+			float time_taken;
+			time_taken = g_timer_elapsed (timer, &micro_sec);
+			time_taken += micro_sec / 1000000.0;
+			if (time_taken * 1000 > time_per_move / 2)
+			{
+				ply++;
+				break;
+			}
+		}
 	}
-	hash_print_stats ();
-	hash_clear ();
+	
+	if (game_use_hash)
+	{
+		hash_print_stats ();
+		hash_clear ();
+	}
+	
 	if (opt_verbose) 
 	{ 
 		printf ("ab_dfid(): leaves=%d \tply=%d\teval=%.1f\n", 

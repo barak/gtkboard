@@ -23,11 +23,15 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <ctype.h>
-#include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #include <glib.h>
+
+#ifndef G_MODULE_IMPORT 
+#include <gmodule.h>		// Why isn't this included by glib.h??? 
+#endif
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
@@ -38,6 +42,9 @@
 #include "menu.h"
 #include "ui_common.h"
 #include "board.h"
+
+//! Default thinking time per move
+#define DEF_TIME_PER_MOVE 2000
 
 extern Game 
 	Othello, Samegame, Rgb, Fifteen, Memory, 
@@ -64,6 +71,8 @@ gboolean engine_flag = FALSE; // are we client or server. server will set it to 
 
 /* streams to communicate with engine */
 FILE *move_fin, *move_fout;
+
+static GIOChannel *ui_in = NULL;
 
 Pos cur_pos = {NULL, NULL, NULL, 0};
 
@@ -95,6 +104,7 @@ gboolean game_stateful = FALSE;
 gboolean state_gui_active = FALSE;
 gboolean game_draw_cell_boundaries = FALSE;
 gboolean game_start_immediately = FALSE;
+gboolean game_allow_flip = FALSE;
 gboolean game_file_label = 0,  game_rank_label = 0;
 
 char *game_highlight_colors = NULL;
@@ -111,7 +121,7 @@ char **game_bg_pixmap = NULL;
 Game *opt_game = NULL;
 FILE *opt_infile = NULL;
 FILE *opt_logfile = NULL;
-int opt_delay = 1000;
+int opt_delay = DEF_TIME_PER_MOVE;
 int opt_quiet = 0;
 int opt_white = NONE;
 int opt_black = NONE;
@@ -261,6 +271,7 @@ void reset_game_params ()
 	game_highlight_colors = game_highlight_colors_def;
 	game_draw_cell_boundaries = FALSE;
 	game_start_immediately = FALSE;
+	game_allow_flip = FALSE;
 	game_file_label = FILERANK_LABEL_TYPE_NONE;
 	game_rank_label = FILERANK_LABEL_TYPE_NONE;
 	game_score_fields = prefs_score_fields_def;
@@ -373,6 +384,8 @@ void set_game_params ()
 			// read the initial position
 			if (game_set_init_pos != game_set_init_pos_def)
 				fread (cur_pos.board, board_wid * board_heit, 1, move_fin);
+			fprintf (move_fout, "MSEC_PER_MOVE %d\n", opt_delay);
+			fflush (move_fout);
 		}
 }
 
@@ -425,8 +438,12 @@ void ui_send_make_move ()
 		fprintf (move_fout, "MAKE_MOVE \n");
 		fflush (move_fout);
 	}
-	/* this should be called even for opt_infile */
-	g_timeout_add (opt_delay, ui_get_machine_move, NULL);
+
+	if (opt_infile)
+		g_timeout_add (opt_delay, ui_get_machine_move, NULL);
+
+	else
+		g_io_add_watch (ui_in, G_IO_IN, (GIOFunc) ui_get_machine_move, NULL);
 }
 
 void ui_make_human_move (byte *move, int *rmove)
@@ -457,9 +474,6 @@ int ui_get_machine_move ()
 		return FALSE;
 	if (!opt_infile)
 	{
-		g_assert (engine_pid >= 0);
-		fprintf (move_fout, "MOVE_NOW \n");
-		fflush (move_fout);
 		move = move_fread_ack (move_fin);
 		if (!move)
 		{
@@ -486,6 +500,16 @@ int ui_get_machine_move ()
 	sb_update ();
 	ui_send_make_move ();
 	return FALSE;
+}
+
+int ui_move_now_cb ()
+{
+	if (player_to_play == HUMAN || ui_stopped)
+		return FALSE;
+	g_assert (engine_pid >= 0);
+	fprintf (move_fout, "MOVE_NOW \n");
+	fflush (move_fout);
+	ui_get_machine_move ();
 }
 
 void ui_cancel_move ()
@@ -518,6 +542,7 @@ void ui_start_player ()
 	if (opt_verbose) printf ("forked engine pid = %d\n", engine_pid);
 	move_fin = fdopen (fd[1][0], "r");
 	move_fout = fdopen (fd[0][1], "w");
+	ui_in = g_io_channel_unix_new (fd[1][0]);
 }
 
 gboolean impl_check ()
@@ -569,24 +594,26 @@ static void parse_opts (int argc, char **argv)
 				void *handle;
 				char *error;
 				Game **game;
-				handle = dlopen (optarg, RTLD_LAZY);
-				if (!handle)
+				GModule *module;
+				module = g_module_open (optarg, G_MODULE_BIND_LAZY);
+				if (!module)
 				{
 					fprintf (stderr, 
-							"Failed to load plugin from file \"%s\": %s\n",
-							optarg, dlerror ());
+							"Failed to load plugin from file \"%s\": %s\nTry specifying an absolute file name\n",
+							optarg, g_module_error ());
 					exit (1);
 				}
 
-				game = dlsym(handle, "plugin_game");
-				if ((error = dlerror()) != NULL)
+				if (!g_module_symbol (module, "plugin_game", (gpointer *) &game))
+				//if ((error = dlerror()) != NULL)
 				{
 					fprintf (stderr, 
 							"Failed to load plugin from file \"%s\": %s\n",
-							optarg, error);
+							optarg, g_module_error ());
 					exit(1);
 				}
 				//dlclose(handle);
+				printf ("Successfully loaded game %s\n", (*game)->name);
 				opt_game = *game;
 				if (opt_game->game_init)
 					opt_game->game_init();
@@ -650,7 +677,7 @@ static void parse_opts (int argc, char **argv)
 			case 'd':
 				opt_delay = atoi (optarg);
 				if (opt_delay <= 0)
-					opt_delay = 1000;
+					opt_delay = 3000;
 				break;
 			case 'q':
 				opt_quiet = 1;
@@ -677,7 +704,7 @@ static void parse_opts (int argc, char **argv)
 					   );
 				exit (0);
 			default:
-				assert (0);
+				exit (1);
 		}				
 
 	}
@@ -795,7 +822,7 @@ void gui_init ()
 		{ "/Move/_Forward", "<control>F", menu_back_forw, MENU_FORW, "" },
 		{ "/Move/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Move/_Move Now", "<control>M", 
-			(GtkItemFactoryCallback) ui_get_machine_move, 0, "" },
+			(GtkItemFactoryCallback) ui_move_now_cb, 0, "" },
 #else
 		{ "/_File", NULL, NULL, 0, "<Branch>" },
 		{ "/File/_Load game", "<control>L", menu_load_file_dialog, 0, 
@@ -824,7 +851,7 @@ void gui_init ()
 				"<StockItem>", GTK_STOCK_GO_FORWARD },
 		{ "/Move/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Move/_Move Now", "<control>M", 
-			(GtkItemFactoryCallback) ui_get_machine_move, 0, "" },
+			(GtkItemFactoryCallback) ui_move_now_cb, 0, "" },
 #endif
 		{ "/_Settings", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Player", NULL, NULL, 0, "<Branch>" },
@@ -836,10 +863,31 @@ void gui_init ()
 									"/Settings/Player/File" },
 		{ "/Settings/Player/Machine-Machine", NULL, menu_set_player, 4, 
 									"/Settings/Player/File" },
-		{ "/Settings/_Eval function", NULL, NULL, 0, "<Branch>" },
-		{ "/Settings/_Eval function/_White", NULL, NULL, 0, "<Branch>" },
-		{ "/Settings/_Eval function/_Black", NULL, NULL, 0, "<Branch>" },
+//		{ "/Settings/_Eval function", NULL, NULL, 0, "<Branch>" },
+//		{ "/Settings/_Eval function/_White", NULL, NULL, 0, "<Branch>" },
+//		{ "/Settings/_Eval function/_Black", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Flip Board", "<control>T", menu_board_flip_cb, 0, "" },
+		{ "/Settings/_Time per move", NULL, NULL, 0, "<Branch>" },
+		{ "/Settings/_Time per move/Default", NULL, 
+			menu_set_delay_cb, DEF_TIME_PER_MOVE, "<RadioItem>" },
+		{ "/Settings/_Time per move/100 milliseconds", NULL, 
+			menu_set_delay_cb, 100, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/200 milliseconds", NULL, 
+			menu_set_delay_cb, 200, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/500 milliseconds", NULL, 
+			menu_set_delay_cb, 500, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/1 second", NULL, 
+			menu_set_delay_cb, 1000, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/2 seconds", NULL, 
+			menu_set_delay_cb, 2000, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/5 seconds", NULL, 
+			menu_set_delay_cb, 5000, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/10 seconds", NULL, 
+			menu_set_delay_cb, 10000, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/30 seconds", NULL, 
+			menu_set_delay_cb, 30000, "/Settings/Time per move/Default" },
+		{ "/Settings/Time per move/1 minute", NULL, 
+			menu_set_delay_cb, 600000, "/Settings/Time per move/Default" },
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
 //		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},

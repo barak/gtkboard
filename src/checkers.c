@@ -84,6 +84,7 @@ void checkers_init ()
 	game_reset_uistate = checkers_reset_uistate;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Checkers\n"
 		"Two player game\n"

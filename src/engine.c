@@ -66,14 +66,14 @@ gboolean engine_stop_search = FALSE;
 //! Indicates whether we have to stop and return the move or stop and cancel the move
 static gboolean cancel_move = FALSE;
 
-//! This is currently unused, but will change in the future
-static int time_per_move = 1000;
+//! Max time per move. alpha-beta will often return earlier than this.
+int time_per_move = 5000;
 
 gboolean engine_hup_cb ()
 {
 	if (opt_verbose)
 		fprintf (stderr, "engine: Connection broken. Exiting.\n");
-	// FIXME: to we want to free anything here?
+	// FIXME: do we want to free anything here?
 	exit (1);
 }
 
@@ -210,7 +210,7 @@ void engine_msec_per_move (char *line)
 	if (!line) return;
 	time_per_move = atoi (line);
 	if (time_per_move < 0)
-		time_per_move = 1000;
+		time_per_move = 3000;
 }
 
 void engine_who_won (char *line)
@@ -250,6 +250,12 @@ void engine_move_now (char *line)
 	engine_stop_search = TRUE;
 }
 
+int engine_timeout_cb ()
+{
+	engine_stop_search = TRUE;
+	return FALSE;
+}
+
 void engine_cancel_move (char *line)
 {
 	engine_stop_search = TRUE;
@@ -260,7 +266,7 @@ void engine_cancel_move (char *line)
 //! This structure defines the protocol
 Command commands[] = 
 {
-	{ "MSEC_PER_MOVE "  , 1 , engine_msec_per_move},
+	{ "MSEC_PER_MOVE"  , 1 , engine_msec_per_move},
 	{ "SUGGEST_MOVE"    , 0 , NULL},
 	{ "TAKE_MOVE"       , 1 , engine_take_move},
 	{ "BACK_MOVE"       , 1 , engine_back_move},
@@ -390,21 +396,18 @@ void engine_main (int infd, int outfd)
 
 byte * engine_search (Pos *pos, int player)
 {
+	int tag;
 	byte *move;
 	engine_stop_search = FALSE;
 	if (game_search)
-	{
 		game_search (pos, player, &move);
-		return move;
-	}
-	if (game_single_player)
-		return NULL;
-	move = ab_dfid (pos, player);
-	// FIXME: very ugly hack because we aren't allowed to write our move before receiving MOVE_NOW or CANCEL_MOVE even if we've finished thinking. In the future the protocol will change so that the engine can write the move whenever it wants to.
-	while (!engine_stop_search) 
+	else if (game_single_player)
+		move = NULL;
+	else
 	{
-		g_main_iteration (FALSE);
-		usleep (20000);
+		tag = g_timeout_add (2 * time_per_move, engine_timeout_cb, NULL);
+		move = ab_dfid (pos, player);
+		g_source_remove (tag);
 	}
 	return move;
 }

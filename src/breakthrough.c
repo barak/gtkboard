@@ -80,6 +80,7 @@ void breakthrough_init ()
 	game_movegen = breakthrough_movegen;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Breakthrough\n"
 		"Two player game\n"

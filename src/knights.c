@@ -303,6 +303,8 @@ static ResultType knights_eval_real (Pos *pos, Player player, float *eval, gbool
 {
 	int i, j, k;
 	int wcnt = 0, bcnt = 0;
+	static int disconn_cnt [2 * KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT] = {0};
+	static int total_cnt [2 * KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT] = {0};
 
 	if (pos->state && ((Knights_state *)pos->state)->num_pauses >= 2)
 	{
@@ -313,6 +315,8 @@ static ResultType knights_eval_real (Pos *pos, Player player, float *eval, gbool
 	if (!strict && eval_disconnected (pos->board))
 	{
 		int wlen = 0, blen = 0;
+		disconn_cnt [pos->num_moves]++;
+		total_cnt[pos->num_moves]++;
 		wlen = eval_max_path_len (pos->board, WHITE);
 		blen = eval_max_path_len (pos->board, BLACK);
 		*eval = 2 * (wlen - blen) + (player == WHITE ? -1 : 1);
@@ -320,6 +324,9 @@ static ResultType knights_eval_real (Pos *pos, Player player, float *eval, gbool
 		else if (wlen < blen) return RESULT_BLACK;
 		else return player == WHITE ? RESULT_BLACK : RESULT_WHITE;
 	}
+
+	total_cnt[pos->num_moves]++;
+//	if (total_cnt[pos->num_moves] % 10000 == 0) printf ("Ply: %d;\t total: %d;\t disc: %d\n", pos->num_moves, total_cnt[pos->num_moves], disconn_cnt[pos->num_moves]);
 
 	get_cur_pos (pos->board, WHITE, &i, &j);
 	for (k=0; k<8; k++)
@@ -342,11 +349,13 @@ static ResultType knights_eval_real (Pos *pos, Player player, float *eval, gbool
 	if (player == WHITE && wcnt == 0)
 	{
 		if (bcnt == 0) *eval -= 1;
+		*eval *= GAME_EVAL_INFTY;
 		return RESULT_BLACK;
 	}
 	if (player == BLACK && bcnt == 0)
 	{
 		if (wcnt == 0) *eval += 1;
+		*eval *= GAME_EVAL_INFTY;
 		return RESULT_WHITE;
 	}
 	return RESULT_NOTYET;

@@ -34,7 +34,7 @@
 #define ATAXX_WP 1
 #define ATAXX_BP 2
 
-#define ATAXX_MOVEGEN_PLAUSIBLE 0
+#define ATAXX_MOVEGEN_PLAUSIBLE 1
 
 static char ataxx_colors[6] = {140, 160, 140, 200, 200, 200};
 
@@ -78,6 +78,7 @@ void ataxx_init ()
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_reset_uistate = ataxx_reset_uistate;
+	game_allow_flip = TRUE;
 	game_doc_about = 
 		"Ataxx\n"
 		"Two player game\n"
@@ -136,20 +137,19 @@ ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
 }
 
 
-float ataxx_eval_material (byte *pos)
-{
-	int i, sum = 0;
-	for (i=0; i<board_wid * board_heit; i++)
-		if (pos[i] == ATAXX_WP)
-			sum++;
-		else if (pos[i] == ATAXX_BP)
-			sum--;
-	return sum;	
-}
-
 ResultType ataxx_eval (Pos *pos, Player to_play, float *eval)
 {
-	*eval = ataxx_eval_material (pos->board);
+	int i;
+	int wcount, bcount;
+	for (i=0, wcount=0, bcount=0; i<board_wid*board_heit; i++)
+	{
+		if (pos->board[i] == ATAXX_WP) wcount++;
+		if (pos->board[i] == ATAXX_BP) bcount++;
+	}
+	*eval = wcount-bcount;
+	if (!wcount || !bcount) *eval *= GAME_EVAL_INFTY;
+	if (!wcount) return RESULT_BLACK;
+	if (!bcount) return RESULT_WHITE;
 	return RESULT_NOTYET;
 }
 
@@ -347,13 +347,16 @@ int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pla
 		return 0;
 	}
 
-	if (x == oldx && y == oldy)
-	{
-		oldx = -1; oldy = -1; return 0;
+	if (x == oldx && y == oldy) 
+	{ 
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
+		oldx = -1; oldy = -1; return 0; 
+	} 
+	if (pos->board [y * board_wid + x] != ATAXX_EMPTY) 
+	{ 
+		*rp++ = oldx; *rp++ = oldy; *rp++ = RENDER_NONE; *rp++ = -1; *rmovep = rmove;
+		return oldx = oldy = -1; 
 	}
-	
-	if (x == oldx && y == oldy) { oldx = -1; oldy = -1; return 0; } 
-	if (pos->board [y * board_wid + x] != ATAXX_EMPTY) { return oldx = oldy = -1; }
 	diffx = abs (x - oldx); diffy = abs (y - oldy);
 	if (diffx > 2 || diffy > 2) { return oldx = oldy = -1; }
 	if (diffx > 1 || diffy > 1)

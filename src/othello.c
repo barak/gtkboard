@@ -337,7 +337,7 @@ static float othello_eval_liberty (Pos *pos)
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{
-		if (pos->board [j * board_wid + i] == OTHELLO_EMPTY)
+		if (pos->board [j * board_wid + i] != OTHELLO_EMPTY)
 			continue;
 		for (k=0; k<8; k++)
 		{
@@ -396,6 +396,11 @@ static int othello_eval_is_safe (Pos *pos, int x, int y, byte our)
 static float othello_eval_safe (Pos *pos)
 {
 	int i, x, y, sum=0;
+	if (pos->board [0 * board_wid + 0] == OTHELLO_EMPTY &&
+		pos->board [0 * board_wid + 7] == OTHELLO_EMPTY &&
+		pos->board [7 * board_wid + 0] == OTHELLO_EMPTY &&
+		pos->board [7 * board_wid + 7] == OTHELLO_EMPTY )
+		return 0;
 	safe_cached = (byte *) malloc (board_wid * board_heit);
 	assert (safe_cached);
 	for (i=0; i<board_wid * board_heit; i++)
@@ -480,15 +485,27 @@ static float othello_eval_weights (Pos *pos)
 
 ResultType othello_eval (Pos *pos, Player player, float *eval)
 {
+	int i;
+	gboolean found;
 	assert (board_wid == 8 && board_heit == 8);
-/*	if (pos->num_moves > 50)
+
+	if (pos->num_moves >= 64)
 	{
-		*eval = othello_eval_material (pos);
-		return RESULT_NOTYET;
+		for (i=0, found=FALSE; i<board_wid*board_heit; i++)
+			if (pos->board [i] == OTHELLO_EMPTY) {found = TRUE; break;}
+		if (!found)
+		{
+			*eval = othello_eval_material (pos);
+			*eval *= GAME_EVAL_INFTY;
+			if (*eval > 0) return RESULT_WHITE;
+			if (*eval < 0) return RESULT_BLACK;
+			return RESULT_NOTYET;
+		}
 	}
-*/
+
 	*eval = 
 		10 * othello_eval_liberty (pos) 
+		//10 * othello_eval_mobility (pos) 
 		+ 100 * othello_eval_safe (pos) 
 		+ othello_eval_weights (pos);
 	return RESULT_NOTYET;
