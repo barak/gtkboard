@@ -97,7 +97,7 @@ Getting the latest source release from the file releases page is usually OK.
 <li/>
 Think about what game you want to implement and decide basic things like will it be a single or a two player game, the dimensions and colors of the board, etc.
 <li/>
-Read the <a href="../doxygen/game_h.html">game.h documentation</a>. <i>This is very important</i>. All the details might need to know are in that file. You need to create a <tt>Game</tt> struct for your game before you can compile your game. 
+Read the <a href="http://gtkboard.sourceforge.net/doc/doxygen/game_h.html">game.h documentation</a>. <i>This is very important</i>. All the details might need to know are in that file. You need to create a <tt>Game</tt> struct for your game before you can compile your game. 
 <li/>
 <ul>
 <li/>
@@ -110,7 +110,7 @@ Edit the file "ui.c" and add your game to the list of games (the <tt>Game *games
 <li/>You are now ready to compile your game! In the root directory of the source invoke automake and then make. 
 <li/>Now run gtkboard. Your game should appear in the "Game-&gt;Select game" menu. 
 When you choose it you will see the initial board position that you specified. However, you can not do anything yet. If you try to make a move a dialog will pop up saying "Not yet implemented."
-<li/>Your next job is to write a function that will take user input and return a move. Moves are represented in a standard format for all games. See the <a href="../doxygen/move_h.html">move.h documentation</a> for a description of this format. You should also see the source of some other game to get a feel for the code. The function you will need to implement is <tt>game_getmove()</tt>. After writing the function remember to add a function pointer to this function in your <tt>game_init()</tt> function.
+<li/>Your next job is to write a function that will take user input and return a move. Moves are represented in a standard format for all games. See the <a href="http://gtkboard.sourceforge.net/doc/doxygen/move_h.html">move.h documentation</a> for a description of this format. You should also see the source of some other game to get a feel for the code. The function you will need to implement is <tt>game_getmove()</tt>. After writing the function remember to add a function pointer to this function in your <tt>game_init()</tt> function.
 <li/>If your game is a single player game you are nearly done. The user will be able to play your game, the only thing missing is that there is no notification of when the game is over. Skip the next step. In two player games, at this stage two humans can play the game against each other but not human vs. machine. Read the next step.
 <li/>(Only for two player games.) You need to implement two functions, <tt>game_movegen()</tt> and <tt>game_eval()</tt>. The first function generates a list of legal moves in a given position and the second associates a "goodness" value to a given position. This is used by the AI in deciding which move to make, in conjuction with the alpha-beta search strategy and transposition tables. Writing these functions (movegen and eval) is probably the most time consuming part.
 <li/>Next you have to write a function to determine whether the game is over. This
@@ -130,7 +130,7 @@ Write code for gtkboard. Good at AI, search trees and the like? You could work o
 <li/>
 Write a <a href="#newgame">new game</a>. You've always wanted to write a game, didn't you? You don't get a better opportunity than this! The mundane part is already taken care of, you just have to worry about the rules and strategy of the game you want to implement.
 <li/>
-Describe a game: If the rules and strategy (i.e, evaluation function) of a game are described precisely, it usually takes only an hour to code it up :) Therefore if there's a game you're good at that's not been implemented, please please consider visiting the <a href="TODO: insert link here">forum</a> and describing the game.
+Describe a game: If the rules and strategy (i.e, evaluation function) of a game are described precisely, it usually takes only an hour to code it up :) Therefore if there's a game you're good at that's not been implemented, please please consider visiting the <a href="http://sourceforge.net/forum/forum.php?thread_id=900029&forum_id=285669">forum</a> and describing the game.
 <li/>
 Write documentation. End-user documentation, that is. The rules haven't been documented for several games yet. If you are good at some game, please consider writing a strategy document for the game.
 <li/>

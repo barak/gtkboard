@@ -62,8 +62,9 @@ getmove and are therefore a problem.
 * 2 problems in samegame: anim not starting immediately; continues even after cursor leaves board
 * implement desens+resens with a single call -- fixed
 * globally change score to 64 chars
-* file input is freezing :(
+* file input is freezing :( -- dixed
 * FIXED both the inefficiency and the memory leak in samegame
 * call sb_update synchronously; move the 3 sec code alone to a new fn which called every 100ms -- fixed
 * tetris -- implement next tile, game over detection not working correctly
 * implement shadow in balls
+add version number to highscores file

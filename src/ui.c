@@ -1,3 +1,21 @@
+/*  This file is a part of gtkboard, a board games system.
+    Copyright (C) 2003, Arvind Narayanan <arvindn@users.sourceforge.net>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA
+
+*/
 #include <time.h>
 #include <assert.h>
 #include <unistd.h>
@@ -151,7 +169,7 @@ int ui_animate_cb ()
 	return TRUE;
 }
 
-// Will be called on both client and server 
+// Will be called on both ui and engine
 void game_setinitpos_def (Pos *pos)
 {
 	int x, y;
@@ -163,7 +181,7 @@ void game_setinitpos_def (Pos *pos)
 }
 
 
-// Will be called on both client and server 
+// Will be called on both ui and engine
 void reset_game_params ()
 {
 	if (game_free) game_free ();
@@ -262,9 +280,9 @@ void ui_start_game ()
 }
 
 
+//! game specific initialization
 // FIXME: fork this into 2 functions for client and server
 void set_game_params ()
-	/* game specific initialization */
 {
 	Game *game = opt_game;
 	if (!game) return;
@@ -274,7 +292,8 @@ void set_game_params ()
 	cur_pos.board = (char *) malloc (board_wid * board_heit);
 	assert (cur_pos.board);
 
-	if (engine_flag) // server always executes this
+	if (engine_flag) 
+		// server always executes this
 		game_setinitpos (&cur_pos);
 	else if (game_setinitpos == game_setinitpos_def) 
 		// client executes only if it is the default
@@ -372,7 +391,6 @@ int ui_get_machine_move ()
 	if (!opt_infile)
 	{
 		g_assert (engine_pid >= 0);
-		//kill (engine_pid, SIGUSR1);
 		fprintf (move_fout, "MOVE_NOW \n");
 		fflush (move_fout);
 		move = move_fread_ack (move_fin);

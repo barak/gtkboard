@@ -1,5 +1,5 @@
 %define name	gtkboard
-%define ver	0.9.2
+%define ver	0.9.3
 %define rel	1
 
 Summary: Board games suite
@@ -8,7 +8,8 @@ Version: %ver
 Release: %rel
 Copyright: GPL
 Group: Games
-Source: http://idunno.whatever.org/gtkboard-0.9.2.tar.gz
+URL: http://gtkboard.sourceforge.net/
+Source: %{name}-%{version}.tar.gz
 BuildRoot: /tmp/%{name}-root
 Docdir: /usr/local/doc
 

@@ -6,7 +6,7 @@
 <body>
 <h1 align="center">Gtkboard documentation</h1>
   <font size="-1"> 
-<p align="center"> This is the end user documentation for gtkboard version 0.10.0. If you are interested in hacking gtkboard or writing a new game for gtkboard you can also read the <a href="file:///home/arvindn/projects/gtkboard/gtkboard/doc/devel/">
+<p align="center"> This is the end user documentation for gtkboard version 0.10.0. If you are interested in hacking gtkboard or writing a new game for gtkboard you can also read the <a href="devel/">
 developer documentation</a>. </p>
  
 <p align="center"> Please note that a stable version of gtkboard has not been released yet. 0.10.0 is a developer release and hence this documentation is necessarily incomplete. </p>
@@ -15,7 +15,8 @@ developer documentation</a>. </p>
  
 <p> 
 You can download the source tarball or the source or
-binary (i386) rpm from the <a href="TODO: insert link here">download page</a>.
+binary (i386) rpm from the 
+<a href="http://sourceforge.net/project/showfiles.php?group_id=83635">download page</a>.
 To install from the sources, do the usual 
 <br/>
 <tt>
@@ -100,5 +101,25 @@ Light blue: In two player games with... well you get the idea.
 <li/>
 Grey: No game is selected, or the game is a saved game being replayed.
 </ul>
+
+<h2>Command line options</h2>
+There are a few command line options. You should know about them because
+there are certain things (like setting the time per move) that can 
+currently be done only through  command line options and not through the
+GUI. The output of <tt>gtkboard -h<tt> is shown below:
+<pre>
+Usage: gtkboard 	[-qvh] [-g game] [-f file] [-l logfile] [-d msec]
+			[-p XX] [-w wheur -b bheur] 
+	-g	name of the game
+	-f	file to load game from
+	-l	log file to record game
+	-q	don't show board
+	-d	delay in milliseconds
+	-p	human or machine players. Each X must be 'h' or 'm'
+	-w	name of heuristic function for white
+	-b	name of heuristic function for black
+	-v	be verbose
+	-h	print this help
+</pre>
 </body>
 </html>
