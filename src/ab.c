@@ -120,7 +120,7 @@ float game_ab (Pos *pos, int player, int level,
 }
 
 	
-float game_ab_hash (Pos *pos, int player, int level, 
+float ab_with_tt (Pos *pos, int player, int level, 
 		float alpha, float beta, byte **ret_movep, int depth)
 	/* level is the number of ply to search */
 {
@@ -192,10 +192,10 @@ float game_ab_hash (Pos *pos, int player, int level,
 			else
 			{
 				if (player == WHITE)
-					val = game_ab_hash 
+					val = ab_with_tt 
 						(&newpos, BLACK, level-1, alpha, beta, NULL, depth+1);
 				else
-					val = game_ab_hash 
+					val = ab_with_tt 
 						(&newpos, WHITE, level-1, alpha, beta, NULL, depth+1);
 				hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
 			}
@@ -224,12 +224,12 @@ float game_ab_hash (Pos *pos, int player, int level,
 	if (game_stateful) free (newpos.state);
 	free (movlist);
 /*	if (depth == 0) 
-		printf ("game_ab_hash: eval = %f\n", player == WHITE ? alpha : beta);
+		printf ("ab_with_tt: eval = %f\n", player == WHITE ? alpha : beta);
 */
 	return player == WHITE ? alpha : beta;
 }
 
-float game_ab_hash_incr (Pos *pos, int player, int level, 
+float ab_with_tt_incr (Pos *pos, int player, int level, 
 		float eval, float alpha, float beta, byte **ret_movep, int depth)
 	/* level is the number of ply to search */
 {
@@ -302,7 +302,7 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 					{ val = cacheval; found = 1; }
 			}
 			if (!found)
-				val = game_ab_hash_incr
+				val = ab_with_tt_incr
 					(pos, player == WHITE ? BLACK : WHITE, 
 						level-1, neweval, alpha, beta, NULL, depth+1);
 			if (level >= 1)
@@ -345,13 +345,15 @@ static void catch_USR1 (int sig)
 	signal (SIGUSR1, catch_USR1);
 }
 
-byte * game_ab_dfid (Pos *pos, int player)
+byte * ab_dfid (Pos *pos, int player)
 {
 	byte *best_move;
 	int ply;
 	float val = 0, eval = 0, oldval = 0;
 	gboolean use_incr_eval = FALSE;
 	engine_stop_search = 0;
+	if (!game_movegen || !game_eval)
+		return NULL;
 	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
 	if (game_eval_incr && (!game_use_incr_eval || game_use_incr_eval (pos, player)))
@@ -363,10 +365,10 @@ byte * game_ab_dfid (Pos *pos, int player)
 		oldval = val;
 		ab_tree_exhausted = 1;
 		if (use_incr_eval)
-			val = game_ab_hash_incr (pos, player, ply, 
+			val = ab_with_tt_incr (pos, player, ply, 
 					eval, -1e+16, 1e+16, &best_move, 0);
 		else
-			val = game_ab_hash (pos, player, ply, -1e+16, 1e+16, &best_move, 0);
+			val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, &best_move, 0);
 		if (ab_tree_exhausted)
 			break;
 	}
@@ -374,9 +376,9 @@ byte * game_ab_dfid (Pos *pos, int player)
 	hash_clear ();
 	if (opt_verbose) 
 	{ 
-		printf ("game_ab_dfid(): leaves=%d \tply=%d\teval=%.1f\n", 
+		printf ("ab_dfid(): leaves=%d \tply=%d\teval=%.1f\n", 
 				ab_leaf_cnt, ply, oldval);
-		printf ("game_ab_dfid(): move= "); 
+		printf ("ab_dfid(): move= "); 
 		move_fwrite (best_move, stdout); 
 	}
 	return best_move;

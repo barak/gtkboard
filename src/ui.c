@@ -45,13 +45,13 @@ extern Game
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
 	Ninemm, Stopgate, Knights, Breakthrough, 
-	CapturePento, Towers, Quarto, Kttour, Eightqueens
+	CapturePento, Towers, Quarto, Kttour, Eightqueens, Dnb
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Antichess, &Ataxx, &Breakthrough, &Checkers, &Chess, &CapturePento, 
-	&Eightqueens, &Fifteen, &Flw, &Hiq, &Hypermaze, &Infiltrate, 
+	&Dnb, &Eightqueens, &Fifteen, &Flw, &Hiq, &Hypermaze, &Infiltrate, 
 	&Knights, &Kttour, &Mastermind, &Maze, &Memory, &Ninemm, &Othello, 
 	&Pacman, &Pentaline, &Plot4, &Quarto,
 	&Rgb, &Samegame, &Stopgate, &Tetris, &Towers, &Wordtris};
@@ -133,6 +133,7 @@ ResultType (*game_eval_incr) (Pos *, Player, byte *, float *) = NULL;
 gboolean (*game_use_incr_eval) (Pos *, Player) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
+void (*game_search) (Pos *, Player player, byte **) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
 int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
 int (*game_getmove_kb) (Pos *, int, Player, byte **, int **) = NULL;
@@ -228,6 +229,7 @@ void reset_game_params ()
 	game_use_incr_eval = NULL;
 	game_eval_white = NULL;
 	game_eval_black = NULL;
+	game_search = NULL;
 	game_movegen = NULL;
 	game_getmove = NULL;
 	game_getmove_kb = NULL;
@@ -457,7 +459,13 @@ int ui_get_machine_move ()
 		fprintf (move_fout, "MOVE_NOW \n");
 		fflush (move_fout);
 		move = move_fread_ack (move_fin);
-		g_assert (move);
+		if (!move)
+		{
+			sb_error ("Couldn't make move\n", TRUE);
+			ui_stopped = TRUE;
+			sb_update ();
+			return FALSE;
+		}
 		if (opt_logfile)
 			move_fwrite (move, opt_logfile);
 	}
@@ -469,7 +477,8 @@ int ui_get_machine_move ()
 			move_fwrite (move, opt_logfile);
 	}
 	board_apply_refresh (move, NULL);
-	state_player = (state_player == WHITE ? BLACK : WHITE);
+	if (!game_single_player)
+		state_player = (state_player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
 	ui_check_who_won ();
 	sb_update ();
@@ -516,7 +525,7 @@ gboolean impl_check ()
 	{
 		if (!game_single_player)
 		if ((ui_white == MACHINE || ui_black == MACHINE)
-				&& (!game_movegen || !game_eval))
+				&& (!game_movegen || !game_eval) && !game_search)
 			return FALSE;
 		if ((ui_white == HUMAN || ui_black == HUMAN)
 				&& !game_getmove && !game_getmove_kb)
@@ -741,11 +750,12 @@ static void parse_opts (int argc, char **argv)
 		game_eval = engine_eval;
 	}
 
-	if (game_single_player)
+/*	if (game_single_player)
 	{
 		opt_white = HUMAN;
 		opt_black = HUMAN;
 	}
+*/
 	else if (!opt_infile)
 	{
 		// default is human vs. machine

@@ -215,6 +215,9 @@ extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float 
 //! Should we use the incr eval function
 extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
 
+//! A function to search and return the best move - for games for which minimax is not appropriate
+extern void (*game_search) (Pos *pos, Player player, byte **move);
+
 //! A pointer to the game's move generation function.
 /** Only for two player games. It <b>must</b> be implemented if you want
   the computer to be able to play the game. 

@@ -41,7 +41,7 @@ extern Pos cur_pos;
 
 extern Game *opt_game, *games[];
 extern int num_games;
-byte * game_search (Pos *, int);
+byte * engine_search (Pos *, int);
 static FILE *engine_fin, *engine_fout;
 
 //! Eval fn for white (can be NULL, in which case game_eval will be used for both)
@@ -58,7 +58,7 @@ extern void game_set_init_pos_def (Pos *);
 extern byte *game_minimax_dfid (Pos *, int);
 
 //! Alpha-beta search function (using depth first iterative deepening).
-extern byte *game_ab_dfid (Pos *, int);
+extern byte *ab_dfid (Pos *, int);
 
 //! The input pipe is accessed through a GIOChannel so that we can register a callback for events
 static GIOChannel *channel_in = NULL;
@@ -117,9 +117,14 @@ void engine_make_move ()
 	byte *move;
 	movstack_trunc ();
 	cancel_move = FALSE;
-	move = game_search (&cur_pos, state_player);
+	move = engine_search (&cur_pos, state_player);
 	if (cancel_move)
 		return;
+	if (!move)
+	{
+		move_fwrite_nak ("Nice try", engine_fout);
+		return;
+	}
 	movstack_push (cur_pos.board, move);
 	if (game_stateful)
 	{
@@ -386,11 +391,16 @@ void engine_main (int infd, int outfd)
 	g_main_run (loop);
 }
 
-byte * game_search (Pos *pos, int player)
+byte * engine_search (Pos *pos, int player)
 {
 	byte *move;
 	engine_stop_search = FALSE;
-	move = game_ab_dfid (pos, player);
+	if (game_search)
+		game_search (pos, player, &move);
+	return move;
+	if (game_single_player)
+		return NULL;
+	move = ab_dfid (pos, player);
 	// FIXME: very ugly hack because we aren't allowed to write our move before receiving MOVE_NOW or CANCEL_MOVE even if we've finished thinking. In the future the protocol will change so that the engine can write the move whenever it wants to.
 	while (!engine_stop_search) 
 	{

@@ -38,7 +38,7 @@
 #define PENTALINE_BP 2
 #define PENTALINE_EMPTY 0
 
-char pentaline_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+char pentaline_colors[9] = {200, 220, 200, 200, 220, 200, 0, 0, 0};
 
 
 void pentaline_init ();
@@ -51,7 +51,7 @@ Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEI
 static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType pentaline_who_won (Pos *, Player , char **);
 static void pentaline_set_init_pos (Pos *pos);
-char ** pentaline_get_pixmap (int idx, int color);
+unsigned char * pentaline_get_rgbmap (int idx, int color);
 ResultType pentaline_eval_incr (Pos *, Player, byte *, float *);
 byte * pentaline_movegen (Pos *, Player);
 ResultType pentaline_eval (Pos *, Player, float *);
@@ -63,7 +63,7 @@ void pentaline_init ()
 	game_movegen = pentaline_movegen;
 	game_getmove = pentaline_getmove;
 	game_who_won = pentaline_who_won;
-	game_get_pixmap = pentaline_get_pixmap;
+	game_get_rgbmap = pentaline_get_rgbmap;
 	game_draw_cell_boundaries = TRUE;
 	game_eval_incr = pentaline_eval_incr;
 	game_white_string = "Red";
@@ -185,18 +185,18 @@ int pentaline_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to
 	return 1;
 }
 
-char ** pentaline_get_pixmap (int idx, int color)
+unsigned char * pentaline_get_rgbmap (int idx, int color)
 {
-	int fg = 0, bg, i;
+	int fg, bg, i;
 	char *colors;
-	static char pixbuf[PENTALINE_CELL_SIZE*(PENTALINE_CELL_SIZE+1)];
+	static char rgbbuf[3 * PENTALINE_CELL_SIZE * PENTALINE_CELL_SIZE];
 	colors = pentaline_colors;
-	if (idx == PENTALINE_RP) fg = 255 << 16;
-	else if (idx == PENTALINE_BP) fg = 255;
-	else { return NULL;}
+	fg = (idx == PENTALINE_RP ? 0xee << 16 : 0xee);
+	if (color == BLACK) colors += 3;
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
-	return pixmap_ball_gen(PENTALINE_CELL_SIZE, pixbuf, fg, bg, 13.0, 30.0);
+	rgbmap_ball_shadow_gen(PENTALINE_CELL_SIZE, rgbbuf, fg, bg, 13.0, 30.0, 2);
+	return rgbbuf;
 }
 
 static float eval_line (byte *board, int x, int y, int incx, int incy)

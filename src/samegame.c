@@ -33,6 +33,7 @@
 #define SAMEGAME_BOARD_WID 15
 #define SAMEGAME_BOARD_HEIT 10
 
+#define SAMEGAME_EMPTY 0
 #define SAMEGAME_RP 1
 #define SAMEGAME_BP 2
 #define SAMEGAME_GP 3
@@ -64,6 +65,7 @@ static int samegame_getmove (Pos *, int, int, GtkboardEventType, Player, byte **
 static char **samegame_get_pixmap (int , int);
 static void *samegame_newstate (Pos *, byte *);
 static ResultType samegame_who_won (Pos *, Player, char **);
+static void samegame_search (Pos *pos, Player player, byte **movp);
 
 static int anim_curx=-1, anim_cury=-1;
 
@@ -80,6 +82,7 @@ void samegame_init ()
 	game_getmove = samegame_getmove;
 	game_set_init_pos = samegame_set_init_pos;
 	game_get_pixmap = samegame_get_pixmap;
+	game_search = samegame_search;
 	game_animate = samegame_animate;
 	game_animation_time = 80;
 	game_animation_use_movstack = FALSE;
@@ -231,22 +234,9 @@ int samegame_animate (Pos *pos, byte **movp)
 	return 1;
 }
 
-int samegame_getmove 
-	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
+static int getmove_real (Pos *pos, int x, int y, byte **movp)
 {
 	byte *newboard, val;
-	if (type == GTKBOARD_MOTION_NOTIFY)
-	{
-		anim_curx = x;
-		anim_cury = y;
-	}
-	if (type == GTKBOARD_LEAVE_NOTIFY)
-	{
-		anim_curx = -1;
-		anim_cury = -1;
-	}
-	if (type != GTKBOARD_BUTTON_RELEASE)
-		return 0;
 	if ((val = pos->board[y * board_wid + x]) == 0)	
 		return -1;
 	/* do we have at least 1 neighbor */
@@ -273,6 +263,25 @@ int samegame_getmove
 	free (newboard);
 	
 	return 1;
+}
+
+int samegame_getmove 
+	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
+{
+	if (type == GTKBOARD_MOTION_NOTIFY)
+	{
+		anim_curx = x;
+		anim_cury = y;
+	}
+	if (type == GTKBOARD_LEAVE_NOTIFY)
+	{
+		anim_curx = -1;
+		anim_cury = -1;
+	}
+	if (type != GTKBOARD_BUTTON_RELEASE)
+		return 0;
+
+	return getmove_real (pos, x, y, movp);
 }
 
 static void recursive_delete (byte *board, int x, int y, int val)
@@ -370,4 +379,31 @@ char ** samegame_get_pixmap (int idx, int color)
 			SAMEGAME_CELL_SIZE * 2/7, 24.0);
 	}
 	return pixmap_header_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg);
+}
+
+void samegame_getxy (byte *board, int *x, int *y)
+{
+	int i, j;
+	for (i=0; i<board_wid; i++)
+	for (j=0; j<board_heit; j++)
+	{
+		int val = board [j * board_wid + i];
+		if (val == SAMEGAME_EMPTY) continue;
+		if ((i > 0 && board [j * board_wid + i-1] == val) || 
+				(j > 0 && board [(j-1) * board_wid + i] == val))
+		{
+			*x = i;
+			*y = j;
+			return;
+		}
+	}
+}
+
+void samegame_search (Pos *pos, Player player, byte **movp)
+{
+	int x, y;
+	int retval;
+	samegame_getxy (pos->board, &x, &y);
+	retval = getmove_real (pos, x, y, movp);
+	assert (retval > 0);
 }
