@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA
 
 */
+
+/** \file pentaline.c */
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -47,7 +50,7 @@ Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEI
 	pentaline_colors,  NULL, NULL, "Pentaline", pentaline_init};
 
 
-static int pentaline_getmove (Pos *, int, int, int, Player, byte **);
+static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static ResultType pentaline_who_won (Pos *, Player , char **);
 static void pentaline_setinitpos (Pos *pos);
 char ** pentaline_get_pixmap (int idx, int color);
@@ -173,7 +176,7 @@ ResultType pentaline_who_won (Pos *pos, Player to_play, char **commp)
 	return RESULT_NOTYET;
 }
 
-int pentaline_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+int pentaline_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	int val;
 	static byte move[4];

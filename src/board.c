@@ -269,12 +269,12 @@ void board_init ()
 
 	if (!game)
 	{
-		gtk_drawing_area_size (GTK_DRAWING_AREA (board_area), 300, 300);
+		gtk_widget_set_size_request (GTK_WIDGET (board_area), 300, 300);
 		gdk_draw_rectangle ((GdkDrawable *)board_area->window, def_gc, TRUE, 0, 0, 300, 300);
 		return;
 	}
 	
-	gtk_drawing_area_size (GTK_DRAWING_AREA (board_area), 
+	gtk_widget_set_size_request (GTK_WIDGET (board_area), 
 			cell_size * board_wid, cell_size * board_heit);
 	pieces = (GdkPixmap **) malloc (2 * num_pieces * sizeof (GdkPixmap *));
 	g_assert (pieces);

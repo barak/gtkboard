@@ -59,7 +59,7 @@ Game Hypermaze = { HYPERMAZE_CELL_SIZE, HYPERMAZE_BOARD_WID, HYPERMAZE_BOARD_HEI
 static void hypermaze_setinitpos (Pos *pos);
 static char ** hypermaze_get_pixmap (int idx, int color);
 static int hypermaze_getmove_kb (Pos *, int, Player, byte **);
-int hypermaze_getmove (Pos *pos, int, int, int, Player, byte **);
+int hypermaze_getmove (Pos *pos, int, int, GtkboardEventType, Player, byte **);
 ResultType hypermaze_who_won (Pos *, Player, char **);
 
 
@@ -139,7 +139,7 @@ int hypermaze_getmove_common (Pos *pos, byte **movp,
 	return 1;
 }
 
-int hypermaze_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+int hypermaze_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	int curx = -1, cury = -1;
 	int incx = -1, incy = -1;

@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA
 
 */
+
+/** \file plot4.c */
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -49,7 +52,7 @@ Game Plot4 = { PLOT4_CELL_SIZE, PLOT4_BOARD_WID, PLOT4_BOARD_HEIT,
 
 static int eval_runs (Pos *, int);
 static int find_runs (byte *, int, int, int , int, int, int);
-static int plot4_getmove (Pos *, int, int, int, Player, byte **);
+static int plot4_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static ResultType plot4_who_won (Pos *, Player , char **);
 static void plot4_setinitpos (Pos *pos);
 static char ** plot4_get_pixmap (int, int);
@@ -121,7 +124,7 @@ int plot4_islegal (byte *board, int x, int y)
 			((y == 0) || (board [(y-1) * board_wid + x] != PLOT4_EMPTY)));
 }
 
-int plot4_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+int plot4_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 	/* translate a sequence of mouse clicks into a cbgf move.
 	   pos is the current position, x and y are the square which was
 	   clicked, type is the event type: MOUSE_PRESSED, MOUSE_RELEASED
@@ -260,6 +263,7 @@ byte * plot4_movegen_single (char *pos, int player, int reset)
 	return NULL;
 }
 
+//! movegen function
 byte *plot4_movegen (Pos *pos, Player player)
 {
 	byte movbuf[256];

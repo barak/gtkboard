@@ -87,7 +87,7 @@ char ** chess_pixmaps[] =
 
 
 void chess_init ();
-int chess_getmove (Pos *, int, int, int, Player, byte **);
+int chess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 ResultType chess_who_won (Pos *, Player, char **);
 byte *chess_movegen (Pos *, Player );
 float chess_eval (Pos *, Player);
@@ -255,7 +255,7 @@ static int oppcolor (byte *pos, int oldx, int oldy, int x, int y)
 	return 0;
 }
 
-int chess_getmove (Pos *pos, int x, int y, int type, Player player, 
+int chess_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player player, 
 		byte ** movep)
 	/* Translate mouse clicks into move */
 {

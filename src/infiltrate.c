@@ -53,7 +53,7 @@ static int infiltrate_max_moves = 200;
 
 
 void infiltrate_init ();
-int infiltrate_getmove (Pos *, int, int, int, Player, byte **);
+int infiltrate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 //ResultType infiltrate_who_won (byte *, int, char **);
 byte *infiltrate_movegen (Pos *, Player );
 float infiltrate_eval (Pos *, Player);
@@ -128,7 +128,7 @@ float infiltrate_eval (Pos *pos, Player to_play)
 
 }
 
-int infiltrate_getmove (Pos *pos, int x, int y, int type, Player to_play, 
+int infiltrate_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp)
 {
 	static byte move[10];

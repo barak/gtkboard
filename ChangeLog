@@ -1,0 +1,13 @@
+2003-07-17	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* Initial release
+
+2003-07-18	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* board.c: Changed gtk_drawing_area_size() to gtk_widget_set_size_request()
+
+2003-07-19	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* parse_opts(): Implemented loading a game from .so file (only from command line; -G option)
+	* checkers.c: fixed bug in check_who_won(), pointed out by Paddu, where it wouldn't reset the score string when the state changed from gameover to not gameover.
+	* game.h: updated documentation

@@ -58,7 +58,7 @@ Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT,
 float ataxx_eval (Pos *, Player);
 byte *ataxx_movegen (Pos *, Player);
 
-static int ataxx_getmove (Pos *, int, int, int, Player, byte **);
+static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static ResultType ataxx_who_won (Pos *, Player , char **);
 char ** ataxx_get_pixmap (int, int);
 
@@ -309,7 +309,7 @@ byte *ataxx_movegen (Pos *pos, Player player)
 	
 }
 
-int ataxx_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 	/* translate a sequence of mouse clicks into a cbgf move.
 	   pos is the current position, x and y are the square which was
 	   clicked, type is the event type: MOUSE_PRESSED, MOUSE_RELEASED

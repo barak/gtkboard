@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <ctype.h>
+#include <dlfcn.h>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -89,7 +90,6 @@ int game_state_size = 0;
 SCORE_FIELD * game_score_fields = prefs_score_fields_def;
 gchar **game_score_field_names = prefs_score_field_names_def;
 
-int opt_game_idx = -1;
 Game *opt_game = NULL;
 FILE *opt_infile = NULL;
 FILE *opt_logfile = NULL;
@@ -117,7 +117,7 @@ float (*game_eval_incr) (Pos *, Player, byte *) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
-int (*game_getmove) (Pos *, int, int, int, Player, byte **) = NULL;
+int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **) = NULL;
 int (*game_getmove_kb) (Pos *, int, Player, byte **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
 int (*game_animate) (Pos *, byte **) = NULL;
@@ -133,6 +133,7 @@ int (*game_scorecmp_def_iscore) (gchar *, int, gchar*, int) = prefs_scorecmp_isc
 int (*game_scorecmp_def_time) (gchar *, int, gchar*, int) = prefs_scorecmp_time;
 
 GtkWidget *main_window, *board_area = NULL;
+GtkWidget *board_rowbox = NULL, *board_colbox = NULL;
 
 void ui_cleanup ()
 {
@@ -332,6 +333,7 @@ void ui_check_who_won()
 	while(!isspace(*line) && *line) line++;
 	while(isspace(*line)) line++;
 	sb_set_score (line);
+	printf ("%s\n", line);
 	if (!g_strncasecmp(who_str, "NYET", 4))
 	{
 		ui_gameover = FALSE;
@@ -467,7 +469,7 @@ static void parse_opts (int argc, char **argv)
 {
 	char *wheur = NULL, *bheur = NULL;
 	int c, i;
-	while ((c = getopt (argc, argv, "g:d:f:l:p:w:b:qvh")) != -1)
+	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:qvh")) != -1)
 	{
 		switch (c)
 		{
@@ -478,7 +480,6 @@ static void parse_opts (int argc, char **argv)
 					if (!strcasecmp (optarg, games[i]->name))
 					{
 						opt_game = games[i];
-						opt_game_idx = i;
 						if (opt_game->game_init)
 							opt_game->game_init();
 						found = 1;
@@ -489,7 +490,35 @@ static void parse_opts (int argc, char **argv)
 					exit(1);
 				}
 				}
-					
+				break;
+
+			case 'G':
+				{
+				void *handle;
+				char *error;
+				Game **game;
+				handle = dlopen (optarg, RTLD_LAZY);
+				if (!handle)
+				{
+					fprintf (stderr, 
+							"Failed to load plugin from file \"%s\": %s\n",
+							optarg, dlerror ());
+					exit (1);
+				}
+
+				game = dlsym(handle, "plugin_game");
+				if ((error = dlerror()) != NULL)
+				{
+					fprintf (stderr, 
+							"Failed to load plugin from file \"%s\": %s\n",
+							optarg, error);
+					exit(1);
+				}
+				//dlclose(handle);
+				opt_game = *game;
+				if (opt_game->game_init)
+					opt_game->game_init();
+				}
 				break;
 			/* FIXME : make these long options */
 			case 'w':
@@ -559,10 +588,11 @@ static void parse_opts (int argc, char **argv)
 				break;
 			case 'h':
 				printf ("Usage: gtkboard \t[-qvh] "
-						"[-g game] [-f file] [-l logfile] [-d msec]\n"
+						"[-g game] [-G file] [-f file] [-l logfile] [-d msec]\n"
 						"\t\t\t[-p XX] [-w wheur -b bheur] "
 						"\n"
 						"\t-g\tname of the game\n"
+						"\t-G\tplugin file to load game from\n"
 						"\t-f\tfile to load game from\n"
 						"\t-l\tlog file to record game\n"
 						"\t-q\tdon't show board\n"
@@ -765,8 +795,10 @@ void gui_init ()
 	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
 
 	{
+	board_colbox = gtk_vbox_new (FALSE, 0);
 	board_area = gtk_drawing_area_new ();
-	hbox = gtk_hbox_new (TRUE, 0);
+	hbox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), board_colbox, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), board_area, TRUE, FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (frame), hbox);
 
@@ -820,6 +852,8 @@ void gui_init ()
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
+	board_rowbox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), board_rowbox, FALSE, FALSE, 0);
 	sb_message_label = gtk_label_new (NULL);
 	gtk_misc_set_alignment (GTK_MISC (sb_message_label), 0, 0.5);
 	hbox = gtk_hbox_new (TRUE, 0);

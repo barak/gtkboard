@@ -46,7 +46,7 @@ Game Rgb = { RGB_CELL_SIZE, RGB_BOARD_WID, RGB_BOARD_HEIT,
 	rgb_colors,  NULL, NULL, "Rgb", rgb_init};
 
 
-static int rgb_getmove (Pos *, int, int, int, Player, byte **);
+static int rgb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static ResultType rgb_who_won (Pos *, Player, char **);
 static void rgb_setinitpos (Pos *pos);
 void rgb_init (void);
@@ -157,7 +157,7 @@ static ResultType rgb_who_won (Pos *pos, Player to_play, char **commp)
 	return RESULT_NOTYET;
 }
 
-static int rgb_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+static int rgb_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	int val;
 	static byte move[4];

@@ -60,7 +60,7 @@ static void pull_down (byte *board);
 static byte * synth_move (byte *newboard, byte *board);
 
 static int samegame_animate (Pos *pos, byte **movp);
-static int samegame_getmove (Pos *, int, int, int, Player, byte **);
+static int samegame_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static char **samegame_get_pixmap (int , int);
 static void *samegame_newstate (Pos *, byte *);
 static ResultType samegame_who_won (Pos *, Player, char **);
@@ -232,7 +232,7 @@ int samegame_animate (Pos *pos, byte **movp)
 }
 
 int samegame_getmove 
-	(Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	byte *newboard, val;
 	if (type == GTKBOARD_MOTION_NOTIFY)

@@ -138,7 +138,7 @@ typedef struct
 
 static Memory_state state = {0, 0};
 
-static int memory_getmove (Pos *pos, int x, int y, int type, Player to_play, 
+static int memory_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp);
 static int memory_animate (Pos *pos, byte **movp);
 static void memory_setinitpos (Pos *pos);
@@ -269,7 +269,7 @@ void memory_setinitpos (Pos *pos)
 	}
 }
 
-int memory_getmove (Pos *pos, int x, int y, int type, Player to_play, 
+int memory_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp)
 {
 	static byte move[16];

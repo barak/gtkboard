@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA
 
 */
+
+/** \file mastermind.c */
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -67,7 +70,7 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 
 //static ResultType mastermind_who_won (byte *, int , char **);
 static void mastermind_setinitpos (Pos *pos);
-int mastermind_getmove (Pos *, int, int, int, Player, byte**);
+int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**);
 int mastermind_getmove_kb (Pos *, int , Player, byte **);
 void mastermind_reset_uistate ();
 byte * mastermind_movegen (Pos *, int);
@@ -165,7 +168,7 @@ void mastermind_reset_uistate ()
 }
 
 int mastermind_getmove 
-  (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+  (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	int tmp;
 	static byte move[4];

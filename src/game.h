@@ -168,12 +168,27 @@ extern float (*game_eval_incr) (Pos *, Player, byte *);
 extern byte * (*game_movegen) (Pos *, Player);
 
 
-// TODO: document these
 //! This takes a mouse click and returns the move that it corresponds to.
-extern int (*game_getmove) (Pos *, int, int, int, Player, byte **);
+/**	@param pos 
+	@param x x coordinate of the square that was clicked
+	@param y y coordinate of the square that was clicked
+	@param type type of event
+	@param to_play whose turn is it
+	@param movp a pointer to store the move in if the move is valid
+	@param returns: >0 if move is valid, 0 if more information is needed, -1 if move is illegal // TODO: there should be an enum for this
+
+	pentaline_getmove() is a good example of a minimal getmove function.
+ 
+ */
+extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte ** movp);
 
 //! Takes a keypress and returns the move that it corresponds to.
-extern int (*game_getmove_kb) (Pos *, int, Player, byte **);
+/**	@param pos
+	@param key the key that the user pressed
+	@param to_play
+	@param movp
+*/
+extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp);
 
 //! Checks if the game is over, and if so, who has won
 /** This function is called after every move, both after single player and two player games. 
@@ -190,14 +205,14 @@ extern void (*game_setinitpos) (Pos *pos);
 extern char ** (*game_get_pixmap) (int piece, int color);
 
 //! Same as game_get_pixmap() but returns a rgbmap instead of pixmap.
-extern guchar * (*game_get_rgbmap) (int, int);
+extern guchar * (*game_get_rgbmap) (int piece, int color);
 
 //! Pointer to animation callback which will be called periodically
-extern int (*game_animate) (Pos *, byte **);
+extern int (*game_animate) (Pos *pos, byte ** movp);
 
 //! Pointer to function which will compute the new state from the current position and the move
 /** The returned state should be a pointer to a statically declared structure. */
-extern void * (*game_newstate) (Pos *, byte *);
+extern void * (*game_newstate) (Pos *pos, byte * move);
 
 //! Called at the end of every game.
 extern void (*game_free) ();
@@ -215,7 +230,7 @@ extern int board_wid, board_heit, cell_size, num_pieces;
 //! Are we a single player game or a two-player game? DEFAULT: FALSE.
 extern int game_single_player;
 
-//! Determines how frequently to call the game's animation callback function. Default: 0.
+//! Determines how frequently to call the game's animation callback function (game_animate()). Default: 0.
 extern int game_animation_time;
 
 //! Whether or not to consider animations "moves". Default: TRUE.

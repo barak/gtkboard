@@ -346,7 +346,7 @@ void menu_start_stop_game (gpointer data, guint what)
 		case MENU_RESET_GAME:
 			if (!opt_game) break;
 			ui_terminate_game ();
-			ui_start_game (opt_game);
+			ui_start_game ();
 			sb_reset_human_time ();
 			sb_update();
 			break;

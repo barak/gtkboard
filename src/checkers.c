@@ -61,7 +61,7 @@ static int checkers_max_moves = 200;
 
 
 void checkers_init ();
-int checkers_getmove (Pos *, int, int, int, Player, byte **);
+int checkers_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 ResultType checkers_who_won (Pos *, Player, char **);
 byte *checkers_movegen (Pos *, Player );
 float checkers_eval (Pos *, Player);
@@ -93,18 +93,19 @@ ResultType checkers_who_won (Pos *pos, Player player, char **commp)
 	char *who_str [2] = { "white won", "black won"};
 	int found_w = 0, found_b = 0;
 	int i;
-	*commp = comment;
 	for (i=0; i<board_wid * board_heit; i++)
 		if (CHECKERS_ISWHITE (pos->board[i])) found_w = 1;
 		else if (CHECKERS_ISBLACK (pos->board[i])) found_b = 1;
 	if (!found_b)
 	{
 		strncpy (comment, who_str[0], 31);
+		*commp = comment;
 		return RESULT_WHITE;
 	}
 	if (!found_w)
 	{
 		strncpy (comment, who_str[1], 31);
+		*commp = comment;
 		return RESULT_BLACK;
 	}
 	return RESULT_NOTYET;
@@ -195,7 +196,7 @@ float checkers_eval (Pos *pos, Player to_play)
 
 }
 
-int checkers_getmove (Pos *pos, int x, int y, int type, Player to_play, 
+int checkers_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp)
 {
 	static byte move[10];
