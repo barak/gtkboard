@@ -6,6 +6,12 @@ LDADD = @GTK_LIBS@
 
 bin_PROGRAMS = gtkboard
 
+#we'll install this when we're more stable
+#gtkboardincludedir=$(includedir)/gtkboard-1.0
+#gtkboardinclude_HEADERS =   \
+#    game.h
+
+
 gtkboard_SOURCES = 	\
 	board.c\
 	menu.c\
@@ -39,11 +45,11 @@ gtkboard_SOURCES = 	\
 	samegame.c\
 	tetris.c
 
-#NOTE: we want to install game.h
 noinst_HEADERS =  \
 	aaball.h\
 	board.h\
 	engine.h\
+	game.h\
 	menu.h\
 	move.h\
 	prefs.h\

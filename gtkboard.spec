@@ -1,5 +1,5 @@
 %define name	gtkboard
-%define ver	0.9.4
+%define ver	0.10.0
 %define rel	1
 
 Summary: Board games suite
@@ -32,5 +32,5 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 /usr/local/bin/gtkboard
-%doc COPYING README AUTHORS ChangeLog doc/index.html doc/devel/index.html
+%doc COPYING README AUTHORS ChangeLog doc/
 
