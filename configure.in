@@ -5,7 +5,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gtkboard,0.11)
+AM_INIT_AUTOMAKE(gtkboard,0.11pre0)
 AC_PROG_CC
 
 AC_ARG_ENABLE(gtk2,
@@ -32,13 +32,25 @@ AC_ARG_ENABLE(sdl,
 
 if test "$enable_sdl" = "yes" ; then
 	dnl Check for SDL
-	SDL_VERSION=1.2.0
-	AM_PATH_SDL($SDL_VERSION,
-			AC_DEFINE([HAVE_SDL], [], [Do we have the SDL library]), 
-			AC_MSG_WARN([*** SDL version $SDL_VERSION not found. Sound will be disabled])
-	)
-	CFLAGS="$CFLAGS $SDL_CFLAGS"
-	LIBS="$LIBS $SDL_LIBS -lSDL_mixer"
+#	SDL_VERSION=1.2.0
+#	AM_PATH_SDL($SDL_VERSION,
+#			AC_DEFINE([HAVE_SDL], [], [Do we have the SDL library]), 
+#			AC_MSG_WARN([*** SDL version $SDL_VERSION not found. Sound will be disabled])
+#	)
+	AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
+		have_SDL_mixer=yes, have_SDL_mixer=no)
+
+	if test "$have_SDL_mixer" = "yes" ; then 
+#		CFLAGS="$CFLAGS -DHAVE_SDL" 
+		AC_DEFINE([HAVE_SDL], [], [Do we have the SDL library])
+	    LIBS="$LIBS -lSDL_mixer"
+	else
+	    echo "*** SDL_mixer not found.  Configuring without audio support."
+	fi
+
+	
+#	CFLAGS="$CFLAGS $SDL_CFLAGS"
+#	LIBS="$LIBS $SDL_LIBS -lSDL_mixer"
 fi
 
 gnome=false

@@ -11,11 +11,11 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 
-extern gboolean opt_verbose;
-
 Mix_Music *music = NULL;
 
 #endif
+
+extern gboolean opt_verbose;
 
 char *sound_dir = NULL;
 

@@ -537,6 +537,7 @@ void board_init ()
 	Game *game = opt_game;
 	GdkGC *def_gc = gdk_gc_new ((GdkWindow *)board_area->window);
 //	GtkWidget *hbox, *vbox;
+	state_board_flipped = FALSE;
 
 	if (!game)
 	{
