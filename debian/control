@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 Package: gtkboard
 Architecture: any
 Depends: ${shlibs:Depends} ${misc:Depends}
-Description: Many board games in one program
+Description: many board games in one program
  Gtkboard aims to provide a common platform for all board games.  All
  games have a common interface.  The first thing you do on starting
  gtkboard is to select a game from the menu.  Currently 18 games are
