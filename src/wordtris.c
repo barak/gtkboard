@@ -647,6 +647,7 @@ int wordtris_get_rand_char ()
 		if ((sum += charcounts[i]) > thresh)
 			return i;
 	assert (0);
+	return -1;
 }
 
 int wordtris_animate (Pos *pos, byte **movp)
