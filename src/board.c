@@ -74,7 +74,7 @@ gboolean state_board_flipped = FALSE;
 //! default background
 char board_default_colors [9] = {215, 215, 215, 215, 215, 215, 0, 0, 0};
 
-static int cell_size, num_pieces;
+int cell_size, num_pieces;
 
 extern void ui_make_human_move (byte *move, int *rmove);
 

@@ -1,5 +1,6 @@
 Makefile
 build-stamp
+confdefs.h
 config.cache
 config.guess
 config.h
