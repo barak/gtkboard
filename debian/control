@@ -1,0 +1,20 @@
+Source: gtkboard
+Section: games
+Priority: optional
+Maintainer: Barak A. Pearlmutter <bap@debian.org>
+Build-Depends: debhelper (>> 4.0.0), libgtk2.0-dev | libgtk1.3-dev | libgtk1.2-dev
+Standards-Version: 3.5.9
+
+Package: gtkboard
+Architecture: any
+Depends: ${shlibs:Depends} ${misc:Depends}
+Description: Many board games in one program
+ Gtkboard aims to provide a common platform for all board games.  All
+ games have a common interface.  The first thing you do on starting
+ gtkboard is to select a game from the menu.  Currently 18 games are
+ implemented.  Of these, Antichess, Ataxx, Fifteen puzzle, Hiq,
+ Memory, Othello, Pentaline, Plot4, Rgb and Samegame are fully
+ implemented.  Checkers, Infiltrate, Hypermaze, Mastermind, Maze, and
+ Tetris are partially implemented but playable.  Chess, and Pacman are
+ partially implemented and currently unplayable.  Some are single
+ player and some are two player games.

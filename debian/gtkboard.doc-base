@@ -1,0 +1,11 @@
+Document: gtkboard
+Title: gtkboard Manual
+Author: Arvind Narayanan
+Abstract: This manual describes what gtkboard is
+ and how it can be used to play games.
+Section: Games/Board
+
+Format: HTML
+Index: /usr/share/doc/gtkboard/html/index.html
+Files: /usr/share/doc/gtkboard/html/*.html
+Files: /usr/share/doc/gtkboard/html/devel/*.html
