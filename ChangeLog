@@ -47,8 +47,13 @@
 	* mastermind.c: fixed bug which caused balls to become dice on resetting the game
 	* flw.c: fixed bug, pointed out by Thomas Klausner, where return wouldn't work sometimes
 
-2003-07-25	Arvind Narayanan	<arvindn@users.sourceforge.net>
+2003-07-27	Arvind Narayanan	<arvindn@users.sourceforge.net>
 
 	* ui.c: fixed bug, pointed out by Thomas Klausner, where motion_notify events were not being received
 	* wordtris.c: implemented wordtris
 	* bumped version to 0.10.4
+
+2003-07-28	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* wordtris.c: implemented lives
+	* prefs.c: added OK button to "enter your name" dialog in gtk2 version

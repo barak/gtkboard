@@ -75,7 +75,10 @@ static char **wordtris_pixmaps [] =
 typedef struct
 {
 	int score;
+	int lives;
 } Wordtris_state;
+
+static int total_lives = 10;
 
 
 static int wordtris_wordcmp (const void *p1, const void *p2)
@@ -169,7 +172,7 @@ static void wordtris_init ()
 		"Press Ctrl+G to start the game.\n\n"
 		" Click one of the letters of the word at the bottom and type the letter on one of the falling blocks to change that letter to the new letter. The new word must be legal.\n"
 		"\n"
-		"You get a point for every new word you make. Currently the game ends when a block falls to the bottom row. In the future this will change so that you have a fixed number of lives.";
+		"You get a point for every new word you make. You have a total of ten lives. You lose a life when a block falls to the bottom row. The game ends when you lose all your lives.";
 }
 
 static int wordtris_curx = 0, wordtris_cury = 0;
@@ -180,27 +183,35 @@ ResultType wordtris_who_won (Pos *pos, Player to_play, char **commp)
 	int i;
 	*commp = comment;
 	for (i=0; i<WORDTRIS_LEN; i++)
-		if (pos->board [board_wid + i] != WORDTRIS_EMPTY)
+		if (pos->board [board_wid + i] != WORDTRIS_EMPTY 
+				&& pos->state && ((Wordtris_state *)pos->state)->lives == 0)
 		{
 			snprintf (comment, 32, "Game over. Score: %d", 
 					pos->state ? ((Wordtris_state *)pos->state)->score: 0);
 			return RESULT_WON;
 		}
-	snprintf (comment, 32, "Score: %d", 
-					pos->state ? ((Wordtris_state *)pos->state)->score: 0);
+	snprintf (comment, 32, "Score: %d;  Lives: %d", 
+					pos->state ? ((Wordtris_state *)pos->state)->score: 0,
+					pos->state ? ((Wordtris_state *)pos->state)->lives: total_lives);
 	return RESULT_NOTYET;
 }
 
 void *wordtris_newstate (Pos *pos, byte *move)
 {
 	static Wordtris_state state;
-	int i, score = 0;
+	int i, score = 0, count = 0, died = 0;
 	for (i=0; move[3*i] >= 0; i++)
 	{
 		if (move[3*i+1] == 0)
 			score = 1;
+		if (move[3*i+2] == WORDTRIS_EMPTY) 
+			count--;
+		else
+			count++;
 	}
+	if (count + score < 1) died = 1;
 	state.score = (pos->state ? ((Wordtris_state *)pos->state)->score : 0) + score;
+	state.lives = (pos->state ? ((Wordtris_state *)pos->state)->lives : total_lives) - died;
 	return &state;
 }
 
@@ -306,7 +317,7 @@ int wordtris_animate (Pos *pos, byte **movp)
 	byte *mp = move;
 	byte *board = pos->board;
 	for (i=0; i<board_wid; i++)
-	for (j=board_heit-1; j>=2; j--)
+	for (j=board_heit-1; j>=1; j--)
 	{
 		int val;
 		if ((val = pos->board [j * board_wid + i]) != WORDTRIS_EMPTY)
@@ -314,9 +325,12 @@ int wordtris_animate (Pos *pos, byte **movp)
 			*mp++ = i;
 			*mp++ = j;
 			*mp++ = WORDTRIS_EMPTY;
-			*mp++ = i;
-			*mp++ = j-1;
-			*mp++ = val;
+			if (j > 1)
+			{
+				*mp++ = i;
+				*mp++ = j-1;
+				*mp++ = val;
+			}
 		}
 	}
 	while (1)
