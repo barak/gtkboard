@@ -1,0 +1,203 @@
+#include "rgb.h"
+#include "aaball.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <stdlib.h>
+
+char rgb_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+
+int * rgb_initpos = NULL;
+
+#define RGB_RP 1
+#define RGB_GP 2
+#define RGB_BP 3
+#define RGB_EMPTY 0
+
+
+/*char ** rgb_pixmaps[] = { red_ball_55_xpm, 
+	blue_ball_55_xpm, green_ball_55_xpm };*/
+
+void rgb_init ();
+
+Game Rgb = { RGB_CELL_SIZE, RGB_BOARD_WID, RGB_BOARD_HEIT, 
+	RGB_NUM_PIECES,
+	rgb_colors,  NULL, NULL, "Rgb", rgb_init};
+
+
+static int rgb_getmove (Pos *, int, int, int, Player, byte **);
+static ResultType rgb_who_won (Pos *, Player, char **);
+static void rgb_setinitpos (Pos *pos);
+void rgb_init (void);
+static byte * rgb_movegen (Pos *, Player);
+static float rgb_eval (Pos *, Player);
+
+static char ** rgb_get_pixmap (int idx, int color);
+
+void rgb_init ()
+{
+	game_eval = rgb_eval;
+	game_movegen = rgb_movegen;
+	game_getmove = rgb_getmove;
+	game_who_won = rgb_who_won;
+	game_setinitpos = rgb_setinitpos;
+	game_get_pixmap = rgb_get_pixmap;
+	game_draw_cell_boundaries = TRUE;
+	game_doc_about = 
+		"Rgb\n"
+		"Two player game\n"
+		"URL: "GAME_DEFAULT_URL ("rgb");
+	game_doc_rules = 
+		"Rgb rules\n"
+		"\n"
+		"Rgb, short for red-green-blue, is a harder version of tic-tac-toe. The goal is to get 3 balls in a line (row, column, or diagonal) of any one color. Clicking on an empty square puts a red ball on it, clicking on a red ball turns it green, and clicking on a green ball turns it blue.";
+}
+
+static void rgb_setinitpos (Pos *pos)
+{
+	int i;
+	for (i=0; i<board_wid * board_heit; i++)
+		pos->board [i] = RGB_EMPTY;
+}
+
+static byte * rgb_movegen (Pos *pos, Player player)
+{
+	int i, j;
+	byte movbuf [64];
+	byte *movlist, *movp = movbuf;
+	int lines[8][2] = 
+	{ 
+		{0, 1}, {3, 1}, {6, 1},
+		{0, 3}, {1, 3}, {2, 3},
+		{0, 4}, {2, 2},
+	};
+	int val, found;
+	for (i=0; i<8; i++)
+	{
+		val = -1; found = 1;
+		for (j=0; j<3; j++)
+		{
+			if (val >= 0 && pos->board[lines[i][0] + j * lines[i][1]] != val) 
+			{ found = 0; break; }
+			val = pos->board[lines[i][0] + j * lines[i][1]];
+			if (val == RGB_EMPTY) { found = 0; break; }
+		}
+		if (found) 
+			break;
+	}
+	if (!found)
+	{
+		for (i=0; i<board_wid; i++)
+		for (j=0; j<board_heit; j++)
+			if (pos->board[j * board_wid + i] != RGB_BP)
+			{
+				*movp++ = i;
+				*movp++ = j;
+				*movp++ = pos->board[j * board_wid + i] + 1;
+				*movp++ = -1;
+			}
+	}
+	*movp++ = -2;
+	movlist = (byte *) (malloc (movp - movbuf));
+	memcpy (movlist, movbuf, (movp - movbuf));
+	return movlist;
+}
+
+static ResultType rgb_who_won (Pos *pos, Player to_play, char **commp)
+{
+	static char comment[32];
+	char *who_str [] = { "white won", "black won"};
+	int lines[8][2] = 
+	{ 
+		{0, 1}, {3, 1}, {6, 1},
+		{0, 3}, {1, 3}, {2, 3},
+		{0, 4}, {2, 2},
+	};
+	int i, j;
+	int val, found;
+	for (i=0; i<8; i++)
+	{
+		val = -1; found = 1;
+		for (j=0; j<3; j++)
+		{
+			if (val >= 0 && pos->board[lines[i][0] + j * lines[i][1]] != val) 
+			{ found = 0; break; }
+			val = pos->board[lines[i][0] + j * lines[i][1]];
+			if (val == RGB_EMPTY) { found = 0; break; }
+		}
+		if (found) 
+		{
+			*commp = who_str[to_play == WHITE ? 1 : 0];
+			return to_play == WHITE ? RESULT_BLACK : RESULT_WHITE;
+		}
+	}
+	*commp = NULL;
+	return RESULT_NOTYET;
+}
+
+static int rgb_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+{
+	int val;
+	static byte move[4];
+	if (type != GTKBOARD_BUTTON_RELEASE)
+		return 0;
+	val = pos->board [y * board_wid + x];
+	if (val == RGB_BP) return -1;
+	move[0] = x;
+	move[1] = y;
+	move[2] = val+1;
+	move[3] = -1;
+	if (movp)
+		*movp = move;	
+	return 1;
+}
+
+static char ** rgb_get_pixmap (int idx, int color)
+{
+	int fg = 0, bg, i;
+	char *colors;
+	static char pixbuf[RGB_CELL_SIZE*(RGB_CELL_SIZE+1)];
+	colors = rgb_colors;
+	if (idx == RGB_RP) fg = 255 << 16;
+	else if (idx == RGB_GP) fg = 255 << 8;
+	else if (idx == RGB_BP) fg = 255;
+	else { return NULL;}
+	for(i=0, bg=0;i<3;i++) 
+	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
+	return pixmap_ball_gen(RGB_CELL_SIZE, pixbuf, fg, bg, 17.0, 30.0);
+}
+
+
+static float rgb_eval (Pos *pos, Player to_play)
+	// not working properly
+{
+	int i, j;
+	int lines[8][2] = 
+	{ 
+		{0, 1}, {3, 1}, {6, 1},
+		{0, 3}, {1, 3}, {2, 3},
+		{0, 4}, {2, 2},
+	};
+	int val, found;
+	int wt = 1 << 24;
+	//return rand();	// unless we have stateful we can't do anything better
+	for (i=0; i<8; i++)
+	{
+		val = -1; found = 1;
+		for (j=0; j<3; j++)
+		{
+			if (val >= 0 && pos->board[lines[i][0] + j * lines[i][1]] != val) 
+			{ found = 0; break; }
+			val = pos->board[lines[i][0] + j * lines[i][1]];
+			if (val == RGB_EMPTY) { found = 0; break; }
+		}
+		if (found) 
+		{
+			for (i=0; i<board_wid * board_heit; i++)
+				wt >= pos->board[i];
+			return (to_play == WHITE ? -wt : wt);
+		}
+	}
+	return 0; //1.0 * rand() / RAND_MAX / 10;
+}

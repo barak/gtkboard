@@ -1,0 +1,69 @@
+
+game_stopped sucks. Remove it and use machine_thinking() or something like
+that
+
+menus: add help/about
+change game/reset to game/new
+       file/save to game/save
+	   file/load to player/file
+  and remove /file
+  implement game/save
+
+change byte to gint8
+use dynamic loading
+implement pixmap files
+write a struct Board which will have pos, wid, ht, and state.
+pass Board around instead of pos. That will make it easier
+to implement stateful games
+
+Implement move ordering using hash, not graphs.
+OK, I see why static data is a Good Thing :-)
+
+Do gnotski. After that do AI for single player games
+
+
+==stateful==
+
+* use state as local variable - remove nasty misconception -- fixed
+* implement newstate in minimax etc -- done (not yet done for incr)
+* clear up the stop/start mess -- fixed
+	- make human/machine the default -- done
+	- states are as follows:    -- hmmm
+		: waiting for human
+		: waiting for human and clock is running
+		: waiting for computer
+		: paused
+* implement uistate/animstate which will be cleared when context changes -- fixed (but not all games have implemented it)
+* state should be sent from server to client <---- without this chess.getmove() will not work
+* HAHAHAHA if setinitpos is random it is different in client and server -- fixed
+* game should have the option of drawing lines between the squares -- fixed
+* try to figure out a way to implement highlighting
+* allow games to prevent back/forw -- done
+* implement newstate in incr
+* fix pentaline_eval_incr -- done
+* eval should be able to indicate who_won -- using MAX_FLOAT perhaps -- done
+* set_player from command line isn't working -- fixed, but code became a bit uglier :(
+* in a  single player game user should not be able to change the player -- fixed
+* aa for plot4 -- done
+* when the size of the board_area is smaller than that of the menubar the absence of separator is showing -- fixed by putting a hbox inside the frame
+* dialog box too small -- fixed, kinda
+* no game_over state. In particular, asking machine to move when game is over (in ataxx) leads to a freeze -- fixed
+* make new statusbar for two player games
+* implement solution for maze and dirmaze -- done
+* write hypermaze-rugby
+* MAJOR IDEA : client should be hyper-light. Should be possible to write 
+client in JAVASCRIPT or in HARDWARE. Therefore check_who_won being server is
+the right thing to do. Client NEED NOT know the state. Like xboard. Server
+can inform client that move is illegal. Games like samegame have a heavy 
+getmove and are therefore a problem.
+* try to implement move ordering in alpha beta
+* option of showing file and rank number and letter
+* Implement games being able to start immediately (eg: maze) -- done
+* 2 problems in samegame: anim not starting immediately; continues even after cursor leaves board
+* implement desens+resens with a single call -- fixed
+* globally change score to 64 chars
+* file input is freezing :(
+* FIXED both the inefficiency and the memory leak in samegame
+* call sb_update synchronously; move the 3 sec code alone to a new fn which called every 100ms -- fixed
+* tetris -- implement next tile, game over detection not working correctly
+* implement shadow in balls

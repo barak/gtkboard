@@ -1,0 +1,361 @@
+#include "stack.h"
+#include "game.h"
+#include "ataxx.h"
+#include "aaball.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <stdlib.h>
+
+char ataxx_colors[6] = {120, 120, 120, 200, 200, 200};
+
+#define ATAXX_MOVEGEN_PLAUSIBLE 0
+
+int ataxx_initpos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
+{
+	1 , 0 , 0 , 0 , 0 , 0 , 2 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	0 , 0 , 0 , 0 , 0 , 0 , 0 ,
+	2 , 0 , 0 , 0 , 0 , 0 , 1 ,
+};
+
+void ataxx_init ();
+
+Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT, 
+	ATAXX_NUM_PIECES,
+	ataxx_colors, ataxx_initpos, NULL, "Ataxx", ataxx_init};
+
+float ataxx_eval (Pos *, Player);
+byte *ataxx_movegen (Pos *, Player);
+
+static int ataxx_getmove (Pos *, int, int, int, Player, byte **);
+static ResultType ataxx_who_won (Pos *, Player , char **);
+char ** ataxx_get_pixmap (int, int);
+
+
+static int ataxx_max_moves = 200;
+
+void ataxx_init ()
+{
+	game_eval = ataxx_eval;
+	game_movegen = ataxx_movegen;
+	game_getmove = ataxx_getmove;
+	game_who_won = ataxx_who_won;
+	game_get_pixmap = ataxx_get_pixmap;
+	game_doc_about = 
+		"Ataxx\n"
+		"Two player game\n"
+		"URL: "GAME_DEFAULT_URL("ataxx");
+	game_doc_rules = 
+		"Ataxx rules\n"
+		"\n"
+		"  - The objective of the game is to get as many balls of your color as possible.\n"
+		"  - In each move you must click an existing ball of your color followed by an empty square.\n"
+	   "   - The new square should be at a distance of at most 2 from the first square (a diagonal counts as one unit).\n"
+	   "   - If the distance is two the first square becomes empty, but not if the distance is 1.\n"
+	   "   - In either case all balls adjacent to the new square, if they are the opponent's color, get converted to your color.\n"
+	   "   - If you have no move you pass to the opponent.\n";
+}
+
+ResultType ataxx_who_won (Pos *pos, Player to_play, char **commp)
+{
+	static char comment[32];
+	int i, wscore = 0, bscore = 0, who_idx;
+	char *who_str [3] = { "white won", "black won", "its a tie" };
+	byte *move = ataxx_movegen (pos, to_play);
+	for (i=0; i<board_wid * board_heit; i++)
+		if (pos->board[i] == ATAXX_WP)
+			wscore++;
+		else if (pos->board[i] == ATAXX_BP)
+			bscore++;
+	if (move[0] != -2)
+	{
+		free (move);
+		/* FIXME: ugly hack to determine if we have exceeded the
+	   move limit */	   
+		if (movstack_get_num_moves() > ataxx_max_moves)
+		{
+			fprintf (stderr, "max moves reached\n");
+			snprintf (comment, 32, "%s", who_str[2]);
+			*commp = comment;
+			return RESULT_TIE;
+		}
+		else
+		{
+			snprintf (comment, 32, "%d : %d", wscore, bscore);
+			*commp = comment;
+			return RESULT_NOTYET;
+		}
+	}
+	free (move);
+	if (wscore > bscore) who_idx = 0;
+	else if (wscore < bscore) who_idx = 1;
+	else who_idx = 2;
+	snprintf (comment, 32, "%s (%d : %d)", who_str [who_idx], wscore, bscore);
+	*commp = comment;
+	if (wscore > bscore)
+		return RESULT_WHITE;
+	if (wscore < bscore)
+		return RESULT_BLACK;
+	return RESULT_TIE;
+}
+
+
+float ataxx_eval_material (byte *pos)
+{
+	int i, sum = 0;
+	for (i=0; i<board_wid * board_heit; i++)
+		if (pos[i] == ATAXX_WP)
+			sum++;
+		else if (pos[i] == ATAXX_BP)
+			sum--;
+	return sum;	
+}
+
+float ataxx_eval (Pos *pos, Player to_play)
+{
+	return ataxx_eval_material (pos->board);
+	//return 0;
+}
+
+byte *ataxx_movegen (Pos *pos, Player player)
+	/* to keep things from getting out of hand, we'll generate only 
+	   _plausible_ moves: find the max #flips possible and generate
+	   only those moves that lead to at least max-1 flips */
+{
+	int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
+	int incy[] = { -1, 0, 1, -1, 1, -1, 0, 1};
+	int incx2[] = { -2, -2, -2, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 2, 2, 2};
+	int incy2[] = { -2, -1, 0, 1, 2, -2, 2, -2, 2, -2, 2, -2, -1, 0, 1, 2};
+	int x, y, i, j, newx, newy;
+	byte our = (player == WHITE ? ATAXX_WP : ATAXX_BP);
+	byte other = (player == WHITE ? ATAXX_BP : ATAXX_WP);
+	byte *board = pos->board;
+#ifdef ATAXX_MOVEGEN_PLAUSIBLE
+	int max_nbrs;
+#endif
+	int found = 0;
+	byte movbuf [4096];
+	byte *movp = movbuf;
+	byte *movlist;
+	byte *nbrs;
+   	nbrs = (byte *) malloc (board_wid * board_heit * sizeof (byte));
+	assert (nbrs);
+	for (i=0; i<board_wid * board_heit; i++)
+		nbrs[i] = 0;
+	for (x=0; x<board_wid; x++)
+		for (y=0; y<board_heit; y++)
+		{
+			if (board [y * board_wid + x] != other)
+				continue;
+			for (i=0; i<8; i++)
+			{
+				newx = x + incx[i];
+				newy = y + incy[i];
+				if (newx >= 0 && newy >= 0 
+						&& newx < board_wid && newy < board_heit)
+					nbrs [newy * board_wid + newx] ++;
+			}
+		}
+#ifdef ATAXX_MOVEGEN_PLAUSIBLE
+	max_nbrs=0;
+	for (x=0; x<board_wid; x++)
+		for (y=0; y<board_heit; y++)
+		if (board[y * board_wid + x] == ATAXX_EMPTY 
+				&& nbrs[y * board_wid + x] > max_nbrs)
+		{
+			found=0;
+			for (j=0; j<8; j++)
+			{
+				newx = x + incx[j];
+				newy = y + incy[j];
+				if (newx >= 0 && newy >= 0 
+						&& newx < board_wid && newy < board_heit
+						&& board [newy * board_wid + newx] == our)
+				{
+					max_nbrs = nbrs[y * board_wid + x];
+					found=1;
+					break;
+				}
+			}
+			/*if (found) continue;
+			nbrs [y * board_wid + x]--;
+			if (nbrs[y * board_wid + x] <= max_nbrs) continue;
+			for (j=0; j<16; j++)
+			{
+				newx = x + incx2[j];
+				newy = y + incy2[j];
+				if (newx >= 0 && newy >= 0 
+						&& newx < board_wid && newy < board_heit
+						&& board [newy * board_wid + newx] == our)
+				{
+					max_nbrs = nbrs[y * board_wid + x];
+					break;
+				}
+			}*/
+		} 
+#endif
+	for (x=0; x<board_wid; x++)
+		for (y=0; y<board_heit; y++)
+		{
+			found=0;
+			if (board [y * board_wid + x] != ATAXX_EMPTY)
+				continue;
+#ifdef ATAXX_MOVEGEN_PLAUSIBLE
+			if (nbrs [y * board_wid + x] < max_nbrs - 1)
+				continue;
+#endif
+			for (i=0; i<8; i++)
+			{
+				newx = x + incx[i];
+				newy = y + incy[i];
+				if (newx >= 0 && newy >= 0 
+						&& newx < board_wid && newy < board_heit)
+					if (board [newy * board_wid + newx] == our)
+					{
+						/* found a same col neighbor */
+						found=1;
+						break;
+					}
+			}
+			if (found)
+			{
+				*movp++ = x;
+				*movp++ = y;
+				*movp++ = our;
+				for (i=0; i<8; i++)
+				{
+					newx = x + incx[i];
+					newy = y + incy[i];
+					if (newx >= 0 && newy >= 0 
+							&& newx < board_wid && newy < board_heit)
+						if (board [newy * board_wid + newx] == other)
+						{
+							*movp++ = newx;
+							*movp++ = newy;
+							*movp++ = our;
+						}
+				}
+				*movp++ = -1;
+			}	
+			else
+			{
+				for (i=0; i<16; i++)
+				{
+					newx = x + incx2[i];
+					newy = y + incy2[i];
+					if (!(newx >= 0 && newy >= 0 
+							&& newx < board_wid && newy < board_heit))
+						continue;
+					if (board [newy * board_wid + newx] != our)
+						continue;
+					*movp++ = x;
+					*movp++ = y;
+					*movp++ = our;
+					*movp++ = newx;
+					*movp++ = newy;
+					*movp++ = ATAXX_EMPTY;
+					for (j=0; j<8; j++)
+					{
+						newx = x + incx[j];
+						newy = y + incy[j];
+						if (newx >= 0 && newy >= 0 
+								&& newx < board_wid && newy < board_heit)
+							if (board [newy * board_wid + newx] == other)
+							{
+								*movp++ = newx;
+								*movp++ = newy;
+								*movp++ = our;
+							}
+					}
+					*movp++ = -1;
+				}
+			}
+		}
+	*movp++ = -2;
+	movlist = (byte *) (malloc (movp - movbuf));
+	memcpy (movlist, movbuf, (movp - movbuf));
+	free (nbrs);
+	return movlist;
+	
+}
+
+int ataxx_getmove (Pos *pos, int x, int y, int type, Player to_play, byte **movp)
+	/* translate a sequence of mouse clicks into a cbgf move.
+	   pos is the current position, x and y are the square which was
+	   clicked, type is the event type: MOUSE_PRESSED, MOUSE_RELEASED
+	   to_play is who has the move, movp is used to return the move
+
+	   the return value is 1 if the clicks were successfully translated
+	   into a move; -1 if the move is illegal, and 0 if further clicks
+	   are required to determine the move. In the latter case, this 
+	   function is responsible for keeping track of the current state.
+	 */
+{
+	static byte move[32];
+	byte *mptr = move;
+	static int  oldx = -1, oldy = -1;
+	int diffx, diffy;
+	int other, i;
+	int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
+	int incy[] = { -1, 0, 1, -1, 1, -1, 0, 1};
+	if (type != GTKBOARD_BUTTON_RELEASE)
+		return 0;
+	if (oldx == -1)
+	{
+		if (pos->board [y * board_wid + x] != (to_play == WHITE ? ATAXX_WP : ATAXX_BP))
+			return -1;
+		oldx = x; oldy = y;
+		return 0;
+	}
+
+	if (x == oldx && y == oldy)
+	{
+		oldx = -1; oldy = -1; return 0;
+	}
+	
+	if (x == oldx && y == oldy) { oldx = -1; oldy = -1; return 0; } 
+	if (pos->board [y * board_wid + x] != ATAXX_EMPTY) { return oldx = oldy = -1; }
+	diffx = abs (x - oldx); diffy = abs (y - oldy);
+	if (diffx > 2 || diffy > 2) { return oldx = oldy = -1; }
+	if (diffx > 1 || diffy > 1)
+	{ *mptr++ = oldx; *mptr++ = oldy; *mptr++ = ATAXX_EMPTY; }
+	other = (to_play == WHITE ? ATAXX_BP : ATAXX_WP);
+	for (i=0; i<8; i++)
+	{
+		int newx = x + incx[i], newy = y + incy[i];
+		if (newx < 0 || newy < 0 || newx >= board_wid || newy >= board_heit)
+			continue;
+		if (pos->board[newy * board_wid + newx] == other)
+		{
+			*mptr++ = newx; *mptr++ = newy; 
+			*mptr++ = (to_play == WHITE ? ATAXX_WP : ATAXX_BP);
+		}
+	}
+	{ *mptr++ = x; *mptr++ = y; *mptr++ = 
+		(to_play == WHITE ? ATAXX_WP : ATAXX_BP); }
+	*mptr = -1;
+	oldx = -1; oldy = -1;
+	if (movp)
+		*movp = move;	
+	move_fwrite (move, stdout);
+	return 1;
+}
+
+char ** ataxx_get_pixmap (int idx, int color)
+{
+	int fg, bg, i;
+	char *colors;
+	static char pixbuf[ATAXX_CELL_SIZE*(ATAXX_CELL_SIZE)+1];
+	colors = ataxx_colors;
+	fg = (idx == ATAXX_WP ? 0xee << 16 : 0xee);
+	if (color == BLACK) colors += 3;
+	for(i=0, bg=0;i<3;i++) 
+	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
+	return pixmap_ball_gen(55, pixbuf, fg, bg, 17.0, 30.0);
+}
+
