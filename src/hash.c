@@ -48,7 +48,7 @@
 #endif
 
 #ifndef byte
-#define byte char
+#define byte gint8
 #endif
 
 // FIXME: write a function called debug or something instead of doing it this way

@@ -20,9 +20,10 @@
 #define _STACK_H_
 
 #include <stdio.h>
+#include <glib.h>
 
 #ifndef byte 
-#define byte char
+#define byte gint8
 #endif
 
 void stack_free ();

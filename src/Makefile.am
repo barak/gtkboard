@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g -O3 -Wno-unused
+AM_CFLAGS = -Wall -g -O3 -Wno-unused
 
 INCLUDES = @GTK_CFLAGS@
 

@@ -66,7 +66,7 @@ PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 VERSION = @VERSION@
 
-CFLAGS = -Wall -g -O3 -Wno-unused
+AM_CFLAGS = -Wall -g -O3 -Wno-unused
 
 INCLUDES = @GTK_CFLAGS@
 
@@ -102,6 +102,7 @@ samegame.o tetris.o wordtris.o
 gtkboard_LDADD = $(LDADD)
 gtkboard_DEPENDENCIES = 
 gtkboard_LDFLAGS = 
+CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@

@@ -37,7 +37,7 @@
 #include <glib.h>
 
 #ifndef byte 
-#define byte char
+#define byte gint8
 #endif
 
 

@@ -100,7 +100,7 @@ byte *move_read (char *line)
 	tmp = line;
 	while (1)
 	{
-		movbuf[nc] = (byte) strtol (tmp, &new, 10);
+		movbuf[nc] = (byte) strtol (tmp, (char **) &new, 10);
 		if (new == tmp)
 			break;
 		tmp = new;

@@ -83,3 +83,8 @@
 
 	* flw.c: implemented render
 	* wordtris: fixed starting with words without any neighbor
+
+2003-08-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* Makefile.am: changed CFLAGS to AM_CFLAGS as suggested by Frank Gevaerts
+	* move.h: changed byte from char to gint8 to fix powerpc crash. Patch by Frank Gevaerts.
