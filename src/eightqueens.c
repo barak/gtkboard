@@ -52,7 +52,7 @@ char ** eightqueens_pixmaps [] =
 Game Eightqueens = { EIGHTQUEENS_CELL_SIZE, 
 	EIGHTQUEENS_BOARD_WID, EIGHTQUEENS_BOARD_HEIT, 
 	EIGHTQUEENS_NUM_PIECES, 
-	eightqueens_colors, NULL, eightqueens_pixmaps, "Eight queens puzzle", 
+	eightqueens_colors, NULL, eightqueens_pixmaps, "Eight Queens Puzzle", 
 	"Logic puzzles",
 	eightqueens_init};
 

@@ -1166,7 +1166,9 @@ void html_help_gen_game (Game *game)
 {
 	FILE *fout;
 	gchar *filename;
-	filename = g_strdup_printf ("%s.html", game->name);
+	mkdir (filename = g_strdup_printf ("%s", game->name), 0777);
+	g_free (filename);
+	filename = g_strdup_printf ("%s/index.html", game->name);
 	fout = fopen (filename, "w");
 	if (!fout)
 	{
@@ -1178,11 +1180,30 @@ void html_help_gen_game (Game *game)
 	reset_game_params ();
 	opt_game = game;
 	game->game_init(game);
+	fprintf (fout, 
+			"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+			"<html> \n <head> \n"
+			"<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \n"
+			"<title>%s - gtkboard </title> \n"
+			"<link rel=\"stylesheet\" type=\"text/css\" href=\"/styles/default.css\"> \n"
+			"</head>\n"
+			"<body>\n"
+			"<!--#include virtual=\"/header.html\"-->\n",
+			game->name);
 	fprintf (fout, "<h1 align=\"center\"> %s </h1>\n\n", game->name);
+	fprintf (fout, "<table width=\"100%%\"> \n <tr> \n <td width=\"2%%\"></td> \n <td width=\"75%%\" valign=\"top\"> \n");
 	fprintf (fout, "%s<br>\n", game_single_player ? "Single player game" : "Two player game");
 	html_help_gen_format (fout, filename, "Rules", game_doc_rules);
 	html_help_gen_format (fout, filename, "Strategy", game_doc_strategy);
 	html_help_gen_format (fout, filename, "History", game_doc_history);
+	fprintf (fout, "<h2> Screenshot </h2>\n <p align=\"center\">" 
+			"<img  src=\"/screenshots/%s default.png\" alt=\"%s screenshot\"/> </p>\n", 
+			game->name, game->name);
+	fprintf (fout, "</td> \n <td width=\"3%%\"></td> \n" 
+			"<td width=\"20%%\" valign=\"top\"> \n <!--#include virtual=\"/gamelist.html\"-->\n" 
+			"</td> \n</tr>\n </table>"
+			"<hr/> \n<!--#include virtual=\"/footer.html\"-->\n"			
+			"</body> \n</html>");
 	g_free (filename);
 	fclose (fout);
 }
@@ -1215,7 +1236,7 @@ void html_help_gen_gamelist ()
 		for (i=0; i<num_games; i++)
 		{
 			if (strcmp (games[i]->group, group)) continue;
-			fprintf (fout, "<li> <a href=\"/games/%s.html\">%s</a> </li>\n", games[i]->name, games[i]->name);
+			fprintf (fout, "<li> <a href=\"/games/%s/\">%s</a> </li>\n", games[i]->name, games[i]->name);
 		}
 		if (group[0] != '\0')
 			fprintf (fout, "</ul> </li>\n");
@@ -1231,9 +1252,9 @@ void html_help_gen ()
 	int i;
 	char dirbuf[1024];
 	getcwd (dirbuf, 1024);
-	if (strcmp (basename (dirbuf), "www"))
+	if (strcmp (basename (dirbuf), "games"))
 	{
-		fprintf (stderr, "To generate html help, you must be in the \"www\" directory.\n");
+		fprintf (stderr, "To generate html help, you must be in the \"games\" directory.\n");
 		exit (1);
 	}
 	if (opt_game)

@@ -149,7 +149,7 @@ typedef enum {
 #define ISINBOARD(x,y) ((x)>=0 && (y)>=0 && (x)<board_wid && (y)< board_heit)
 
 //! Home page for the game <tt>x</tt>
-#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/showgame.pl?game="x
+#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/games"
 
 struct _Game;
 

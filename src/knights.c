@@ -74,7 +74,7 @@ static void *knights_newstate (Pos *, byte *);
 
 Game Knights = { KNIGHTS_CELL_SIZE, KNIGHTS_BOARD_WID, KNIGHTS_BOARD_HEIT, 
 	KNIGHTS_NUM_PIECES, 
-	knights_colors, knights_initpos, knights_pixmaps, "Balanced joust", "Nimlike games",
+	knights_colors, knights_initpos, knights_pixmaps, "Balanced Joust", "Nimlike games",
 	knights_init};
 
 void knights_init ()

@@ -278,21 +278,7 @@ ResultType stopgate_who_won (Pos *pos, Player player, char ** commp)
 	result = stopgate_eval (pos, player, &eval);
 	if (result == RESULT_WHITE) *commp = who_str[0];
 	if (result == RESULT_BLACK) *commp = who_str[1];
-	printf ("%f\n", eval);
 	return result;
-/*	if (abs (eval) < GAME_EVAL_INFTY)
-		return RESULT_NOTYET;
-	if (eval > 0)
-	{
-		*commp = who_str[0];
-		return RESULT_WHITE;
-	}
-	else
-	{
-		*commp = who_str[1];
-		return RESULT_BLACK;
-	}
-	*/
 }
 
 #define EVAL_ISEMPTY(x, y) ((ISINBOARD((x), (y))) && (board[(y) * board_wid + (x)] == STOPGATE_EMPTY))
