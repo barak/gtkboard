@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <libgen.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -57,7 +58,6 @@ extern Game
 	Blet, Othello6x6
 	;
 
-// TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Chess, 
 	&Antichess, 
@@ -1267,9 +1267,18 @@ void html_help_gen ()
 		html_help_gen_game (games[i]);
 }
 
+static int get_seed ()
+{
+	GTimeVal timeval;
+	g_get_current_time (&timeval);
+	return timeval.tv_usec;
+}
+                                                                                                               
+
+
 int main (int argc, char **argv)
 {
-	srandom (time(0));
+	srandom (get_seed());
 	reset_game_params ();
 	parse_opts (argc, argv);
 	ui_start_player ();

@@ -159,6 +159,8 @@ void *samegame_newstate (Pos *pos, byte *move)
 			bonus = TRUE;
 		if (move[3*i+2] == 0)
 			score++;
+		else if (pos->board[move[3*i+1] * board_wid + move[3*i]] == 0)
+			score--;
 	}
 	score -= 2; score *= score;
 	if (score < 0) score = 0;

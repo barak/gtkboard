@@ -1049,7 +1049,7 @@ gboolean sb_update_periodic ()
 	gtk_label_set_text (GTK_LABEL(sb_message_label), sb_message_str);
 	{
 	gchar *tempstr = NULL;
-	if (!ui_stopped && (player_to_play == HUMAN))
+	if (!ui_stopped && (player_to_play == HUMAN || game_single_player))
 		gtk_label_set_text (GTK_LABEL(sb_time_label),
 			 tempstr = g_strdup_printf ("Time:%s", sb_ftime(sb_human_time++)));
 	if (first)
