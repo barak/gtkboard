@@ -79,10 +79,10 @@ bin_PROGRAMS = gtkboard
 #gtkboardinclude_HEADERS =   \
 #    game.h
 
-gtkboard_SOURCES =  	board.c 	menu.c 	prefs.c 	ui.c 		aaball.c 	ab.c 	engine.c 	hash.c 	minimax.c 	move.c 	stack.c 		antichess.c 	ataxx.c 	checkers.c 	chess.c 	dirmaze.c 	fifteen.c 	flw.c 	hiq.c 	infiltrate.c 	mastermind.c 	maze.c 	memory.c 	othello.c 	pacman.c 	pentaline.c 	plot4.c 	rgb.c 	samegame.c 	tetris.c
+gtkboard_SOURCES =  	board.c 	menu.c 	prefs.c 	ui.c 		aaball.c 	ab.c 	engine.c 	hash.c 	minimax.c 	move.c 	stack.c 		antichess.c 	ataxx.c 	checkers.c 	chess.c 	dirmaze.c 	fifteen.c 	flw.c 	hiq.c 	infiltrate.c 	mastermind.c 	maze.c 	memory.c 	othello.c 	pacman.c 	pentaline.c 	plot4.c 	rgb.c 	samegame.c 	tetris.c 	wordtris.c
 
 
-noinst_HEADERS =  	aaball.h 	board.h 	engine.h 	game.h 	menu.h 	move.h 	prefs.h 	stack.h 	ui_common.h 	ui.h
+noinst_HEADERS =  	aaball.h 	board.h 	engine.h 	game.h 	menu.h 	move.h 	prefs.h 	stack.h 	ui_common.h 	ui.h 		flwords.h
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -98,7 +98,7 @@ gtkboard_OBJECTS =  board.o menu.o prefs.o ui.o aaball.o ab.o engine.o \
 hash.o minimax.o move.o stack.o antichess.o ataxx.o checkers.o chess.o \
 dirmaze.o fifteen.o flw.o hiq.o infiltrate.o mastermind.o maze.o \
 memory.o othello.o pacman.o pentaline.o plot4.o rgb.o samegame.o \
-tetris.o
+tetris.o wordtris.o
 gtkboard_LDADD = $(LDADD)
 gtkboard_DEPENDENCIES = 
 gtkboard_LDFLAGS = 
@@ -120,7 +120,8 @@ DEP_FILES =  .deps/aaball.P .deps/ab.P .deps/antichess.P .deps/ataxx.P \
 .deps/infiltrate.P .deps/mastermind.P .deps/maze.P .deps/memory.P \
 .deps/menu.P .deps/minimax.P .deps/move.P .deps/othello.P \
 .deps/pacman.P .deps/pentaline.P .deps/plot4.P .deps/prefs.P \
-.deps/rgb.P .deps/samegame.P .deps/stack.P .deps/tetris.P .deps/ui.P
+.deps/rgb.P .deps/samegame.P .deps/stack.P .deps/tetris.P .deps/ui.P \
+.deps/wordtris.P
 SOURCES = $(gtkboard_SOURCES)
 OBJECTS = $(gtkboard_OBJECTS)
 

@@ -43,14 +43,14 @@ extern Game
 	Othello, Samegame, Rgb, Fifteen, Memory, 
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
-	Pentaline, Mastermind, Pacman, Flw
+	Pentaline, Mastermind, Pacman, Flw, Wordtris
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Flw, &Hiq, 
 	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Othello,
-	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, };
+	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
 
@@ -866,7 +866,14 @@ void gui_init ()
 
    	gtk_widget_set_events(board_area, 
 			gtk_widget_get_events (board_area) 
-			|	GDK_ALL_EVENTS_MASK);
+			|   GDK_BUTTON_PRESS_MASK
+			|   GDK_BUTTON_RELEASE_MASK
+			|   GDK_POINTER_MOTION_MASK
+			|   GDK_KEY_PRESS_MASK
+			|	GDK_KEY_RELEASE_MASK
+			|	GDK_LEAVE_NOTIFY_MASK
+			);
+
 	gtk_signal_connect (GTK_OBJECT (board_area), "leave_notify_event",
 		GTK_SIGNAL_FUNC (board_clicked), NULL);
 	gtk_signal_connect (GTK_OBJECT (board_area), "motion_notify_event",

@@ -44,7 +44,8 @@ gtkboard_SOURCES = 	\
 	plot4.c\
 	rgb.c\
 	samegame.c\
-	tetris.c
+	tetris.c\
+	wordtris.c
 
 noinst_HEADERS =  \
 	aaball.h\
@@ -56,4 +57,6 @@ noinst_HEADERS =  \
 	prefs.h\
 	stack.h\
 	ui_common.h\
-	ui.h
+	ui.h\
+	\
+	flwords.h
