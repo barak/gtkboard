@@ -1,0 +1,857 @@
+<tagfile>
+  <compound kind="file">
+    <name>aaball.c</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>aaball_c.html</filename>
+    <member kind="function">
+      <name>pixmap_ball_gen</name>
+      <anchor>a3</anchor>
+      <arglist>(int len, char *pixbuf, int fg, int bg, float rad, float grad)</arglist>
+    </member>
+    <member kind="function">
+      <name>pixmap_ball_header_gen</name>
+      <anchor>a4</anchor>
+      <arglist>(int len, char *pixbuf, int fg, int bg, float rad, float grad)</arglist>
+    </member>
+    <member kind="function">
+      <name>pixmap_die_gen</name>
+      <anchor>a5</anchor>
+      <arglist>(int len, char *pixbuf, int fg, int bg, float rad, float grad, int num)</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>board.c</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>board_c.html</filename>
+    <member kind="function">
+      <name>ui_make_human_move</name>
+      <anchor>a7</anchor>
+      <arglist>(byte *move)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_set_game_params</name>
+      <anchor>a8</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>board_set_cell</name>
+      <anchor>a9</anchor>
+      <arglist>(int x, int y, byte val)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_refresh_cell_real</name>
+      <anchor>a10</anchor>
+      <arglist>(int x, int y, int real_x, int real_y)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_refresh_cell</name>
+      <anchor>a11</anchor>
+      <arglist>(int x, int y)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_redraw</name>
+      <anchor>a12</anchor>
+      <arglist>(GtkWidget *widget, GdkEventExpose *event)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_redraw_all</name>
+      <anchor>a13</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>board_show</name>
+      <anchor>a14</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>board_hide</name>
+      <anchor>a15</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>board_key_pressed</name>
+      <anchor>a17</anchor>
+      <arglist>(GtkWidget *widget, GdkEventKey *event, gpointer data, byte **movp)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_clicked</name>
+      <anchor>a18</anchor>
+      <arglist>(GtkWidget *widget, GdkEventButton *event, gpointer data)</arglist>
+    </member>
+    <member kind="function">
+      <name>board_free</name>
+      <anchor>a19</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>board_init</name>
+      <anchor>a20</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="variable">
+      <name>gdk_colors</name>
+      <anchor>a0</anchor>
+      <arglist>[3]</arglist>
+    </member>
+    <member kind="variable">
+      <name>board_gcs</name>
+      <anchor>a1</anchor>
+      <arglist>[3]</arglist>
+    </member>
+    <member kind="variable">
+      <name>board_suspended</name>
+      <anchor>a3</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>state_board_flipped</name>
+      <anchor>a4</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>engine.c</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>engine_c.html</filename>
+    <member kind="define">
+      <name>NUM_COMMANDS</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function">
+      <name>game_search</name>
+      <anchor>a20</anchor>
+      <arglist>(Pos *, int)</arglist>
+    </member>
+    <member kind="function">
+      <name>reset_game_params</name>
+      <anchor>a21</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>set_game_params</name>
+      <anchor>a22</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>game_setinitpos_def</name>
+      <anchor>a23</anchor>
+      <arglist>(Pos *)</arglist>
+    </member>
+    <member kind="function">
+      <name>game_minimax_dfid</name>
+      <anchor>a24</anchor>
+      <arglist>(Pos *, int)</arglist>
+    </member>
+    <member kind="function">
+      <name>game_ab_dfid</name>
+      <anchor>a25</anchor>
+      <arglist>(Pos *, int)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_hup_cb</name>
+      <anchor>a26</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_eval</name>
+      <anchor>a27</anchor>
+      <arglist>(Pos *pos, Player player)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_set_to_play</name>
+      <anchor>a28</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_take_move</name>
+      <anchor>a29</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_make_move</name>
+      <anchor>a30</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_new_game</name>
+      <anchor>a31</anchor>
+      <arglist>(char *gamename)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_reset_game</name>
+      <anchor>a32</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_back_move</name>
+      <anchor>a33</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_forw_move</name>
+      <anchor>a34</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_msec_per_move</name>
+      <anchor>a35</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_who_won</name>
+      <anchor>a36</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_move_now</name>
+      <anchor>a37</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_cancel_move</name>
+      <anchor>a38</anchor>
+      <arglist>(char *line)</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_poll</name>
+      <anchor>a42</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>engine_main</name>
+      <anchor>a43</anchor>
+      <arglist>(int infd, int outfd)</arglist>
+    </member>
+    <member kind="variable">
+      <name>board_wid</name>
+      <anchor>a1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>board_heit</name>
+      <anchor>a2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>opt_verbose</name>
+      <anchor>a3</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>state_player</name>
+      <anchor>a4</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>engine_flag</name>
+      <anchor>a5</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>cur_pos</name>
+      <anchor>a6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>opt_game</name>
+      <anchor>a7</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>games</name>
+      <anchor>a8</anchor>
+      <arglist>[]</arglist>
+    </member>
+    <member kind="variable">
+      <name>num_games</name>
+      <anchor>a9</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_eval_white</name>
+      <anchor>a12</anchor>
+      <arglist>)(Pos *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_eval_black</name>
+      <anchor>a13</anchor>
+      <arglist>)(Pos *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>engine_stop_search</name>
+      <anchor>a15</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>commands</name>
+      <anchor>a18</anchor>
+      <arglist>[]</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>game.h</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>game_h.html</filename>
+    <class kind="struct">Game</class>
+    <class kind="struct">HeurTab</class>
+    <class kind="struct">Pos</class>
+    <member kind="define">
+      <name>byte</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <name>GAME_EVAL_INFTY</name>
+      <anchor>a1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <name>ISINBOARD</name>
+      <anchor>a2</anchor>
+      <arglist>(x, y)</arglist>
+    </member>
+    <member kind="define">
+      <name>GAME_DEFAULT_URL</name>
+      <anchor>a3</anchor>
+      <arglist>(x)</arglist>
+    </member>
+    <member kind="enumeration">
+      <name>Player</name>
+      <anchor>a58</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="enumeration">
+      <name>GtkboardEventType</name>
+      <anchor>a59</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="enumeration">
+      <name>ResultType</name>
+      <anchor>a60</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="enumeration">
+      <name>SCORE_FIELD</name>
+      <anchor>a61</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_eval</name>
+      <anchor>a4</anchor>
+      <arglist>)(Pos *, Player)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_eval_incr</name>
+      <anchor>a5</anchor>
+      <arglist>)(Pos *, Player, byte *)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_movegen</name>
+      <anchor>a6</anchor>
+      <arglist>)(Pos *, Player)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_getmove</name>
+      <anchor>a7</anchor>
+      <arglist>)(Pos *, int, int, int, Player, byte **)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_getmove_kb</name>
+      <anchor>a8</anchor>
+      <arglist>)(Pos *, int, Player, byte **)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_who_won</name>
+      <anchor>a9</anchor>
+      <arglist>)(Pos *pos, Player player, char **scorep)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_setinitpos</name>
+      <anchor>a10</anchor>
+      <arglist>)(Pos *pos)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_get_pixmap</name>
+      <anchor>a11</anchor>
+      <arglist>)(int piece, int color)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_get_rgbmap</name>
+      <anchor>a12</anchor>
+      <arglist>)(int, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_animate</name>
+      <anchor>a13</anchor>
+      <arglist>)(Pos *, byte **)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_newstate</name>
+      <anchor>a14</anchor>
+      <arglist>)(Pos *, byte *)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_free</name>
+      <anchor>a15</anchor>
+      <arglist>)()</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_reset_uistate</name>
+      <anchor>a16</anchor>
+      <arglist>)()</arglist>
+    </member>
+    <member kind="variable">
+      <name>board_wid</name>
+      <anchor>a17</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>board_heit</name>
+      <anchor>a18</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>cell_size</name>
+      <anchor>a19</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>num_pieces</name>
+      <anchor>a20</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_single_player</name>
+      <anchor>a21</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_animation_time</name>
+      <anchor>a22</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_animation_use_movstack</name>
+      <anchor>a23</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_stateful</name>
+      <anchor>a24</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_draw_cell_boundaries</name>
+      <anchor>a25</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_allow_back_forw</name>
+      <anchor>a26</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_start_immediately</name>
+      <anchor>a27</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_state_size</name>
+      <anchor>a28</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_htab</name>
+      <anchor>a29</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_doc_about</name>
+      <anchor>a30</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_doc_rules</name>
+      <anchor>a31</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_doc_strategy</name>
+      <anchor>a32</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_score_fields</name>
+      <anchor>a33</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_score_field_names</name>
+      <anchor>a34</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_scorecmp</name>
+      <anchor>a35</anchor>
+      <arglist>)(gchar *, int, gchar *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_scorecmp_def_dscore</name>
+      <anchor>a36</anchor>
+      <arglist>)(gchar *, int, gchar *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_scorecmp_def_iscore</name>
+      <anchor>a37</anchor>
+      <arglist>)(gchar *, int, gchar *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>game_scorecmp_def_time</name>
+      <anchor>a38</anchor>
+      <arglist>)(gchar *, int, gchar *, int)</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>hash.c</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>hash_c.html</filename>
+    <class kind="struct">hash_t</class>
+    <member kind="define">
+      <name>uint</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <name>byte</name>
+      <anchor>a1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function">
+      <name>hash_insert</name>
+      <anchor>a14</anchor>
+      <arglist>(byte *pos, int poslen, int depth, float eval)</arglist>
+    </member>
+    <member kind="function">
+      <name>hash_get_eval</name>
+      <anchor>a15</anchor>
+      <arglist>(byte *pos, int poslen, int depth, float *evalp)</arglist>
+    </member>
+    <member kind="function">
+      <name>hash_clear</name>
+      <anchor>a16</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>hash_print_stats</name>
+      <anchor>a17</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="variable">
+      <name>opt_verbose</name>
+      <anchor>a2</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>move.h</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>move_h.html</filename>
+    <member kind="define">
+      <name>byte</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function">
+      <name>movdup</name>
+      <anchor>a1</anchor>
+      <arglist>(byte *)</arglist>
+    </member>
+    <member kind="function">
+      <name>movcpy</name>
+      <anchor>a2</anchor>
+      <arglist>(byte *dest, byte *src)</arglist>
+    </member>
+    <member kind="function">
+      <name>mov_getinv</name>
+      <anchor>a3</anchor>
+      <arglist>(byte *, byte *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_apply</name>
+      <anchor>a4</anchor>
+      <arglist>(byte *, byte *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_apply_refresh</name>
+      <anchor>a5</anchor>
+      <arglist>(byte *, byte *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_fwrite</name>
+      <anchor>a6</anchor>
+      <arglist>(byte *, FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_read</name>
+      <anchor>a7</anchor>
+      <arglist>(char *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_fread</name>
+      <anchor>a8</anchor>
+      <arglist>(FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_fread_ack</name>
+      <anchor>a9</anchor>
+      <arglist>(FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>line_read</name>
+      <anchor>a10</anchor>
+      <arglist>(FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_fwrite_ack</name>
+      <anchor>a11</anchor>
+      <arglist>(byte *, FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>move_fwrite_nak</name>
+      <anchor>a12</anchor>
+      <arglist>(char *, FILE *)</arglist>
+    </member>
+    <member kind="function">
+      <name>movlist_next</name>
+      <anchor>a13</anchor>
+      <arglist>(byte *)</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>stack.c</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>stack_c.html</filename>
+    <member kind="define">
+      <name>STACK_SIZE</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function">
+      <name>stack_free</name>
+      <anchor>a8</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_init</name>
+      <anchor>a9</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_get_num_moves</name>
+      <anchor>a10</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_push</name>
+      <anchor>a11</anchor>
+      <arglist>(byte *board, byte *move)</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_pop</name>
+      <anchor>a12</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_trunc</name>
+      <anchor>a13</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_forw</name>
+      <anchor>a14</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_back</name>
+      <anchor>a15</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>movstack_free</name>
+      <anchor>a16</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_push</name>
+      <anchor>a17</anchor>
+      <arglist>(void *state)</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_peek</name>
+      <anchor>a18</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_pop</name>
+      <anchor>a19</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_trunc</name>
+      <anchor>a20</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_forw</name>
+      <anchor>a21</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_back</name>
+      <anchor>a22</anchor>
+      <arglist>()</arglist>
+    </member>
+    <member kind="function">
+      <name>statestack_free</name>
+      <anchor>a23</anchor>
+      <arglist>()</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>ui_common.h</name>
+    <path>/home/arvindn/projects/gtkboard/gtkboard-0.9.2/src/</path>
+    <filename>ui_common_h.html</filename>
+    <member kind="function">
+      <name>sb_message</name>
+      <anchor>a1</anchor>
+      <arglist>(char *msg, gboolean serious)</arglist>
+    </member>
+    <member kind="function">
+      <name>sb_error</name>
+      <anchor>a2</anchor>
+      <arglist>(char *msg, gboolean serious)</arglist>
+    </member>
+    <member kind="function">
+      <name>sb_ftime</name>
+      <anchor>a3</anchor>
+      <arglist>(int temps)</arglist>
+    </member>
+    <member kind="variable">
+      <name>main_window</name>
+      <anchor>a0</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>Command</name>
+    <filename>struct_Command.html</filename>
+    <member kind="variable">
+      <name>proto_str</name>
+      <anchor>m0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>isimpl</name>
+      <anchor>m1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>impl_func</name>
+      <anchor>m2</anchor>
+      <arglist>)(char *)</arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>Game</name>
+    <filename>struct_Game.html</filename>
+    <member kind="variable">
+      <name>cell_size</name>
+      <anchor>m0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>board_wid</name>
+      <anchor>m1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>board_heit</name>
+      <anchor>m2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>num_pieces</name>
+      <anchor>m3</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>colors</name>
+      <anchor>m4</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>initpos</name>
+      <anchor>m5</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>pixmaps</name>
+      <anchor>m6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>name</name>
+      <anchor>m7</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>game_init</name>
+      <anchor>m8</anchor>
+      <arglist>)()</arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>HeurTab</name>
+    <filename>struct_HeurTab.html</filename>
+    <member kind="variable">
+      <name>name</name>
+      <anchor>m0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>eval_fun</name>
+      <anchor>m1</anchor>
+      <arglist>)(Pos *, int)</arglist>
+    </member>
+    <member kind="variable">
+      <name>comment</name>
+      <anchor>m2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>args</name>
+      <anchor>m3</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>Pos</name>
+    <filename>struct_Pos.html</filename>
+    <member kind="variable">
+      <name>board</name>
+      <anchor>m0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>state</name>
+      <anchor>m1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <name>num_moves</name>
+      <anchor>m2</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+</tagfile>
