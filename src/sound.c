@@ -22,12 +22,14 @@ static void find_sound_dir ()
 	sound_dir = prefs_get_config_val ("sound_dir");
 	if (!sound_dir)
 		sound_dir = g_strdup_printf ("%s/sounds/gtkboard", DATADIR);
+#if GLIB_MAJOR_VERSION > 1
 	if (!g_file_test (sound_dir, G_FILE_TEST_IS_DIR))
 	{
 		fprintf (stderr, "Sound directory %s not found\n", sound_dir);
 		g_free (sound_dir);
 		sound_dir = NULL;
 	}
+#endif
 }
 
 void sound_init()
