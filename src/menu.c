@@ -401,6 +401,8 @@ void menu_start_stop_game (gpointer data, guint what)
 			ui_black = saved_black;
 			menu_put_player(FALSE);
 			sb_reset_human_time ();
+			ui_stopped = FALSE;
+			ui_send_make_move ();
 			sb_update();
 			break;
 			}

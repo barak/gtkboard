@@ -971,7 +971,7 @@ void gui_init ()
 			menu_set_delay_cb, 30000, "/Settings/Time per move/Default" },
 		{ "/Settings/Time per move/1 minute", NULL, 
 			menu_set_delay_cb, 600000, "/Settings/Time per move/Default" },
-		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
+		{ "/_Help", NULL, NULL, 0, "<Branch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
 //		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
 		// TODO: implement context help

@@ -1530,7 +1530,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=gtkboard
- VERSION=0.10.7
+ VERSION=0.10.8
 
 
 cat >>confdefs.h <<_ACEOF
