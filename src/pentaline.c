@@ -142,8 +142,8 @@ byte * pentaline_movegen (Pos *pos, Player player)
 	}
 	if (movp == movbuf) // empty board
 	{
-		*movp++ = rand () % board_wid;
-		*movp++ = rand () % board_heit;
+		*movp++ = random () % board_wid;
+		*movp++ = random () % board_heit;
 		*movp++ = (player == WHITE ? PENTALINE_RP : PENTALINE_BP);
 		*movp++ = -1;
 	}
@@ -266,7 +266,7 @@ static float eval_runs (byte *board)
 		for (k=0; k<4; k++)
 			eval += eval_line (board, i, j, incx[k], incy[k]);
 	}
-	return eval + 0.1 * rand() / RAND_MAX;
+	return eval + 0.1 * random() / RAND_MAX;
 }
 
 float pentaline_eval_incr (Pos *pos, Player to_play, byte *move)
@@ -279,7 +279,7 @@ float pentaline_eval_incr (Pos *pos, Player to_play, byte *move)
 	for (k=0; k<4; k++)
 		eval += eval_line_bidir (pos->board, move[0], move[1], incx[k], incy[k]);
 	pos->board [move[1] * board_wid + move[0]] = 0;
-	return eval + 0.01 * rand() / RAND_MAX;
+	return eval + 0.01 * random() / RAND_MAX;
 }
 
 float pentaline_eval (Pos *pos, Player to_play)

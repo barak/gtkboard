@@ -209,9 +209,9 @@ void hypermaze_setinitpos (Pos *pos)
 			if (i % 2 || j % 2)
 			{
 				if ((i + j) % 2 == 0)
-					pos->board [j * board_wid + i] = 6 + rand() % 4;
+					pos->board [j * board_wid + i] = 6 + random() % 4;
 				else
-					pos->board [j * board_wid + i] = 2 + rand() % 4;
+					pos->board [j * board_wid + i] = 2 + random() % 4;
 			}
 			else 
 				pos->board [j * board_wid + i] = 0;
@@ -219,10 +219,10 @@ void hypermaze_setinitpos (Pos *pos)
 		// edges can't have arbitrary arrows
 		for (i=0; i<board_wid; i+=(board_wid-1))
 		for (j=1; j<board_heit; j+=2)
-			pos->board [j *  board_wid + i] = (rand() % 2 ? HYPERMAZE_N : HYPERMAZE_S);
+			pos->board [j *  board_wid + i] = (random() % 2 ? HYPERMAZE_N : HYPERMAZE_S);
 		for (i=1; i<board_wid; i+=2)
 		for (j=0; j<board_heit; j+=(board_heit-1))
-			pos->board [j *  board_wid + i] = (rand() % 2 ? HYPERMAZE_E : HYPERMAZE_W);
+			pos->board [j *  board_wid + i] = (random() % 2 ? HYPERMAZE_E : HYPERMAZE_W);
 
 		recursive_pathgen (pos->board, 0, 0, -1);
 	}

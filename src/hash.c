@@ -84,7 +84,7 @@ static void hash_init ()
 	hash_coeffts = (uint *) malloc (num_hash_coeffts * sizeof (uint));
 	assert (hash_coeffts);
 	for (i=0; i<num_hash_coeffts; i++)
-		hash_coeffts[i] = (rand() << 1u) + 1;
+		hash_coeffts[i] = (random() << 1u) + 1;
 	hash_table = (hash_t *) malloc (hash_table_size * sizeof (hash_t));
 	assert (hash_table);
 	for (i=0; i<hash_table_size; i++)

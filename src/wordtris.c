@@ -31,7 +31,7 @@
 
 #define WORDTRIS_CELL_SIZE 36
 
-#define WORDTRIS_NUM_PIECES 26
+#define WORDTRIS_NUM_PIECES 27
 
 #define WORDTRIS_BOARD_WID 4
 #define WORDTRIS_BOARD_HEIT 14
@@ -39,9 +39,53 @@
 #define WORDTRIS_LEN 4
 
 #define WORDTRIS_EMPTY 0
+#define WORDTRIS_WILDCARD 27
 
 char wordtris_colors[9] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0xd7, 0, 0, 0xff};
 char wordtris_highlight_colors[9] = {0x80, 0x80, 0x0, 0, 0, 0, 0, 0, 0};
+
+static char *smiley_xpm[] = 
+{
+	"36 36 2 1",
+	"  c none",
+	". c #ffff77",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"         ...              ...       ",
+	"        .....            .....      ",
+	"         ...              ...       ",
+	"                                    ",
+	"                                    ",
+	"                  ..                ",
+	"                  ..                ",
+	"                  ..                ",
+	"                  ..                ",
+	"                  ..                ",
+	"                  ..                ",
+	"                  ..                ",
+	"                                    ",
+	"                                    ",
+	"         ..                ..       ",
+	"          ..              ..        ",
+	"           ...          ...         ",
+	"            ....      ....          ",
+	"              ..........            ",
+	"                ......              ",
+	"                  ..                ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+	"                                    ",
+};
 
 static char **wordtris_pixmaps [] = 
 {
@@ -71,6 +115,7 @@ static char **wordtris_pixmaps [] =
 	char_X_grey_36_36_xpm,
 	char_Y_grey_36_36_xpm,
 	char_Z_grey_36_36_xpm,
+	smiley_xpm,
 };
 
 
@@ -462,7 +507,7 @@ static char ** wordtris_getbgxpm ()
 static void wordtris_setinitpos (Pos *pos)
 {
 	int i, j;
-	const char *word = flwords [rand() % num_flwords];
+	const char *word = flwords [random() % num_flwords];
 	for (i=0; i<board_wid * board_heit; i++)
 		pos->board[i] = 0;
 	for (i=0; i<WORDTRIS_LEN; i++)
@@ -497,8 +542,11 @@ static void wordtris_init ()
 		" Wordtris rules\n\n"
 		"Press Ctrl+G to start the game.\n\n"
 		" Click one of the letters of the word at the bottom and type the letter on one of the falling blocks to change that letter to the new letter. The new word must be legal.\n"
+		"The smiley face acts as a wildcard and can be used as an arbitrary letter.\n"
 		"\n"
 		"You get a point for every new word you make. You have a total of ten lives. You lose a life when a block falls to the bottom row. The game ends when you lose all your lives.";
+	game_doc_strategy = 
+		"Try to replace rarely occuring letters with more commonly occuring	letters\n";
 }
 
 static int wordtris_curx = 0, wordtris_cury = 0;
@@ -573,7 +621,7 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 		for (j=1; j<board_heit; j++)
 		{
 			int val = board [j * board_wid + i];
-			if (val == letter)
+			if (val == letter || val == WORDTRIS_WILDCARD)
 			{
 				if (j < miny)
 				{
@@ -640,12 +688,14 @@ void wordtris_free ()
 int wordtris_get_rand_char ()
 {
 	int i, sum, thresh;
+	if (random () % 10 == 0)
+		return WORDTRIS_WILDCARD;
 	for (i=0, sum=0; i<26; i++)
 		sum += charcounts[i];
-	thresh = rand() % sum;
+	thresh = random() % sum;
 	for (i=0, sum=0; i<26; i++)
 		if ((sum += charcounts[i]) > thresh)
-			return i;
+			return i + 1;
 	assert (0);
 	return -1;
 }
@@ -675,12 +725,12 @@ int wordtris_animate (Pos *pos, byte **movp)
 	}
 	while (1)
 	{
-		i = rand() % WORDTRIS_LEN;
+		i = random() % WORDTRIS_LEN;
 		if (pos->board [(board_heit - 1) * board_wid + i])
 			continue;
 		*mp++ = i;
 		*mp++ = board_heit - 1;
-		*mp++ = wordtris_get_rand_char() + 1;
+		*mp++ = wordtris_get_rand_char();
 		break;
 	}
 	*mp = -1;

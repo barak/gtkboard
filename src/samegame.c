@@ -71,7 +71,7 @@ void samegame_setinitpos (Pos *pos)
 {
 	int i;
 	for (i=0; i<SAMEGAME_BOARD_WID * SAMEGAME_BOARD_HEIT; i++)
-		pos->board[i] = ((rand () % 3) + 1) * SAMEGAME_NUM_ANIM;
+		pos->board[i] = ((random () % 3) + 1) * SAMEGAME_NUM_ANIM;
 }
 
 void samegame_init ()

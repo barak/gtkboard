@@ -154,12 +154,12 @@ void fifteen_setinitpos (Pos *pos)
 	byte *board = pos->board;
 	for (i=0; i<size; i++)
 		board[i] = i+1;
-	board[rand()%(board_heit*board_wid)] = 0;
+	board[random()%(board_heit*board_wid)] = 0;
 	for (i=1; i<size; i++)
 	{
 		int tmp;
 		if (!board[i]) continue;
-		do j = rand() % (i + 1); while (!board[j]);
+		do j = random() % (i + 1); while (!board[j]);
 		tmp = board[i]; board[i] = board[j]; board[j] = tmp;
 		swaps += (i%board_wid-j%board_wid+i/board_wid-j/board_wid);
 	}

@@ -85,16 +85,16 @@ void flw_find_chain (char chain[FLW_LEN+1][FLW_LEN+1])
 	char word[FLW_LEN+1];
 	do
 	{
-		strncpy (word, flwords[rand() % num_flwords], FLW_LEN+1);
+		strncpy (word, flwords[random() % num_flwords], FLW_LEN+1);
 		sprintf (chain[0], "%s", word);
 		for (i=0, memset (done, 0, FLW_LEN * sizeof (int)); i<FLW_LEN; i++)
 		{
 			char orig;
-			do {idx = rand() % FLW_LEN;} while (done[idx]); done[idx] = 1;
+			do {idx = random() % FLW_LEN;} while (done[idx]); done[idx] = 1;
 			orig= word[idx];
 			for (j=0, found=0; j<100; j++)
 			{
-				if ((word[idx] = rand() % 26 + 'a') == orig) continue;
+				if ((word[idx] = random() % 26 + 'a') == orig) continue;
 				if (bsearch (word, flwords, num_flwords, sizeof (flwords[0]), flw_wordcmp))
 				{
 					sprintf (chain[i+1], "%s", word);

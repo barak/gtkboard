@@ -172,8 +172,8 @@ static void mazegen ()
 		maze_maze[x][y] = MAZE_WALL;
 	while (npts < board_wid * board_heit * 0.58)
 	{
-		x = rand() % board_wid;
-		y = rand() % board_heit;
+		x = random() % board_wid;
+		y = random() % board_heit;
 		if (maze_maze[x][y] == 0) continue;
 		if (maze_checknbrs(x, y))
 		{
@@ -244,8 +244,8 @@ void maze_setinitpos (Pos *pos)
 	
 	/*while(1)
 	{
-		i = rand()%board_wid;
-		j = rand()%board_heit;
+		i = random()%board_wid;
+		j = random()%board_heit;
 		if (pos->board [j*board_wid+i] == 0)
 		{
 			pos->board [j * board_wid + i] = 1;

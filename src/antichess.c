@@ -646,7 +646,7 @@ float antichess_eval (Pos * pos, Player player)
 			sum--;
 		else if (ANTICHESS_ISBLACK (pos->board[i]))
 			sum++;
-	return sum + 0.01 * rand() / RAND_MAX;
+	return sum + 0.01 * random() / RAND_MAX;
 }
 
 float antichess_eval_incr (Pos *pos, Player player, byte *move)

@@ -218,7 +218,7 @@ int pacman_animate (Pos *pos, byte **movp)
 		gid = PACMAN_GET_GHOST_NUM(board [j * board_wid + i]);
 		for (k=0; k<10; k++)
 		{
-			int rnd = rand()%4;
+			int rnd = random()%4;
 			switch(rnd)
 			{
 				case 0: incx = 0; incy = 1; break;

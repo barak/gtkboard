@@ -153,7 +153,7 @@ void mastermind_setinitpos (Pos *pos)
 		pos->board [j * board_wid + i] = 
 			mastermind_initpos [(board_heit - 1 - j) * board_wid + i];
 	for (i=MASTERMIND_MAIN_COL_START; i<=MASTERMIND_MAIN_COL_END; i++)
-		pos->board [(board_heit - 1) * board_wid + i] = 9 + rand() % 6;
+		pos->board [(board_heit - 1) * board_wid + i] = 9 + random() % 6;
 }
 
 char ** mastermind_get_pixmap (int idx, int color)
