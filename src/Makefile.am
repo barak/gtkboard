@@ -38,6 +38,7 @@ gtkboard_SOURCES = 	\
 	mastermind.c\
 	maze.c\
 	memory.c\
+	ninemm.c\
 	othello.c\
 	pacman.c\
 	pentaline.c\

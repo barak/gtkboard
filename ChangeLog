@@ -57,3 +57,4 @@
 
 	* wordtris.c: implemented lives
 	* prefs.c: added OK button to "enter your name" dialog in gtk2 version
+	* menu.c: implemented different cursor types reflecting the state of the game

@@ -61,7 +61,7 @@ static int checkers_max_moves = 200;
 
 
 void checkers_init ();
-int checkers_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+int checkers_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType checkers_who_won (Pos *, Player, char **);
 byte *checkers_movegen (Pos *, Player );
 float checkers_eval (Pos *, Player);
@@ -208,7 +208,7 @@ void checkers_reset_uistate ()
 }
 
 int checkers_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
-		byte **movp)
+		byte **movp, int ** rmovep)
 {
 	static byte move[10];
 	byte *mp = move;

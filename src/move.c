@@ -28,9 +28,9 @@
 extern int board_wid, board_heit;
 
 // FIXME: this is ugly
-extern void board_refresh_cell (int, int);
+/*extern void board_refresh_cell (int, int);
 extern void board_set_cell (int, int, byte);
-
+*/
 	
 int movcpy (byte *dest, byte *src)
 {
@@ -59,17 +59,7 @@ void move_apply (byte *board, byte *move)
 	}
 }
 
-void move_apply_refresh (byte *board, byte *move)
-{
-	int i, x, y;
-	if (!move) return;
-	for (i=0; move[3*i] != -1; i++)
-	{
-		x = move[3*i]; y = move[3*i+1];
-		board_set_cell (x, y, move [3*i+2]);
-		board_refresh_cell (x, y);
-	}
-}
+
 
 void move_fwrite (byte *move, FILE *fout)
 {

@@ -152,7 +152,11 @@ typedef struct
 
 	//! Additional information about how to render the square
 	/** For example, highlight, shade, hide etc. See #RenderType*/
-	byte *render;
+	/* A note on why this is int* while board is byte*: the latter will
+	 be used by the engine, and so size is important. But render can be 
+	 big because it will be used only by the engine which will have only
+	 once instance of Pos*/
+	int *render;
 
 	//! State information required to completely describe the position
 	/** Some games are <i>stateful</i>, which means that the position can not
@@ -224,7 +228,7 @@ extern byte * (*game_movegen) (Pos *, Player);
 	pentaline_getmove() is a good example of a minimal getmove function.
  
  */
-extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte ** movp);
+extern int (*game_getmove) (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte ** movp, int **renderp);
 
 //! Takes a keypress and returns the move that it corresponds to.
 /**	@param pos
@@ -319,6 +323,10 @@ extern gchar *game_doc_strategy;
 
 //! User visible labels for white and black
 extern gchar *game_white_string, *game_black_string;
+
+
+//! Background image for the board
+extern char ** game_bg_pixmap;
 
 
 //! The columns that will be shown in the highscores.

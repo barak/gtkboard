@@ -43,13 +43,14 @@ extern Game
 	Othello, Samegame, Rgb, Fifteen, Memory, 
 	Tetris, Chess, Antichess, Hiq, Checkers, 
 	Plot4, Maze, Infiltrate, Hypermaze, Ataxx, 
-	Pentaline, Mastermind, Pacman, Flw, Wordtris
+	Pentaline, Mastermind, Pacman, Flw, Wordtris,
+	Ninemm
 	;
 
 // TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
 	&Antichess, &Ataxx, &Checkers, &Chess, &Fifteen, &Flw, &Hiq, 
-	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Othello,
+	&Hypermaze, &Infiltrate, &Mastermind, &Maze, &Memory, &Ninemm, &Othello,
 	&Pacman, &Pentaline, &Plot4, &Rgb, &Samegame, &Tetris, &Wordtris};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
@@ -97,6 +98,8 @@ int game_state_size = 0;
 SCORE_FIELD * game_score_fields = prefs_score_fields_def;
 gchar **game_score_field_names = prefs_score_field_names_def;
 
+char **game_bg_pixmap = NULL;
+
 Game *opt_game = NULL;
 FILE *opt_infile = NULL;
 FILE *opt_logfile = NULL;
@@ -116,7 +119,7 @@ gboolean impl_check ();
 void ui_check_who_won ();
 void game_setinitpos_def (Pos *);
 int ui_get_machine_move ();
-void ui_make_human_move (byte *);
+void ui_make_human_move (byte *, int *);
 void set_game_params ();
 
 float (*game_eval) (Pos *, Player) = NULL;
@@ -124,7 +127,7 @@ float (*game_eval_incr) (Pos *, Player, byte *) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
-int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **) = NULL;
+int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
 int (*game_getmove_kb) (Pos *, int, Player, byte **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
 int (*game_animate) (Pos *, byte **) = NULL;
@@ -186,9 +189,9 @@ int ui_animate_cb ()
 	if (game_animate (&cur_pos, &move) > 0)
 	{
 		if (game_animation_use_movstack)
-			ui_make_human_move (move);
+			ui_make_human_move (move, NULL);
 		else
-			move_apply_refresh (cur_pos.board, move);
+			board_apply_refresh (cur_pos.board, move, NULL);
 	}
 	return TRUE;
 }
@@ -244,6 +247,7 @@ void reset_game_params ()
 	game_rank_label = FILERANK_LABEL_TYPE_NONE;
 	game_score_fields = prefs_score_fields_def;
 	game_score_field_names = prefs_score_field_names_def;
+	game_bg_pixmap = NULL;
 	if (cur_pos.board) free (cur_pos.board);
 	if (cur_pos.render) free (cur_pos.render);
 	cur_pos.board = NULL;
@@ -325,8 +329,8 @@ void set_game_params ()
 
 	if (!engine_flag)
 	{
-		cur_pos.render = (byte *) malloc (board_wid * board_heit);
-		memset (cur_pos.render, 0, board_wid * board_heit);
+		cur_pos.render = (int *) malloc (sizeof (int) * board_wid * board_heit);
+		memset (cur_pos.render, 0, sizeof (int) * board_wid * board_heit);
 		assert (cur_pos.render);
 	}
 	
@@ -401,9 +405,10 @@ void ui_send_make_move ()
 	g_timeout_add (opt_delay, ui_get_machine_move, NULL);
 }
 
-void ui_make_human_move (byte *move)
+void ui_make_human_move (byte *move, int *rmove)
 {
-	move_apply_refresh (cur_pos.board, move);
+	board_apply_refresh (cur_pos.board, move, rmove);
+	if (!move) return;
 	if (move_fout)
 	{
 		fprintf (move_fout, "TAKE_MOVE ");
@@ -443,7 +448,7 @@ int ui_get_machine_move ()
 		if (opt_logfile)
 			move_fwrite (move, opt_logfile);
 	}
-	move_apply_refresh (cur_pos.board, move);
+	board_apply_refresh (cur_pos.board, move, NULL);
 	state_player = (state_player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
 	ui_check_who_won ();
@@ -806,6 +811,8 @@ void gui_init ()
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
 		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
+		// TODO: implement context help
+//		{ "/Help/_Context help", NULL, ui_set_context_help, 0, ""},
 	};
 	int i;
 	gdk_rgb_init ();
@@ -933,7 +940,7 @@ void gui_init ()
 	// leads to the whole window not popping up at once
 	gtk_widget_show_all (main_window);
 	
-	board_init ();
+	if (!opt_game) board_init ();
 
 	gtk_timeout_add (100, sb_update_periodic, NULL);
 

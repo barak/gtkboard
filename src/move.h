@@ -59,8 +59,6 @@ byte *mov_getinv (byte *, byte *);
 //! Applies the move to the board.
 void move_apply (byte *, byte *);
 
-void move_apply_refresh (byte *, byte *);
-
 //! Writes a move to the pipe in human friendly format
 void move_fwrite (byte *, FILE *);
 

@@ -87,7 +87,7 @@ char ** chess_pixmaps[] =
 
 
 void chess_init ();
-int chess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+int chess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType chess_who_won (Pos *, Player, char **);
 byte *chess_movegen (Pos *, Player );
 float chess_eval (Pos *, Player);
@@ -269,7 +269,7 @@ void chess_reset_uistate ()
 }
 
 int chess_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player player, 
-		byte ** movep)
+		byte ** movep, int ** rmovep)
 	/* Translate mouse clicks into move */
 {
 	static byte move [13];

@@ -127,7 +127,7 @@ typedef struct
 	int score;
 }Hiq_state;
 
-static int hiq_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+static int hiq_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType hiq_who_won (Pos *, Player , char **);
 char ** hiq_get_pixmap (int , int); 
 byte * hiq_movegen (char *, int);
@@ -214,7 +214,7 @@ ResultType hiq_who_won (Pos *pos, Player player, char **commp)
 
 
 int hiq_getmove 
-	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
+	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
 {
 	static byte move[10];
 	static int  oldx = -1, oldy = -1;

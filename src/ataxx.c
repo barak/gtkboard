@@ -58,7 +58,7 @@ Game Ataxx = { ATAXX_CELL_SIZE, ATAXX_BOARD_WID, ATAXX_BOARD_HEIT,
 float ataxx_eval (Pos *, Player);
 byte *ataxx_movegen (Pos *, Player);
 
-static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType ataxx_who_won (Pos *, Player , char **);
 char ** ataxx_get_pixmap (int, int);
 void ataxx_reset_uistate ();
@@ -322,7 +322,7 @@ void ataxx_reset_uistate ()
 	oldx = -1, oldy = -1;
 }
 
-int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
+int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int **rmovep)
 {
 	static byte move[32];
 	byte *mptr = move;

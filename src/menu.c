@@ -205,6 +205,22 @@ void sb_set_turn_image ()
 #endif
 }
 
+static void sb_set_cursor ()
+{
+	static GdkCursor *cursor_normal = NULL, *cursor_busy = NULL, 
+		*cursor_inactive = NULL;
+	// FIXME: is it ok to hard code the shape of the normal cursor?
+	if (!cursor_normal) cursor_normal = gdk_cursor_new (GDK_LEFT_PTR);
+	if (!cursor_busy) cursor_busy = gdk_cursor_new (GDK_WATCH);
+	if (!cursor_inactive) cursor_inactive = gdk_cursor_new (GDK_XTERM);
+	if (player_to_play == MACHINE && !ui_stopped)
+		gdk_window_set_cursor (board_area->window, cursor_busy);
+	else if (player_to_play == MACHINE && ui_stopped)
+		gdk_window_set_cursor (board_area->window, cursor_inactive);
+	else
+		gdk_window_set_cursor (board_area->window, cursor_normal);
+}
+
 void menu_board_flip_cb ()
 {
 	state_board_flipped = state_board_flipped ? FALSE : TRUE;
@@ -666,7 +682,7 @@ void menu_back_forw (gpointer data, guint what)
 				sb_error ("Initial position. Can't go back.", FALSE);
 				break;
 			}
-			move_apply_refresh (cur_pos.board, move);
+			board_apply_refresh (cur_pos.board, move, NULL);
 			if (!game_single_player)
 				state_player = (state_player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves --;
@@ -696,7 +712,7 @@ void menu_back_forw (gpointer data, guint what)
 				sb_error ("Final position. Can't go forward.", FALSE);
 				break;
 			}
-			move_apply_refresh (cur_pos.board, move);
+			board_apply_refresh (cur_pos.board, move, NULL);
 			if (!game_single_player)
 				state_player = (state_player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves ++;
@@ -877,6 +893,7 @@ void sb_update ()
 	}
 	gtk_label_set_text (GTK_LABEL(sb_score_label), sb_score_str);
 	sb_set_turn_image();
+	sb_set_cursor ();
 }
 
 gboolean sb_update_periodic ()

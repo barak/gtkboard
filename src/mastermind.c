@@ -43,6 +43,7 @@
 #define MASTERMIND_IS_MAIN_COL(x) ((x)>1&&(x)<6)
 
 char mastermind_colors[9] = {200, 200, 200, 200, 200, 200, 0, 0, 0};
+char mastermind_highlight_colors[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] = 
 {
@@ -74,7 +75,7 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 
 static ResultType mastermind_who_won (Pos *, Player, char **);
 static void mastermind_setinitpos (Pos *pos);
-int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**);
+int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
 int mastermind_getmove_kb (Pos *, int , Player, byte **);
 void mastermind_reset_uistate ();
 byte * mastermind_movegen (Pos *, int);
@@ -95,6 +96,7 @@ void mastermind_init ()
 	game_scorecmp = game_scorecmp_def_iscore;
 	game_score_fields = mastermind_score_fields;
 	game_score_field_names = mastermind_score_field_names;
+	game_highlight_colors = mastermind_highlight_colors;
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"
@@ -201,14 +203,35 @@ void mastermind_reset_uistate ()
 }
 
 int mastermind_getmove 
-  (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
+  (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
 {
+	static int rmove[7];
+	int *rp = rmove;
 	int tmp;
 	static byte move[4];
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
 	tmp = MASTERMIND_GET_SELECTION(x,y);
-	if (tmp > 0) { active = tmp; return 0; }
+	if (tmp > 0) 
+	{ 
+		int j;
+		active = tmp;
+		for (j=0; j<board_heit; j++)
+			if (pos->render [j * board_wid + (board_wid - 1)] == RENDER_HIGHLIGHT1)
+			{
+				if (j == y) break;
+				*rp++ = board_wid - 1;
+				*rp++ = j;
+				*rp++ = 0;
+				break;
+			}
+		*rp++ = board_wid - 1;
+		*rp++ = y;
+		*rp++ = RENDER_HIGHLIGHT1;
+		*rp++ = -1;
+		*rmovep = rmove;
+		return 0;
+	}
 	if (active < 1) return -1;
 	if (!MASTERMIND_IS_MAIN_COL(x)) return -1;
 	if (y == board_heit -1) return -1;

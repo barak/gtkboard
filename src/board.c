@@ -50,6 +50,13 @@ GdkGC *board_highlight_gcs[3] = {NULL, NULL, NULL};
 //! Images representing the pieces
 static GdkPixmap **pieces = NULL;
 
+//! Bitmaps to specify transparency for the pieces
+// *sigh* I wish we had a _high-level_ widget set
+static GdkBitmap **piece_masks = NULL;
+
+//! Backround image
+static GdkPixmap *board_bgimage = NULL;
+
 //! This is TRUE when the game is paused
 gboolean board_suspended = FALSE;
 
@@ -58,7 +65,7 @@ gboolean state_board_flipped = FALSE;
 
 static int cell_size, num_pieces;
 
-void ui_make_human_move (byte *move);
+extern void ui_make_human_move (byte *move, int *rmove);
 
 void board_set_game_params ()
 {
@@ -71,25 +78,67 @@ void board_set_cell (int x, int y, byte val)
 	cur_pos.board[y * board_wid + x] = val;
 }
 
+void board_apply_refresh (byte *board, byte *move, int *rmove)
+{
+	int i, x, y;
+	if (move)
+	{
+		for (i=0; move[3*i] != -1; i++)
+		{
+			x = move[3*i]; y = move[3*i+1];
+			cur_pos.board[y * board_wid + x] = move [3*i+2];
+			board_refresh_cell (x, y);
+		}
+	}
+	if (rmove)
+	{
+		for (i=0; rmove[3*i] != -1; i++)
+		{
+			x = rmove[3*i]; y = rmove[3*i+1];
+			cur_pos.render[y * board_wid + x] = rmove [3*i+2];
+			board_refresh_cell (x, y);
+		}
+	}
+}
+
 //! Draws the square (x, y). On the board it is shown at (real_x, real_y)
 void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 {
+	GdkGC *gc;
 	int parity = (board_wid * board_heit + x + y + 1) % 2;
 	if (opt_quiet) return;
+	gc = board_area->style->bg_gc[GTK_STATE_NORMAL];
+	gdk_gc_set_clip_mask (gc, NULL);
+	gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
 	if (cur_pos.board[y * board_wid + x] != 0 && !board_suspended)
 	{
+		if (board_bgimage)
+		{
+			gdk_gc_set_clip_mask (gc, 
+				piece_masks [cur_pos.board[y * board_wid + x] -1 + num_pieces * parity]);
+			gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
+		}
 		gdk_draw_pixmap (board_area->window, 
-				board_area->style->bg_gc[GTK_STATE_NORMAL],
-				(GdkDrawable *) pieces
+				gc, (GdkDrawable *) pieces
 				[cur_pos.board[y * board_wid + x] -1 + num_pieces * parity],
 				0, 0, real_x * cell_size, real_y * cell_size, 
 				cell_size, cell_size);
 	}
 	else
 	{
-		gdk_draw_rectangle (board_area->window, board_gcs[parity], 1, 
-				real_x * cell_size, real_y * cell_size,
-				cell_size, cell_size);
+		if (board_bgimage)
+		{
+			gdk_draw_pixmap (board_area->window,
+					gc, (GdkDrawable *) board_bgimage,
+					real_x * cell_size, real_y * cell_size,
+					real_x * cell_size, real_y * cell_size,
+					cell_size, cell_size
+					);
+		}
+		else
+			gdk_draw_rectangle (board_area->window, board_gcs[parity], 1, 
+					real_x * cell_size, real_y * cell_size,
+					cell_size, cell_size);
 	}
 	if (game_draw_cell_boundaries)
 	{
@@ -194,7 +243,7 @@ static void board_get_cell (GdkEventButton *event, int *row, int *col)
 }
 
 gint board_key_pressed (GtkWidget *widget, GdkEventKey *event, 
-		gpointer data, byte **movp)
+		gpointer data, byte **movp, int **rmovep)
 {
 	int status;
 	if (event->type != GDK_KEY_PRESS)
@@ -211,13 +260,14 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 {
 	int row, col, type;
 	int status = 0;
-	byte *move;
+	byte *move = NULL;
+	int *rmove = NULL;
 	if (!opt_game) return FALSE;
 	if (ui_gameover) return FALSE;
 	if (event->type == GDK_KEY_PRESS && 
 			!(((GdkEventKey *)event)->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
 	{
-		status = board_key_pressed (widget, (GdkEventKey *)event, data, &move);
+		status = board_key_pressed (widget, (GdkEventKey *)event, data, &move, &rmove);
 		if (status < 0) return FALSE;
 	}
 	else
@@ -250,7 +300,7 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 			default:
 				return FALSE;
 		}
-		status = game_getmove (&cur_pos, row, col, type, state_player, &move);
+		status = game_getmove (&cur_pos, row, col, type, state_player, &move, &rmove);
 		if (status < 0)
 		{
 			sb_error ("Illegal Move", FALSE);
@@ -258,9 +308,14 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 		}
 	}
 	if (status == 0)
+	{
+		ui_make_human_move (NULL, rmove);
+		if (rmove)
+			menu_start_stop_game (NULL, MENU_START_GAME); 
 		return FALSE;
+	}
 	menu_start_stop_game (NULL, MENU_START_GAME); 
-	ui_make_human_move (move);
+	ui_make_human_move (move, rmove);
 	return FALSE;
 }
 
@@ -273,8 +328,12 @@ void board_free ()
 		/* It may be the case that the latter half of pieces[] is a copy
 		   of the first half */
 		for (i=0; i<num_pieces; i++)
+		{
 			if (pieces[i] == pieces[i + num_pieces])
 				pieces[i] = NULL;
+			if (piece_masks[i] == piece_masks[i + num_pieces])
+				piece_masks[i] = NULL;
+		}
 		for (i=0; i<2*num_pieces; i++)
 		{
 			if (pieces[i]) 
@@ -282,9 +341,21 @@ void board_free ()
 				gdk_pixmap_unref (pieces[i]);
 				pieces[i] = NULL;
 			}
+			if (piece_masks[i]) 
+			{
+				gdk_pixmap_unref (piece_masks[i]);
+				piece_masks[i] = NULL;
+			}
 		}
 		free (pieces);
+		free (piece_masks);
 		pieces = NULL;
+		piece_masks = NULL;
+	}
+	if (board_bgimage)
+	{
+		free (board_bgimage);
+		board_bgimage = NULL;
 	}
 	if (board_rowbox_real)
 	{
@@ -376,6 +447,8 @@ void board_init ()
 #endif
 	pieces = (GdkPixmap **) malloc (2 * num_pieces * sizeof (GdkPixmap *));
 	g_assert (pieces);
+	piece_masks = (GdkBitmap **) malloc (2 * num_pieces * sizeof (GdkBitmap *));
+	g_assert (piece_masks);
 	for (i=0; i<2*num_pieces; i++)
 		pieces[i] = NULL;
 
@@ -426,6 +499,7 @@ void board_init ()
 					&board_highlight_colors[i], &board_highlight_gcs[i], 
 					board_colormap, board_area);
 
+	g_assert (num_pieces);
 	for (i=0; i<2*num_pieces; i++)
 	{
 		char **pixmap = NULL;
@@ -436,6 +510,7 @@ void board_init ()
 					&& colors[2] == colors[5])
 			{
 				pieces[i] = pieces[i-num_pieces];
+				piece_masks[i] = piece_masks[i-num_pieces];
 				continue;
 			}
 		}
@@ -451,6 +526,7 @@ void board_init ()
 						cell_size, cell_size, GDK_RGB_DITHER_MAX,
 						rgbbuf, cell_size * 3);
 			}
+			piece_masks[i] = NULL;
 		}			
 		else 
 		{
@@ -462,11 +538,21 @@ void board_init ()
 			if (pixmap)
 			{
 				pieces[i] = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-					board_colormap, NULL, board_colors + i / num_pieces, pixmap);
+					board_colormap, &piece_masks[i], 
+					board_colors + i / num_pieces, pixmap);
 				assert (pieces[i]);
 			}
+			else piece_masks[i] = NULL;
 		}
 	}
+
+	if (game_bg_pixmap)
+	{
+		board_bgimage = gdk_pixmap_colormap_create_from_xpm_d (NULL,
+			board_colormap, NULL, board_colors, game_bg_pixmap);
+		assert (board_bgimage);
+	}
+
 	gdk_gc_destroy (def_gc);
 }
 

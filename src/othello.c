@@ -49,7 +49,7 @@ int othello_initpos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] =
 #define OTHELLO_EMPTY 0
 
 
-int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 float othello_eval (Pos *, Player);
@@ -129,7 +129,7 @@ static int get_sandwich_len (Pos *pos, int x0, int y0, int dx, int dy, byte play
 }
 
 int othello_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
-		byte **movp)
+		byte **movp, int ** rmovep)
 {
 	int i, j, sw_len, found=0;
 	static byte move[128];

@@ -83,7 +83,6 @@ void flw_find_chain (char chain[FLW_LEN+1][FLW_LEN+1])
 	int i, j, idx, found;
 	int done[FLW_LEN];
 	char word[FLW_LEN+1];
-	srand (time (0));
 	do
 	{
 		strncpy (word, flwords[rand() % num_flwords], FLW_LEN+1);
@@ -111,7 +110,7 @@ void flw_find_chain (char chain[FLW_LEN+1][FLW_LEN+1])
 }
 
 static void flw_init ();
-int flw_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+int flw_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 int flw_getmove_kb (Pos *, int, Player, byte **);
 void flw_free ();
 ResultType flw_who_won (Pos *, Player , char **);
@@ -177,7 +176,7 @@ ResultType flw_who_won (Pos *pos, Player to_play, char **commp)
 }
 
 int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
-		byte **movp)
+		byte **movp, int ** rmovep)
 {
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;

@@ -45,7 +45,7 @@ Game Fifteen = { FIFTEEN_CELL_SIZE, FIFTEEN_BOARD_WID, FIFTEEN_BOARD_HEIT,
 static void fifteen_setinitpos (Pos *pos);
 static char ** fifteen_get_pixmap (int idx, int color);
 static guchar * fifteen_get_rgbmap (int idx, int color);
-int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player, byte **);
+int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player, byte **, int **);
 static int fifteen_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
 		byte **move);
 void fifteen_free ();
@@ -175,7 +175,7 @@ void fifteen_setinitpos (Pos *pos)
 
 
 int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
-		byte **movp)
+		byte **movp, int ** rmovep)
 {
 	int k;
 	static byte move[16];

@@ -88,7 +88,7 @@ static char ** antichess_pixmaps[] =
 
 
 void antichess_init ();
-int antichess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
+int antichess_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType antichess_who_won (Pos *, Player, char **);
 byte *antichess_movegen (Pos *, Player );
 float antichess_eval (Pos *, Player);
@@ -238,7 +238,7 @@ void antichess_free ()
 }
 
 int antichess_getmove (Pos *pos, int x, int y, 
-		GtkboardEventType type, Player player, byte ** movep)
+		GtkboardEventType type, Player player, byte ** movep, int ** rmovep)
 	/* Translate mouse clicks into move */
 {
 	static byte move [7];
