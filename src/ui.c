@@ -216,6 +216,8 @@ void ui_cleanup ()
 {
 	if (opt_game)
 		ui_terminate_game();
+	sound_stop ();
+	prefs_write_config_file ();
 	signal (SIGCHLD, ignore);
 	if (engine_pid > 0)
 		kill (engine_pid, SIGKILL);
@@ -503,6 +505,8 @@ void ui_check_who_won()
 				menu_put_level (next_level->name);
 		}
 	}
+	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "LOST", 4))
+		sound_play (SOUND_LOST);
 }
 
 void ui_send_make_move ()
@@ -1032,6 +1036,27 @@ void gui_init ()
 	menu_main = gtk_item_factory_get_widget (menu_factory, "<main>");
 	gtk_widget_set_state (gtk_item_factory_get_widget (menu_factory, 
 				"/Settings/Player/File"), GTK_STATE_INSENSITIVE);
+
+	for (i=1; i<=NUM_RECENT_GAMES; i++)
+	{
+		gchar *tmp;
+		gchar *gamename;
+		gamename = prefs_get_config_val (tmp = g_strdup_printf ("recent_game_%d", i));
+		g_free (tmp);
+		if (gamename && gamename[0] != '\0')
+//		{
+			/*
+			GtkWidget * child;
+			GtkMenu *game_menu;
+			game_menu = (GtkMenu *) gtk_item_factory_get_widget (menu_factory, "/Game");
+			assert (game_menu);
+			child = gtk_menu_item_new_with_label (gamename);
+			gtk_menu_shell_insert (GTK_MENU_SHELL (game_menu),  child, i);
+			*/
+			menu_insert_game_item (gamename, i);
+//		}
+	}
+
 	menu_set_eval_function ();
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox), menu_main, FALSE, FALSE, 0);
@@ -1280,13 +1305,20 @@ static int get_seed ()
 	g_get_current_time (&timeval);
 	return timeval.tv_usec;
 }
-                                                                                                               
-
+                         
+//! A wrapper around sound_init so that we can return a value to g_idle_add
+gboolean ui_sound_init (gpointer data)
+{
+	sound_init ();
+	sound_play (SOUND_PROGRAM_START);
+	return FALSE;
+}
 
 int main (int argc, char **argv)
 {
 	srandom (get_seed());
 	reset_game_params ();
+	prefs_read_config_file ();
 	parse_opts (argc, argv);
 	ui_start_player ();
 	
@@ -1299,9 +1331,8 @@ int main (int argc, char **argv)
 		gtk_init(&argc,&argv);    
 		gdk_rgb_init();
 		gui_init ();
-		sound_play (SOUND_PROGRAM_START);
+		g_idle_add ((GSourceFunc) ui_sound_init, NULL);
 		gtk_main ();
-		sound_stop ();
 	}
 	else	// background mode
 	{

@@ -45,6 +45,7 @@ void menu_start_game ();
 void menu_put_game ();
 void menu_board_flip_cb ();
 void menu_set_game (gpointer, guint, GtkWidget *);
+void menu_insert_game_item (gchar *, int);
 void menu_put_level (char *);
 void sb_set_score (gchar *score);
 void sb_update ();

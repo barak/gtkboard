@@ -4,6 +4,7 @@
 #include <glib.h>
 
 #include "sound.h"
+#include "prefs.h"
 
 #ifdef HAVE_SDL
 
@@ -18,8 +19,9 @@ char *sound_dir = NULL;
 
 static void find_sound_dir ()
 {
-	// TODO: eventually we will allow the user to set the sound directory in the prefs file
-	sound_dir = g_strdup_printf ("%s/sounds/gtkboard", DATADIR);
+	sound_dir = prefs_get_config_val ("sound_dir");
+	if (!sound_dir)
+		sound_dir = g_strdup_printf ("%s/sounds/gtkboard", DATADIR);
 	if (!g_file_test (sound_dir, G_FILE_TEST_IS_DIR))
 	{
 		fprintf (stderr, "Sound directory %s not found\n", sound_dir);
@@ -101,6 +103,9 @@ void sound_play (SoundEvent event)
 			break;
 		case SOUND_WON:
 			file = "won.ogg";
+			break;
+		case SOUND_LOST:
+			file = "lost.ogg";
 			break;
 		case SOUND_USER_MOVE:
 			file = "user_move.ogg";

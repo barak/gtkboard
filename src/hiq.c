@@ -242,7 +242,7 @@ InputType hiq_event_handler
 		rmove[2] = RENDER_HIGHLIGHT1;
 		rmove[3] = -1;
 		move_info_p->rmove = rmove;
-		return INPUT_LEGAL;
+		return INPUT_NOTYET;
 	}
 
 	rmove[0] = oldx;

@@ -36,6 +36,15 @@ SCORE_FIELD prefs_score_fields_def[] =
 
 gchar* prefs_score_field_names_def[] = {"User", "Score", "Time", "Date", NULL};
 
+ConfigVar prefs_config_vars[] = 
+{
+	{ "sound_dir", "directory to load sounds from", NULL, NULL, NULL },
+	{ "recent_game_1", "recent game 1", NULL, NULL, NULL },
+	{ "recent_game_2", "recent game 1", NULL, NULL, NULL },
+	{ "recent_game_3", "recent game 1", NULL, NULL, NULL },
+	{ NULL} 
+};
+
 static void prefs_strip_special_chars (gchar *str)
 	// $ is the field separator in our scores file
 	// '<' and '>' are used for markup in GtkLabel
@@ -427,4 +436,110 @@ void prefs_zap_highscores ()
 		return;
 #endif
 	num_highscores = 0;
+}
+
+gchar *prefs_get_config_val (gchar *key)
+{
+	ConfigVar *entry = prefs_config_vars;
+	while (entry->key)
+	{
+		if (strcasecmp (entry->key, key) == 0)
+		{
+			if (entry->cur_val) return entry->cur_val;
+			if (entry->def_val) return entry->def_val;
+			return NULL;
+		}
+		entry++;
+	}
+	fprintf (stderr, "warning: prefs_get_config_val (): no such key: %s", key);
+	return NULL;
+}
+
+void prefs_set_config_val (char *key, char *value)
+{
+	ConfigVar *entry = prefs_config_vars;
+	while (entry->key)
+	{
+		if (strcasecmp (entry->key, key) == 0)
+		{
+			// NOTE: here the old value should not be freed because it is static
+			entry->cur_val = g_strdup (value);
+			return;
+		}
+		entry++;
+	}
+	fprintf (stderr, "Warning: invalid key %s in config file\n", key);
+}
+
+void prefs_write_config_file ()
+{
+	ConfigVar *entry = prefs_config_vars;
+	char *prefs_file;
+	FILE *out;
+	prefs_file = g_strdup_printf ("%s/%s", getenv ("HOME"), ".gtkboard/gtkboardrc");
+	out = fopen (prefs_file, "w");
+	if (!out)
+	{
+		fprintf (stderr, "Couldn't open config file %s for writing: ", prefs_file);
+		perror (NULL);
+		g_free (prefs_file);
+		return;
+	}
+	g_free (prefs_file);
+	
+	while (entry->key)
+	{
+		if (entry->description)
+			fprintf (out, "#%s\n", entry->description);
+		if (entry->comment)
+			fprintf (out, "#\n#%s\n", entry->comment);
+		fprintf (out, "%s = %s\n", entry->key, entry->cur_val ? entry->cur_val : "");
+		entry++;
+	}
+	
+	fclose (out);
+}
+
+void prefs_read_config_file ()
+{
+	char linebuf[1024];
+	char *prefs_file;
+	FILE *in;
+	int line_num = 0;
+	if (!prefs_first_time ())
+		return;
+	prefs_file = g_strdup_printf ("%s/%s", getenv ("HOME"), ".gtkboard/gtkboardrc");
+	in = fopen (prefs_file, "r");
+	if (!in)
+	{
+		fprintf (stderr, "Couldn't open config file %s for reading: ", prefs_file);
+		perror (NULL);
+		g_free (prefs_file);
+		return;
+	}
+	g_free (prefs_file);
+	
+	while (!feof (in))
+	{
+		gchar **tokens;
+		line_num ++;
+		fgets (linebuf, 1024, in);
+		g_strstrip (linebuf);
+		if (linebuf[0] == '#' || linebuf[0] == '\0')
+			continue;
+		tokens = g_strsplit (linebuf, "=", 2);
+		if (tokens[0] == NULL || tokens[1] == NULL)
+		{
+			fprintf (stderr, "Warning: line %d of config file (%s) not of the form \"key = value\"\n",
+				   line_num, linebuf);
+			g_strfreev (tokens);
+			continue;
+		}
+		g_strstrip (tokens[0]);
+		g_strstrip (tokens[1]);
+		prefs_set_config_val (tokens[0], tokens[1][0] ? tokens[1] : NULL);
+		g_strfreev (tokens);
+	}
+	
+	fclose (in);
 }

@@ -27,6 +27,7 @@
 #include "ui_common.h"
 #include "aaball.h"
 #include "board.h"
+#include "prefs.h"
 
 GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
@@ -40,6 +41,7 @@ gchar sb_score_str[SB_SCORE_STRLEN] = "";
 GtkItemFactory *menu_factory = NULL;
 
 void sb_messagebar_message (gchar *);
+void menu_cleanup_var_menus ();
 
 static char * menu_paths_sens_machine_thinking[] = 
 {
@@ -679,6 +681,74 @@ void menu_set_level (gpointer data, guint which, GtkWidget *widget)
 	ui_start_game();
 }
 
+GtkWidget *menu_recent_widgets[NUM_RECENT_GAMES] = {NULL};
+
+
+static void menu_recent_game_cb (GtkWidget *widget, gpointer gamename)
+{
+	int i;
+	gchar *name = gamename;
+	for (i=0; i<num_games; i++)
+	{
+		if (!strcasecmp (games[i]->name, name))
+		{
+			menu_cleanup_var_menus ();
+			opt_game = games[i];
+			menu_put_game ();
+		}
+	}
+}
+
+void menu_insert_game_item (gchar *gamename, int position)
+{
+	GtkWidget * child;
+	GtkMenu *game_menu;
+	int offset = 1; // number of menu entries before start of recent items
+	game_menu = (GtkMenu *) gtk_item_factory_get_widget (menu_factory, "/Game");
+	assert (game_menu);
+	child = gtk_menu_item_new_with_label (gamename);
+	gtk_menu_shell_insert (GTK_MENU_SHELL (game_menu), child, position - 1 + offset);
+	gtk_widget_show(GTK_WIDGET (child));
+	menu_recent_widgets [position-1] = child;
+	gtk_signal_connect (GTK_OBJECT (child), "activate", GTK_SIGNAL_FUNC (menu_recent_game_cb), (gpointer) gamename);
+}
+
+void menu_insert_recent_game (gchar *gamename)
+{
+	int i, j;
+	gchar *tmp;
+	gchar *tmpname;
+	for (i=0; i<NUM_RECENT_GAMES; i++)
+	{
+		tmpname = prefs_get_config_val (tmp = g_strdup_printf ("recent_game_%d", i+1));
+		g_free (tmp);
+		if (!tmpname) break;
+		if (!strcasecmp (gamename, tmpname))
+			break;
+	}
+	
+	if (tmpname)
+	{
+		GtkWidget *wid;
+		gtk_widget_destroy (menu_recent_widgets[i == NUM_RECENT_GAMES ? i - 1 : i]);
+		menu_recent_widgets[i] = NULL;
+		gtk_item_factory_delete_item (menu_factory, tmp = g_strdup_printf ("/Game/%s", tmpname));
+		g_free (tmp);
+	}
+	
+	for (j=i; j>0; j--)
+	{
+		if (j == NUM_RECENT_GAMES) continue;
+		tmpname = prefs_get_config_val (tmp = g_strdup_printf ("recent_game_%d", j));
+		g_free (tmp);
+		prefs_set_config_val (tmp = g_strdup_printf ("recent_game_%d", j+1), tmpname);
+		menu_recent_widgets [j] = menu_recent_widgets[j-1];
+	}
+	prefs_set_config_val ("recent_game_1",  gamename);
+
+	menu_insert_game_item (gamename, 1);
+}
+
 void menu_start_game ()
 {
 	ui_start_game ();
@@ -710,8 +780,8 @@ void menu_start_game ()
 			4, help_items, NULL);
 	}
 	
-		gtk_label_set_text (GTK_LABEL (sb_game_label), 
-				menu_get_game_name_with_level());
+	gtk_label_set_text (GTK_LABEL (sb_game_label), 
+			menu_get_game_name_with_level());
 
 	if (game_levels)
 	{
@@ -735,21 +805,18 @@ void menu_start_game ()
 			level_items[i].callback = menu_set_level;
 			level_items[i].item_type = i == 0 ? "<RadioItem>":  
 				g_strdup_printf ("/Game/Levels/%s", game_levels[0].name);
+			// FIXME: possible memory leak here
 		}
 		gtk_item_factory_create_items (menu_factory, 
 				cnt, level_items, NULL);
-		
 	}
+
+	menu_insert_recent_game (menu_get_game_name ());
 }
 
-void menu_set_game (gpointer data, guint which, GtkWidget *widget)
+void menu_cleanup_var_menus ()
 {
 	gchar *tempstr;
-	if (!GTK_CHECK_MENU_ITEM(widget)->active)
-		return;
-	if (!state_gui_active)
-		return;
-	g_assert (which >= 0 && which < num_games);
 	
 	if (opt_game)
 	{
@@ -766,6 +833,17 @@ void menu_set_game (gpointer data, guint which, GtkWidget *widget)
 
 	if (opt_game)
 		ui_terminate_game ();
+}
+
+void menu_set_game (gpointer data, guint which, GtkWidget *widget)
+{
+	if (!GTK_CHECK_MENU_ITEM(widget)->active)
+		return;
+	if (!state_gui_active)
+		return;
+	g_assert (which >= 0 && which < num_games);
+	
+	menu_cleanup_var_menus ();
 	opt_game = games[which];
 	menu_start_game ();
 	sb_update ();
