@@ -1976,6 +1976,7 @@ int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
 	if (y == 0 || y == board_heit - 1) return 0;
+	if (pos->board [y * board_wid + x] == 0) return 0;
 	flw_curx = x;
 	flw_cury = y;
 	return 0;

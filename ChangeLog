@@ -45,3 +45,4 @@
 	* mastermind.c: changed the notation so that num_white doesn't count the balls in correct positions as well, as suggested by Thomas Klausner
 	* mastermind.c: implemented who_won
 	* mastermind.c: fixed bug which caused balls to become dice on resetting the game
+	* flw.c: fixed bug, pointed out by Thomas Klausner, where return wouldn't work sometimes
