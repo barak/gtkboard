@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <ctype.h>
+#include <libgen.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -129,6 +130,7 @@ int opt_black = NONE;
 int ui_white = NONE;
 int ui_black = NONE;
 int opt_verbose = 0;
+static gboolean opt_html_help = FALSE;
 
 extern void engine_main (int, int);
 extern ResultType engine_eval (Pos *, Player, float *);
@@ -170,6 +172,7 @@ GtkWidget *main_window, *board_area = NULL;
 GtkWidget *board_rowbox = NULL, *board_colbox = NULL;
 
 static void ignore() {}
+static void html_help_gen ();
 
 void ui_cleanup ()
 {
@@ -598,7 +601,7 @@ static void parse_opts (int argc, char **argv)
 {
 	char *wheur = NULL, *bheur = NULL;
 	int c, i;
-	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:qvh")) != -1)
+	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:Hqvh")) != -1)
 	{
 		switch (c)
 		{
@@ -708,6 +711,9 @@ static void parse_opts (int argc, char **argv)
 				opt_delay = atoi (optarg);
 				if (opt_delay <= 0)
 					opt_delay = 3000;
+				break;
+			case 'H':
+				opt_html_help = TRUE;
 				break;
 			case 'q':
 				opt_quiet = 1;
@@ -823,6 +829,12 @@ static void parse_opts (int argc, char **argv)
 	}
 	ui_white = opt_white;
 	ui_black = opt_black;
+
+	if (opt_html_help)
+	{
+		html_help_gen ();
+		exit (0);
+	}
 }
 
 void gui_init ()
@@ -1082,6 +1094,54 @@ void gui_init ()
 	menu_put_player (TRUE);
 	if (!opt_game) sb_message ("Select a game from the Game menu", FALSE);
 	sb_update ();
+}
+
+void html_help_gen_game (Game *game)
+{
+	FILE *fout;
+	gchar *filename;
+	filename = g_strdup_printf ("%s.html", game->name);
+	fout = fopen (filename, "w");
+	if (!fout)
+	{
+		fprintf (stderr, "couldn't open output file %s: ", filename);
+		perror (NULL);
+		g_free (filename);
+		return;
+	}
+	g_free (filename);
+	opt_game = game;
+	game->game_init(game);
+	fprintf (fout, 
+			"<h1>%s</h1>"
+			"%s"
+			"<h2>Rules</h2> <pre>%s</pre>"
+			"<h2>Strategy</h2> <pre>%s</pre>",
+			game->name,
+			game_single_player ? "Single player game" : "Two player game",
+			game_doc_rules ? game_doc_rules : "Not yet written",
+			game_doc_strategy ? game_doc_strategy : "Not yet written"
+			);
+	fclose (fout);
+}
+
+void html_help_gen ()
+{
+	int i;
+	char dirbuf[1024];
+	getcwd (dirbuf, 1024);
+	if (strcmp (basename (dirbuf), "www"))
+	{
+		fprintf (stderr, "To generate html help, you must be in the \"www\" directory.\n");
+		exit (1);
+	}
+	if (opt_game)
+	{
+		html_help_gen_game (opt_game);
+		return;
+	}
+	for (i=0; i<num_games; i++)
+		html_help_gen_game (games[i]);
 }
 
 int main (int argc, char **argv)
