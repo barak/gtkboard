@@ -42,7 +42,7 @@ gboolean prefs_load_scores (gchar *);
 gboolean prefs_save_scores (gchar *);
 void prefs_show_scores ();
 void prefs_zap_highscores ();
-void prefs_add_highscore (gchar *, int);
+gboolean prefs_add_highscore (gchar *, int);
 int prefs_scorecmp_dscore (gchar *, int, gchar*, int);
 int prefs_scorecmp_iscore (gchar *, int, gchar*, int);
 int prefs_scorecmp_time (gchar *, int, gchar*, int);

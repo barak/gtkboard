@@ -44,6 +44,7 @@
 #include "menu.h"
 #include "ui_common.h"
 #include "board.h"
+#include "sound.h"
 
 //! Default thinking time per move
 #define DEF_TIME_PER_MOVE 2000
@@ -482,7 +483,11 @@ void ui_check_who_won()
 	sb_update ();
 	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "WON", 3))
 	{
-		prefs_add_highscore (line, sb_get_human_time ());
+		gboolean retval = prefs_add_highscore (line, sb_get_human_time ());
+		if (retval)
+			sound_play (SOUND_HIGHSCORE);
+		else 
+			sound_play (SOUND_WON);
 		if (game_levels)
 		{
 			GameLevel *next_level = game_levels;
@@ -534,6 +539,7 @@ void ui_make_human_move (byte *move, int *rmove)
 		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	}
 	cur_pos.num_moves ++;
+	sound_play (SOUND_USER_MOVE);
 	ui_check_who_won ();
 	sb_update ();
 	ui_send_make_move ();
@@ -568,6 +574,7 @@ int ui_get_machine_move ()
 	if (!game_single_player)
 		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
+	sound_play (SOUND_MACHINE_MOVE);
 	ui_check_who_won ();
 	sb_update ();
 	ui_send_make_move ();
@@ -1292,7 +1299,9 @@ int main (int argc, char **argv)
 		gtk_init(&argc,&argv);    
 		gdk_rgb_init();
 		gui_init ();
+		sound_play (SOUND_PROGRAM_START);
 		gtk_main ();
+		sound_exit ();
 	}
 	else	// background mode
 	{

@@ -59,6 +59,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 
 EXEEXT = @EXEEXT@
 OBJEXT = @OBJEXT@
@@ -73,12 +75,15 @@ GTK_LIBS = @GTK_LIBS@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
+SDL_CFLAGS = @SDL_CFLAGS@
+SDL_CONFIG = @SDL_CONFIG@
+SDL_LIBS = @SDL_LIBS@
 STRIP = @STRIP@
 VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-AM_CFLAGS = -Wall -g -O3 -Wno-unused
+AM_CFLAGS = -Wall -Wno-unused
 
 INCLUDES = @GTK_CFLAGS@
 
@@ -95,6 +100,7 @@ gtkboard_SOURCES = \
 	board.c\
 	menu.c\
 	prefs.c\
+	sound.c\
 	ui.c\
 	\
 	aaball.c\
@@ -146,6 +152,7 @@ noinst_HEADERS = \
 	move.h\
 	prefs.h\
 	stack.h\
+	sound.h\
 	ui_common.h\
 	ui.h\
 	\
@@ -159,8 +166,8 @@ bin_PROGRAMS = gtkboard$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_gtkboard_OBJECTS = board.$(OBJEXT) menu.$(OBJEXT) prefs.$(OBJEXT) \
-	ui.$(OBJEXT) aaball.$(OBJEXT) ab.$(OBJEXT) engine.$(OBJEXT) \
-	hash.$(OBJEXT) move.$(OBJEXT) stack.$(OBJEXT) \
+	sound.$(OBJEXT) ui.$(OBJEXT) aaball.$(OBJEXT) ab.$(OBJEXT) \
+	engine.$(OBJEXT) hash.$(OBJEXT) move.$(OBJEXT) stack.$(OBJEXT) \
 	antichess.$(OBJEXT) ataxx.$(OBJEXT) blet.$(OBJEXT) \
 	breakthrough.$(OBJEXT) checkers.$(OBJEXT) chess.$(OBJEXT) \
 	cpento.$(OBJEXT) dirmaze.$(OBJEXT) dotsandboxes.$(OBJEXT) \
@@ -201,10 +208,10 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/pacman.Po ./$(DEPDIR)/pentaline.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/plot4.Po ./$(DEPDIR)/prefs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/quarto.Po ./$(DEPDIR)/rgb.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/samegame.Po ./$(DEPDIR)/stack.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stopgate.Po ./$(DEPDIR)/tetris.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/towers.Po ./$(DEPDIR)/ui.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/wordtris.Po
+@AMDEP_TRUE@	./$(DEPDIR)/samegame.Po ./$(DEPDIR)/sound.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stack.Po ./$(DEPDIR)/stopgate.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tetris.Po ./$(DEPDIR)/towers.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ui.Po ./$(DEPDIR)/wordtris.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -294,6 +301,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quarto.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rgb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/samegame.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stopgate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tetris.Po@am__quote@

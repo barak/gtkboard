@@ -1,4 +1,4 @@
-AM_CFLAGS = -Wall -g -O3 -Wno-unused
+AM_CFLAGS = -Wall -Wno-unused
 
 INCLUDES = @GTK_CFLAGS@
 
@@ -16,6 +16,7 @@ gtkboard_SOURCES = 	\
 	board.c\
 	menu.c\
 	prefs.c\
+	sound.c\
 	ui.c\
 	\
 	aaball.c\
@@ -66,6 +67,7 @@ noinst_HEADERS =  \
 	move.h\
 	prefs.h\
 	stack.h\
+	sound.h\
 	ui_common.h\
 	ui.h\
 	\

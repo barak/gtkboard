@@ -31,6 +31,7 @@
 #include "ui_common.h"
 #include "ui.h"
 #include "menu.h"
+#include "sound.h"
 
 //! for showing names of rows and columns
 static GtkWidget *board_rowbox_real = NULL, *board_colbox_real = NULL;
@@ -409,6 +410,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 				: g_strdup_printf ("Illegal move");
 			sb_error (tmpstr, FALSE);
 			g_free (tmpstr);
+			sound_play (SOUND_ILLEGAL_MOVE);
 		}
 	}
 	if (status <= 0)

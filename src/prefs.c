@@ -374,25 +374,26 @@ void prefs_show_username_dialog ()
 #endif
 }
 
-void prefs_add_highscore (gchar *score, int temps)
+gboolean prefs_add_highscore (gchar *score, int temps)
 	// the argument score is the string returned by game_who_won. We expect
 	// it to have a substring which is an integer
 {
 	int i, j;
 	char *realscore = strpbrk (score, "0123456789");
 	if (!realscore) realscore = "";
-	if (!game_scorecmp) return;
+	if (!game_scorecmp) return FALSE;
 	for (i=0; i<num_highscores; i++)
 		if (game_scorecmp (realscore, temps, 
 					scores[i].score, scores[i].time) > 0)
 			break;
-	if (i == MAX_HIGHSCORES) return;
+	if (i == MAX_HIGHSCORES) return FALSE;
 	highscore_index = i;
 	strncpy (highscore_score, realscore, 31);
 	prefs_strip_special_chars (highscore_score);
 	highscore_temps = temps;
 	highscore_date = time (0);
 	prefs_show_username_dialog ();
+	return TRUE;
 }
 
 void prefs_zap_highscores ()
