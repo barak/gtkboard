@@ -31,10 +31,10 @@ static void find_sound_dir ()
 void sound_init()
 {
 #ifdef HAVE_SDL
-	int audio_rate = 22050;
+	int audio_rate = 44100;
 	Uint16 audio_format = AUDIO_S16; /* 16-bit stereo */
 	int audio_channels = 2;
-	int audio_buffers = 4096;
+	int audio_buffers = 512;
 
 	static gboolean first = TRUE;
 	if (!first) return;
