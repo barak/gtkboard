@@ -214,7 +214,7 @@ ResultType memory_who_won (Pos *pos, Player to_play, char **commp)
 			"Missed:", pos->state ? ((Memory_state *)pos->state)->num_moves : 0,
 			"Found:", found);
 	*commp = comment;
-	return (found == board_wid * board_heit / 2) ? RESULT_MISC : RESULT_NOTYET;
+	return (found == board_wid * board_heit / 2) ? RESULT_WON : RESULT_NOTYET;
 }
 
 

@@ -1967,7 +1967,7 @@ ResultType flw_who_won (Pos *pos, Player to_play, char **commp)
 		if (pos->board [i] != pos->board [board_wid + i])
 			return RESULT_NOTYET;
 	*commp = comment;
-	return RESULT_MISC;
+	return RESULT_WON;
 }
 
 int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 

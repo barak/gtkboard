@@ -92,6 +92,7 @@ ResultType chess_who_won (Pos *, Player, char **);
 byte *chess_movegen (Pos *, Player );
 float chess_eval (Pos *, Player);
 void *chess_newstate (Pos *, byte *);
+void chess_reset_uistate ();
 	
 Game Chess = 
 	{ CHESS_CELL_SIZE, CHESS_BOARD_WID, CHESS_BOARD_HEIT, 
@@ -121,6 +122,7 @@ void chess_init ()
 	game_newstate = chess_newstate;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_reset_uistate = chess_reset_uistate;
 	game_doc_about = 
 		"Chess\n"
 		"Two player game\n"
@@ -257,13 +259,20 @@ static int oppcolor (byte *pos, int oldx, int oldy, int x, int y)
 	return 0;
 }
 
+static int oldx = -1, oldy = -1, oldval = -1;
+static int prom = 0, prom_x, prom_oldx;
+	
+void chess_reset_uistate ()
+{
+	oldx = -1, oldy = -1, oldval = -1;
+	prom = 0;
+}
+
 int chess_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player player, 
 		byte ** movep)
 	/* Translate mouse clicks into move */
 {
 	static byte move [13];
-	static int oldx = -1, oldy = -1, oldval = -1;
-	static int prom = 0, prom_x, prom_oldx;
 	int val;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;

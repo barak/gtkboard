@@ -57,9 +57,9 @@ static char *pixmap_get_color(int fg, int bg, float ratio)
 		b1 = bg >> 16;
 		b2 = (bg >> 8) & 0xff;
 		b3 = bg & 0xff;
-		w1 = (1 - ratio) * f1 + ratio * b1;
-		w2 = (1 - ratio) * f2 + ratio * b2;
-		w3 = (1 - ratio) * f3 + ratio * b3;
+		w1 =  (1 - ratio) * f1 +  (ratio) * b1;
+		w2 =  (1 - ratio) * f2 +  (ratio) * b2;
+		w3 =  (1 - ratio) * f3 +  (ratio) * b3;
 		lf = sqrt(f1 * f1 + f2 * f2 + f3 * f3);
 		lb = sqrt(b1 * b1 + b2 * b2 + b3 * b3);
 		lw = sqrt(w1 * w1 + w2 * w2 + w3 * w3);

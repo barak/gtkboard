@@ -71,6 +71,8 @@ void plot4_init ()
 	game_who_won = plot4_who_won;
 	game_setinitpos = plot4_setinitpos;
 	game_get_pixmap = plot4_get_pixmap;
+	game_white_string = "Green";
+	game_black_string = "Yellow";
 	game_doc_about = 
 		"Plot4\n"
 		"Two player game\n"
@@ -92,7 +94,7 @@ void plot4_setinitpos (Pos *pos)
 ResultType plot4_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
-	char *who_str [3] = { "white won", "black won", "its a tie" };
+	char *who_str [3] = { "Green won", "Yellow won", "Its a tie" };
 	int i, wscore, bscore, who_idx;
 	wscore = eval_runs (pos, WHITE) / RUN_WT;
 	bscore = eval_runs (pos, BLACK) / RUN_WT * -1;
@@ -293,8 +295,8 @@ char ** plot4_get_pixmap (int idx, int color)
 	int fg, bg, i;
 	char *colors = plot4_colors;
 	static char pixbuf[PLOT4_CELL_SIZE*(PLOT4_CELL_SIZE)+1];
-	if (idx == PLOT4_WP) fg = 0xee << 16;
-	else if (idx == PLOT4_BP) fg = 0xee;
+	if (idx == PLOT4_WP) fg = 0xee << 8;
+	else if (idx == PLOT4_BP) fg = (0xee << 16) + (0xee << 8);
 	else fg = 0xd7d7d7;
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}

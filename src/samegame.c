@@ -141,7 +141,7 @@ ResultType samegame_who_won (Pos *pos, Player to_play, char **commp)
 	snprintf (comment, 32, "%s %d", scorestr,
 			pos->state ? ((Samegame_state *)pos->state)->score : 0);
 	*commp = comment;
-	return over ? RESULT_MISC : RESULT_NOTYET;
+	return over ? RESULT_WON : RESULT_NOTYET;
 }
 
 

@@ -145,7 +145,7 @@ ResultType tetris_who_won (Pos *pos, Player to_play, char **commp)
 			over ? "Game over. " : "", "Score:",
 			pos->state ? ((Tetris_state *)pos->state)->score : 0);
 	*commp = comment;
-	return over ? RESULT_MISC : RESULT_NOTYET;
+	return over ? RESULT_WON : RESULT_NOTYET;
 }
 
 int tetris_fall (byte *pos, byte **movp, int height)

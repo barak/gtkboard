@@ -109,7 +109,7 @@ ResultType fifteen_who_won (Pos *pos, Player to_play, char **commp)
 	// last move is a dummy
 	snprintf (comment, 32, "%s %d", scorestr, pos->num_moves - (over ? 1 : 0));
 	*commp = comment;
-	return over ? RESULT_MISC : RESULT_NOTYET;
+	return over ? RESULT_WON : RESULT_NOTYET;
 }
 
 

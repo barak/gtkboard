@@ -82,7 +82,10 @@ void othello_init ()
 		"\n"
 		"Two players take turns in placing balls of either color. The objective is to get as many balls of your color as possible.\n"
 		"\n"
-		"When you place a ball in such a way that two of your balls sandwich one or more of the opponent's balls along a line (horizontal, vertical, or diagonal), then the sandwiched balls change to your color. You must move in such a way that at least one switch happens.\n";
+		"When you place a ball in such a way that two of your balls sandwich one or more of the opponent's balls along a line (horizontal, vertical, or diagonal), then the sandwiched balls change to your color. You must move in such a way that at least one switch happens.\n"
+		"\n"
+		"If you don't have a move, you pass by clicking on an empty square."
+		;
 	game_doc_strategy = 
 		"Othello tips\n"
 		"\n"
@@ -90,7 +93,7 @@ void othello_init ()
 		"\n"
 		"Indeed, in the beginning you should try to minimize the number of balls you have. The key is mobility. You must strive to maximize your number of legal moves so that you can try to force your opponent into making bad moves.\n"
 		"\n"
-		"The corners are key squares, because corner balls never flip. If your opponent blunders into giving you a corner before the final stages of the game, you are practically assured of a win.\n";		
+		"The corners are key squares, because corner balls never flip. If your opponent blunders into giving you a corner before the final stages of the game, you are practically assured of a win.\n";
 }
 
 char ** othello_get_pixmap (int idx, int color)

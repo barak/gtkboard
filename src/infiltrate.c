@@ -31,6 +31,7 @@
 #define INFILTRATE_BOARD_WID 7
 #define INFILTRATE_BOARD_HEIT 7
 
+#define INFILTRATE_EMPTY 0
 #define INFILTRATE_WP 1
 #define INFILTRATE_BP 2
 
@@ -58,6 +59,7 @@ int infiltrate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 byte *infiltrate_movegen (Pos *, Player );
 float infiltrate_eval (Pos *, Player);
 char ** infiltrate_get_pixmap (int idx, int color);
+void infiltrate_reset_uistate ();
 	
 Game Infiltrate = 
 	{ INFILTRATE_CELL_SIZE, INFILTRATE_BOARD_WID, INFILTRATE_BOARD_HEIT, 
@@ -72,6 +74,7 @@ void infiltrate_init ()
 	//game_who_won = infiltrate_who_won;
 	game_eval = infiltrate_eval;
 	game_get_pixmap = infiltrate_get_pixmap;
+	game_reset_uistate = infiltrate_reset_uistate;
 	game_doc_about = 
 		"Infiltrate\n"
 		"Two player game\n"
@@ -128,19 +131,25 @@ float infiltrate_eval (Pos *pos, Player to_play)
 
 }
 
+static int oldx = -1, oldy = -1;
+
+void infiltrate_reset_uistate ()
+{
+	oldx = -1, oldy = -1;
+}
+	
 int infiltrate_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp)
 {
 	static byte move[10];
 	byte *mp = move;
-	static int oldx = -1, oldy = -1;
 	byte *board = pos->board;
 	if (type != GTKBOARD_BUTTON_RELEASE) return 0;
 	if (oldx < 0)
 	{
 		int val = board [y * board_wid + x];
-		if ((val == INFILTRATE_WP && !(to_play == WHITE)) ||
-		(val == INFILTRATE_BP && !(to_play == BLACK)))
+		if ((val != INFILTRATE_BP && !(to_play == WHITE)) ||
+		(val != INFILTRATE_WP && !(to_play == BLACK)))
 			return -1;
 		oldx = x; oldy = y;
 		return 0;
@@ -151,6 +160,11 @@ int infiltrate_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player t
 		diffx = x - oldx;
 		diffy = y - oldy;
 		if (abs (diffx) != 1 || abs (diffy) != 1)
+		{
+			oldx = -1; oldy = -1;
+			return -1;
+		}
+		if (board [y * board_wid + x] != INFILTRATE_EMPTY)
 		{
 			oldx = -1; oldy = -1;
 			return -1;

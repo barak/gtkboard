@@ -105,7 +105,7 @@ ResultType hypermaze_who_won (Pos *pos, Player to_play, char **commp)
 			over ? "You won. " : "",
 			pos->num_moves);
 	*commp = comment;
-	return over ? RESULT_MISC : RESULT_NOTYET;
+	return over ? RESULT_WON : RESULT_NOTYET;
 }
 
 int hypermaze_canmove (byte *board, int curx, int cury, int incx, int incy)

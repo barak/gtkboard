@@ -69,6 +69,8 @@ void pentaline_init ()
 	game_get_pixmap = pentaline_get_pixmap;
 	game_draw_cell_boundaries = TRUE;
 	game_eval_incr = pentaline_eval_incr;
+	game_white_string = "Red";
+	game_black_string = "Blue";
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
@@ -169,7 +171,7 @@ ResultType pentaline_who_won (Pos *pos, Player to_play, char **commp)
 			if (val == PENTALINE_EMPTY) {found = 0; break; }
 			if (val != pos->board [j * board_wid + i]) { found = 0; break; }
 		}
-		if (found) {*commp = (to_play == WHITE ? "black won" : "white won");
+		if (found) {*commp = (to_play == WHITE ? "Red won" : "Blue won");
 			return (to_play == WHITE ? RESULT_BLACK : RESULT_WHITE);}
 	}
 	*commp = NULL;

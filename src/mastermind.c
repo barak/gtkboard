@@ -59,6 +59,10 @@ int mastermind_initpos [MASTERMIND_BOARD_WID*MASTERMIND_BOARD_HEIT] =
 	0, 0, 0, 0, 0, 0, 0, 0,
 };
 
+
+SCORE_FIELD mastermind_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_SCORE, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
+char *mastermind_score_field_names[] = {"User", "Tries", "Time", "Date", NULL};
+
 void mastermind_init ();
 char ** mastermind_get_pixmap (int idx, int color);
 
@@ -68,25 +72,29 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 	NULL, 	NULL, "Mastermind", mastermind_init};
 
 
-//static ResultType mastermind_who_won (byte *, int , char **);
+static ResultType mastermind_who_won (Pos *, Player, char **);
 static void mastermind_setinitpos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**);
 int mastermind_getmove_kb (Pos *, int , Player, byte **);
 void mastermind_reset_uistate ();
 byte * mastermind_movegen (Pos *, int);
 float mastermind_eval (Pos *, int);
+int mastermind_get_cur_row (byte *);
 
 
 void mastermind_init ()
 {
 	game_getmove = mastermind_getmove;
 	game_getmove_kb = mastermind_getmove_kb;
-//	game_who_won = mastermind_who_won;
+	game_who_won = mastermind_who_won;
 	game_setinitpos = mastermind_setinitpos;
 	game_get_pixmap = mastermind_get_pixmap;
 	game_single_player = TRUE;
 	game_reset_uistate = mastermind_reset_uistate;
 	game_draw_cell_boundaries = TRUE;
+	game_scorecmp = game_scorecmp_def_iscore;
+	game_score_fields = mastermind_score_fields;
+	game_score_field_names = mastermind_score_field_names;
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"
@@ -95,8 +103,33 @@ void mastermind_init ()
 	game_doc_rules = 
 		"Mastermind rules\n"
 		"\n"
-		"The objective is to find the colors of 4 hidden squares in as few tries as possible.\n";
+		"The objective is to find the colors of 4 hidden squares in as few tries as possible.\n\n"
+		"Select a color by clicking on one of the balls on the extreme right. Place any 4 colors of your choice on the middle 4 squares of the bottom row and hit enter. You will get two numbers on the left. The number of black balls indicates how many balls you've got in the correct position. The number of white balls indicates how many balls you've got n the wrong position. Now try again on the second row. Repeat until you get all four black balls.";
+	
 	// TODO: complete this
+}
+
+ResultType mastermind_who_won (Pos *pos, Player to_play, char **commp)
+{
+	static char comment[32];
+	int j;
+	gboolean over = 
+		pos->board [(board_heit - 1) * board_wid+ MASTERMIND_MAIN_COL_START] 
+			<= 8 ? TRUE : FALSE;
+	char *scorestr = over ? "You won! Tries:" : "Tries:";
+	if (!over && mastermind_get_cur_row (pos->board) == board_heit - 1)
+	{
+		snprintf (comment, 32, "You lost. Tries: %d", board_heit - 1);
+		*commp = comment;
+		return RESULT_LOST;
+	}
+	for (j=0; j<board_heit-1; j++)
+		if (!pos->board[j * board_wid])
+			break;
+	snprintf (comment, 32, "%s %d", scorestr, j);
+	*commp = comment;
+	return over ? RESULT_WON : RESULT_NOTYET;
+
 }
 
 int mastermind_get_cur_row (byte *board)
@@ -126,9 +159,9 @@ char ** mastermind_get_pixmap (int idx, int color)
 	int fg = 0, bg = 0, i;
 	char *colors;
 	static char pixbuf[MASTERMIND_CELL_SIZE*(MASTERMIND_CELL_SIZE)+1];
+	static char dice_pixbuf[MASTERMIND_CELL_SIZE*(MASTERMIND_CELL_SIZE)+1];
 	static gboolean first = TRUE;
 	colors = mastermind_colors;
-	//if (idx < 1 || idx > 6) return NULL;
 	if (idx < 16)
 	{
 		fg += (idx & 1);
@@ -154,7 +187,7 @@ char ** mastermind_get_pixmap (int idx, int color)
 		for(i=0, bg=0;i<3;i++) 
 		{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
 		fg = (idx <= 20 ? 0 : 0xffffff);
-		return pixmap_die_gen(MASTERMIND_CELL_SIZE, pixbuf, fg, bg, 3.0, 30.0, num);
+		return pixmap_die_gen(MASTERMIND_CELL_SIZE, dice_pixbuf, fg, bg, 3.0, 30.0, num);
 	}
 	else return red_X_40_xpm;
 	return NULL;
@@ -178,6 +211,7 @@ int mastermind_getmove
 	if (tmp > 0) { active = tmp; return 0; }
 	if (active < 1) return -1;
 	if (!MASTERMIND_IS_MAIN_COL(x)) return -1;
+	if (y == board_heit -1) return -1;
 	if (y != mastermind_get_cur_row (pos->board)) return -1;
 	move[0] = x;
 	move[1] = y;
@@ -199,6 +233,7 @@ int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
 	if (key != GDK_Return) return 0;
 	if (active < 0) return 0;
 	cur_row = mastermind_get_cur_row (board);
+	if (cur_row == board_heit - 1) return -1;
 	for (i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)
 	{
 		if (board [cur_row * board_wid + i] == MASTERMIND_EMPTY)
@@ -221,14 +256,16 @@ int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp)
 				break;
 			}
 	}
+	assert (nwhite >= nblack);
+	nwhite -= nblack;
 	*mp++ = 0; *mp++ = cur_row; *mp++ = (nblack ? nblack + 16 : 25);
 	*mp++ = 1; *mp++ = cur_row; *mp++ = (nwhite ? nwhite + 20 : 25);
 	if (nblack == 4)
-	for (i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)
-	{
-		*mp++ = i; *mp++ = board_heit - 1; 
-		*mp++ = board [(board_heit - 1) * board_wid + i] & 7;
-	}
+		for (i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)
+		{
+			*mp++ = i; *mp++ = board_heit - 1; 
+			*mp++ = board [(board_heit - 1) * board_wid + i] & 7;
+		}
 	*mp++ = -1;
 	if (movp) *movp = move;
 	cur_row++;

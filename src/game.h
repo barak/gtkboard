@@ -43,7 +43,24 @@ typedef enum {
 	GTKBOARD_KEY_PRESS} GtkboardEventType;
 
 //! Used for representing the result of game_who_won()
-typedef enum {RESULT_WHITE, RESULT_BLACK, RESULT_TIE, RESULT_NOTYET, RESULT_MISC} ResultType;
+typedef enum 
+{
+	//! White won
+	RESULT_WHITE, 
+	//! Black won
+	RESULT_BLACK, 
+	//! Draw
+	RESULT_TIE, 
+	//! Game not over yet
+	RESULT_NOTYET,
+	//! User completed the game successfully (single player game)
+	RESULT_WON,
+	//! User failed to complete game (single player game)
+   /**	eg: exhausted all rows in mastermind (mastermind_who_won()) */
+	RESULT_LOST,
+	//! Anything else
+	RESULT_MISC
+} ResultType;
 
 //! values of #game_file_label and #game_rank_label
 typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_TYPE_ALPHA, FILERANK_LABEL_TYPE_ALPHA_CAPS} FILERANK_LABEL_TYPE;

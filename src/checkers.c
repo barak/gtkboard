@@ -66,6 +66,7 @@ ResultType checkers_who_won (Pos *, Player, char **);
 byte *checkers_movegen (Pos *, Player );
 float checkers_eval (Pos *, Player);
 char ** checkers_get_pixmap (int idx, int color);
+void checkers_reset_uistate ();
 	
 Game Checkers = 
 	{ CHECKERS_CELL_SIZE, CHECKERS_BOARD_WID, CHECKERS_BOARD_HEIT, 
@@ -80,6 +81,7 @@ void checkers_init ()
 	game_who_won = checkers_who_won;
 	game_eval = checkers_eval;
 	game_get_pixmap = checkers_get_pixmap;
+	game_reset_uistate = checkers_reset_uistate;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_doc_about = 
@@ -198,12 +200,18 @@ float checkers_eval (Pos *pos, Player to_play)
 
 }
 
+static int oldx = -1, oldy = -1;
+
+void checkers_reset_uistate ()
+{
+	oldx = -1, oldy = -1;
+}
+
 int checkers_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, 
 		byte **movp)
 {
 	static byte move[10];
 	byte *mp = move;
-	static int oldx = -1, oldy = -1;
 	int diffx, diffy;
 	byte *board = pos->board;
 	if (type != GTKBOARD_BUTTON_RELEASE) return 0;

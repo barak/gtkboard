@@ -61,6 +61,7 @@ byte *ataxx_movegen (Pos *, Player);
 static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **);
 static ResultType ataxx_who_won (Pos *, Player , char **);
 char ** ataxx_get_pixmap (int, int);
+void ataxx_reset_uistate ();
 
 
 static int ataxx_max_moves = 200;
@@ -76,6 +77,7 @@ void ataxx_init ()
 	game_black_string = "Blue";
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
+	game_reset_uistate = ataxx_reset_uistate;
 	game_doc_about = 
 		"Ataxx\n"
 		"Two player game\n"
@@ -313,21 +315,17 @@ byte *ataxx_movegen (Pos *pos, Player player)
 	
 }
 
-int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
-	/* translate a sequence of mouse clicks into a cbgf move.
-	   pos is the current position, x and y are the square which was
-	   clicked, type is the event type: MOUSE_PRESSED, MOUSE_RELEASED
-	   to_play is who has the move, movp is used to return the move
+static int  oldx = -1, oldy = -1;
 
-	   the return value is 1 if the clicks were successfully translated
-	   into a move; -1 if the move is illegal, and 0 if further clicks
-	   are required to determine the move. In the latter case, this 
-	   function is responsible for keeping track of the current state.
-	 */
+void ataxx_reset_uistate ()
+{
+	oldx = -1, oldy = -1;
+}
+
+int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp)
 {
 	static byte move[32];
 	byte *mptr = move;
-	static int  oldx = -1, oldy = -1;
 	int diffx, diffy;
 	int other, i;
 	int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};

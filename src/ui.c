@@ -382,7 +382,7 @@ void ui_check_who_won()
 	if (!state_gui_active)
 		ui_cleanup();
 	sb_update ();
-	if (game_single_player && !ui_cheated)
+	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "WON", 3))
 		prefs_add_highscore (line, sb_get_human_time ());
 }
 

@@ -225,7 +225,9 @@ void engine_who_won (char *line)
 		case RESULT_WHITE: who_str = "WHITE"; break;
 		case RESULT_BLACK: who_str = "BLACK"; break;
 		case RESULT_TIE  : who_str = "TIE"  ; break;
-		case RESULT_MISC :	who_str = "MISC" ; break;
+		case RESULT_WON  : who_str = "WON" ; break;
+		case RESULT_LOST : who_str = "LOST" ; break;
+		case RESULT_MISC : who_str = "MISC" ; break;
 		case RESULT_NOTYET:
 		default:
 						who_str = "NYET"; break; // ;^)
