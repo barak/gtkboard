@@ -18,3 +18,5 @@
 	* ui: implemented feature for game to change the user-visible label for white and black
 	* ab.c: implemented end-of-game checking in game_ab_hash()
 	* rgb: fixed eval function to use GAME_EVAL_INFTY
+	* board: fixed bug where there was no way for samegame to know that the cursor had left the screen
+	* bumped version to 0.10.1

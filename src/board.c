@@ -221,6 +221,8 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 				type = GTKBOARD_BUTTON_RELEASE; break;
 			case GDK_MOTION_NOTIFY:
 				type = GTKBOARD_MOTION_NOTIFY; break;
+			case GDK_LEAVE_NOTIFY:
+				type = GTKBOARD_LEAVE_NOTIFY; break;
 			default:
 				return FALSE;
 		}
@@ -309,13 +311,22 @@ void board_init ()
 
 	if (!game)
 	{
+#if GTK_MAJOR_VERSION == 1
+		gtk_drawing_area_size (GTK_DRAWING_AREA (board_area), 300, 300);
+#else
 		gtk_widget_set_size_request (GTK_WIDGET (board_area), 300, 300);
+#endif
 		gdk_draw_rectangle ((GdkDrawable *)board_area->window, def_gc, TRUE, 0, 0, 300, 300);
 		return;
 	}
 	
+#if GTK_MAJOR_VERSION == 1
+	gtk_drawing_area_size (GTK_DRAWING_AREA (board_area), 
+			cell_size * board_wid, cell_size * board_heit);
+#else
 	gtk_widget_set_size_request (GTK_WIDGET (board_area), 
 			cell_size * board_wid, cell_size * board_heit);
+#endif
 	pieces = (GdkPixmap **) malloc (2 * num_pieces * sizeof (GdkPixmap *));
 	g_assert (pieces);
 	for (i=0; i<2*num_pieces; i++)
@@ -325,8 +336,13 @@ void board_init ()
 	{
 		board_rowbox_real = gtk_hbox_new (TRUE, 0);
 		gtk_box_pack_end (GTK_BOX (board_rowbox), board_rowbox_real, FALSE, FALSE, 0);
+#if GTK_MAJOR_VERSION == 1
+		gtk_widget_set_usize (GTK_WIDGET (board_rowbox_real),
+				cell_size * board_wid, -1);
+#else
 		gtk_widget_set_size_request 
 			(GTK_WIDGET (board_rowbox_real), cell_size * board_wid, -1);
+#endif
 		for (i=0; i<board_wid; i++)
 			gtk_container_add (GTK_CONTAINER (board_rowbox_real), 
 				gtk_label_new (board_get_file_label_str (game_file_label, i)));
@@ -336,8 +352,13 @@ void board_init ()
 	{
 		board_colbox_real = gtk_vbox_new (TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (board_colbox), board_colbox_real, FALSE, FALSE, 0);
+#if GTK_MAJOR_VERSION == 1
+		gtk_widget_set_usize (GTK_WIDGET (board_colbox_real),
+				-1, cell_size * board_heit);
+#else
 		gtk_widget_set_size_request 
 			(GTK_WIDGET (board_colbox_real), -1, cell_size * board_heit);
+#endif
 		for (i=0; i<board_heit; i++)
 			gtk_container_add (GTK_CONTAINER (board_colbox_real), 
 				gtk_label_new (board_get_rank_label_str 

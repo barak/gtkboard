@@ -78,7 +78,7 @@ CONFIG_CLEAN_FILES =
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-Makefile.am Makefile.in NEWS aclocal.m4 config.h.in configure \
+Makefile.am Makefile.in NEWS TODO aclocal.m4 config.h.in configure \
 configure.in install-sh missing mkinstalldirs
 
 

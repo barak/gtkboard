@@ -240,6 +240,11 @@ int samegame_getmove
 		anim_curx = x;
 		anim_cury = y;
 	}
+	if (type == GTKBOARD_LEAVE_NOTIFY)
+	{
+		anim_curx = -1;
+		anim_cury = -1;
+	}
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
 	if ((val = pos->board[y * board_wid + x]) == 0)	

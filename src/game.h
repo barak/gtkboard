@@ -38,6 +38,7 @@ typedef enum {
 	GTKBOARD_BUTTON_PRESS = 1, 
 	GTKBOARD_BUTTON_RELEASE, 
 	GTKBOARD_MOTION_NOTIFY,
+	GTKBOARD_LEAVE_NOTIFY,
 	GTKBOARD_KEY_PRESS} GtkboardEventType;
 
 //! Used for representing the result of game_who_won()
