@@ -25,7 +25,7 @@
 #include "game.h"
 
 // FIXME: confusing name. Make this 2 macros: human_to_move and machine_to_move
-#define player_to_play (state_player == WHITE ? ui_white : ui_black)
+#define player_to_play (cur_pos.player == WHITE ? ui_white : ui_black)
 
 enum {NONE, HUMAN, MACHINE};
 

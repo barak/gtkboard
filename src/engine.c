@@ -32,7 +32,7 @@
 
 extern int board_wid, board_heit;
 extern int opt_verbose;
-extern int state_player;
+//extern int state_player;
 
 // FIXME: this is ugly. Code should be refactored.
 extern gboolean engine_flag;
@@ -41,7 +41,7 @@ extern Pos cur_pos;
 
 extern Game *opt_game, *games[];
 extern int num_games;
-byte * engine_search (Pos *, int);
+byte * engine_search (Pos *);
 static FILE *engine_fin, *engine_fout;
 
 //! Eval fn for white (can be NULL, in which case game_eval will be used for both)
@@ -77,20 +77,20 @@ gboolean engine_hup_cb ()
 	exit (1);
 }
 
-ResultType engine_eval (Pos *pos, Player player, float *eval)
+ResultType engine_eval (Pos *pos, /*Player player,*/ float *eval)
 {
 	ResultType result;
-	result = state_player == WHITE ? game_eval_white(pos, player, eval) :
-	game_eval_black (pos, player, eval);
+	result = pos->player == WHITE ? game_eval_white(pos, pos->player, eval) :
+	game_eval_black (pos, pos->player, eval);
 	return result;
 }
 
 void engine_set_to_play (char *line)
 {
 	if (!strncasecmp (line, "white", 5))
-		state_player = WHITE;
+		cur_pos.player = WHITE;
 	else if (!strncasecmp (line, "black", 5))
-		state_player = BLACK;
+		cur_pos.player = BLACK;
 }
 
 void engine_take_move (char *line)
@@ -106,7 +106,7 @@ void engine_take_move (char *line)
 	}
 	move_apply (cur_pos.board, move);
 	cur_pos.num_moves++;
-	state_player = state_player == WHITE ? BLACK : WHITE;
+	cur_pos.player = cur_pos.player == WHITE ? BLACK : WHITE;
 }
 
 void engine_make_move ()
@@ -114,7 +114,7 @@ void engine_make_move ()
 	byte *move;
 	movstack_trunc ();
 	cancel_move = FALSE;
-	move = engine_search (&cur_pos, state_player);
+	move = engine_search (&cur_pos);
 	if (cancel_move)
 		return;
 	if (!move)
@@ -132,7 +132,7 @@ void engine_make_move ()
 	move_apply (cur_pos.board, move);
 	cur_pos.num_moves++;
 	move_fwrite_ack (move, engine_fout);
-	state_player = state_player == WHITE ? BLACK : WHITE;
+	cur_pos.player = cur_pos.player == WHITE ? BLACK : WHITE;
 }
 
 void engine_new_game (char *gamename)
@@ -154,7 +154,7 @@ void engine_new_game (char *gamename)
 		exit(1);
 	}
 	reset_game_params ();
-	state_player = WHITE;	
+//	state_player = WHITE;	
 	if (opt_game->game_init)
 		opt_game->game_init();
 	set_game_params ();
@@ -169,7 +169,10 @@ void engine_new_game (char *gamename)
 void engine_reset_game ()
 {
 	stack_free ();
-	state_player = WHITE;
+	// FIXME : there should be a separate reset_game_params() for engine
+	cur_pos.player = WHITE;
+	cur_pos.state = NULL;
+	cur_pos.num_moves = 0;
 	game_set_init_pos (&cur_pos);
 }
 
@@ -184,7 +187,7 @@ void engine_back_move ()
 	}
 	move_apply (cur_pos.board, move);
 	cur_pos.num_moves--;
-	state_player = state_player == WHITE ? BLACK : WHITE;
+	cur_pos.player = cur_pos.player == WHITE ? BLACK : WHITE;
 	move_fwrite_ack (move, engine_fout);
 }
 
@@ -201,7 +204,7 @@ void engine_forw_move ()
 	}
 	move_apply (cur_pos.board, move);
 	cur_pos.num_moves++;
-	state_player = state_player == WHITE ? BLACK : WHITE;
+	cur_pos.player = cur_pos.player == WHITE ? BLACK : WHITE;
 	move_fwrite_ack (move, engine_fout);
 }
 
@@ -223,7 +226,7 @@ void engine_who_won (char *line)
 		move_fwrite_nak (NULL, engine_fout);
 		return;
 	}
-	who = game_who_won (&cur_pos, state_player, &msg);
+	who = game_who_won (&cur_pos, cur_pos.player, &msg);
 	switch(who)
 	{
 		case RESULT_WHITE: who_str = "WHITE"; break;
@@ -394,19 +397,19 @@ void engine_main (int infd, int outfd)
 	g_main_run (loop);
 }
 
-byte * engine_search (Pos *pos, int player)
+byte * engine_search (Pos *pos/*, int player*/)
 {
 	int tag;
 	byte *move;
 	engine_stop_search = FALSE;
 	if (game_search)
-		game_search (pos, player, &move);
+		game_search (pos, pos->player, &move);
 	else if (game_single_player)
 		move = NULL;
 	else
 	{
 		tag = g_timeout_add (2 * time_per_move, engine_timeout_cb, NULL);
-		move = ab_dfid (pos, player);
+		move = ab_dfid (pos, pos->player);
 		g_source_remove (tag);
 	}
 	return move;

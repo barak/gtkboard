@@ -27,6 +27,11 @@
   This is the only file that the games need to include.
 */
 
+//! Both moves and positions are arrays of <tt>byte</tt>s
+#ifndef byte 
+#define byte gint8
+#endif
+
 //! Used in a two player game to represent whose move it is.
 /* White is always the player that moves first. Internally they
  are always called white and black even if the game wants the user to
@@ -62,6 +67,28 @@ typedef enum
 	RESULT_MISC
 } ResultType;
 
+//! The move and all the info. associated with it
+typedef struct
+{
+	//! The move. 
+	/** This is a sequence of the form 
+	[x_1, y_1, v_1, x_2, y_2, v_2, ... x_n, y_n, v_n, -1] where [x_i, y_i, v_i]
+	says that the value of the square (x_i, y_i) should change to v_i. */
+	byte *move;
+
+	//! (Only client side) the rendering info. associated with this move
+	int *rmove;
+	//! Any game-specific custom information associated with this move.
+	/** The purpose of having this is that it will be sent from UI to engine and engine to UI */
+	gchar *custom;
+
+	//! (Only client side) Help message
+	gchar *help_message;
+
+	//! The human-readable version of the move eg: "e4" in chess
+	gchar *human_readable;
+}MoveInfo;
+
 //! values of #game_file_label and #game_rank_label
 typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_TYPE_ALPHA, FILERANK_LABEL_TYPE_ALPHA_CAPS} FILERANK_LABEL_TYPE;
 
@@ -69,11 +96,6 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
 
 //! if #game_file_label or #game_rank_label is ORed with this the order of file/rank labels will be reversed
 #define FILERANK_LABEL_DESC (1 << 2)
-
-//! Both moves and positions are arrays of <tt>byte</tt>s
-#ifndef byte 
-#define byte gint8
-#endif
 
 //! The return value of game_eval() should be larger than GAME_EVAL_INFTY in absolute value to indicate that the game is over.
 #define GAME_EVAL_INFTY (1.0e10)
@@ -165,6 +187,11 @@ typedef struct
 	 once instance of Pos*/
 	int *render;
 
+	//! Which player has the move. 
+	/** Currently this is unused, and a separate argument gets passed to every
+	  function along with the Pos. This will change soon. */
+	Player player;
+
 	//! State information required to completely describe the position
 	/** Some games are <i>stateful</i>, which means that the position can not
 	  be completely described by the state of the board alone. 
@@ -177,6 +204,9 @@ typedef struct
 	//! The number of moves that have been made to reach the current position.
 	/** In two-player games, it represents the number of ply.*/
 	int num_moves;
+
+	//! Client-side state information () (currently unused)
+	void *ui_state;
 }Pos;
 
 //! If you have implemented more than one evaluation function then you put them in an array of structs of type HeurTab. Its unlikely that you'll need to know about this. See #game_htab for more details.

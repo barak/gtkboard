@@ -34,7 +34,7 @@ typedef struct
 
 extern Command  commands[];
 
-ResultType engine_eval (Pos *, Player, float *);
+ResultType engine_eval (Pos *, /*Player,*/ float *);
 
 //! Functions that do the actual thinking must periodically call this function.
 /** It checks if new commands have arrived. */

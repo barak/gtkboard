@@ -160,7 +160,7 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 		gdk_draw_pixmap (board_area->window, 
 				gc, (GdkDrawable *) pieces [thepiece],
 				0, 0, real_x * cell_size, real_y * cell_size, 
-				cell_size, cell_size);
+				-1, -1);
 	}
 	else
 	{
@@ -332,7 +332,7 @@ gint board_key_pressed (GtkWidget *widget, GdkEventKey *event,
 	if (event->type != GDK_KEY_PRESS)
 		return -1;
 	if (!game_getmove_kb) return -1;
-	status = game_getmove_kb (&cur_pos, event->keyval, state_player, movp, rmovep);
+	status = game_getmove_kb (&cur_pos, event->keyval, cur_pos.player, movp, rmovep);
 	return status;
 }
 
@@ -383,7 +383,7 @@ gint board_clicked (GtkWidget *widget, GdkEventButton *event,
 			default:
 				return FALSE;
 		}
-		status = game_getmove (&cur_pos, row, col, type, state_player, &move, &rmove);
+		status = game_getmove (&cur_pos, row, col, type, cur_pos.player, &move, &rmove);
 		if (status < 0)
 		{
 			sb_error ("Illegal Move", FALSE);

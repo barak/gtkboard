@@ -74,7 +74,7 @@ FILE *move_fin, *move_fout;
 
 static GIOChannel *ui_in = NULL;
 
-Pos cur_pos = {NULL, NULL, NULL, 0};
+Pos cur_pos = {NULL, NULL, WHITE, NULL, 0, NULL};
 
 int board_wid, board_heit;
 
@@ -82,7 +82,7 @@ static int engine_pid = -1;
 
 static gint animate_tag = -1;
 
-int state_player = WHITE;
+//int state_player = WHITE;
 
 gboolean game_allow_undo = FALSE;
 
@@ -264,7 +264,9 @@ void reset_game_params ()
 	game_doc_strategy = NULL;
 	game_white_string = "White";
 	game_black_string = "Black";
-	state_player = WHITE;
+	//state_player = WHITE;
+	// TODO: replace state_player by cur_pos.player globally
+	cur_pos.player = WHITE;
 	game_state_size = 0;
 	game_newstate = NULL;
 	game_reset_uistate = NULL;
@@ -282,6 +284,7 @@ void reset_game_params ()
 	cur_pos.board = NULL;
 	cur_pos.render = NULL;
 	cur_pos.state = NULL;
+	cur_pos.ui_state = NULL;
 	cur_pos.num_moves = 0;
 }
 
@@ -459,7 +462,7 @@ void ui_make_human_move (byte *move, int *rmove)
 	}
 	if (!game_single_player)
 	{
-		state_player = (state_player == WHITE ? BLACK : WHITE);
+		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	}
 	cur_pos.num_moves ++;
 	ui_check_who_won ();
@@ -494,7 +497,7 @@ int ui_get_machine_move ()
 	}
 	board_apply_refresh (move, NULL);
 	if (!game_single_player)
-		state_player = (state_player == WHITE ? BLACK : WHITE);
+		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
 	ui_check_who_won ();
 	sb_update ();

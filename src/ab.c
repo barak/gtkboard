@@ -324,7 +324,7 @@ byte * ab_dfid (Pos *pos, int player)
 		if (ab_tree_exhausted)
 		{
 			if (opt_verbose)
-				printf (" *** Searched whole tree. Moves=%d;\t Ply=%d\n",
+				printf ("Searched whole tree. Moves=%d;\t Ply=%d\n",
 					pos->num_moves, ply);
 			ply++;
 			break;

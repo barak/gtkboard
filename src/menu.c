@@ -195,7 +195,7 @@ void sb_set_turn_image ()
 	else 
 	{
 		if (!game_single_player && ui_white == HUMAN && ui_black == HUMAN
-				&& state_player == BLACK) index = 4;
+				&& cur_pos.player == BLACK) index = 4;
 		else index =  (player_to_play == HUMAN ? 0 : 2);
 		if (ui_stopped) index++;
 	}
@@ -472,7 +472,7 @@ void menu_load_file (GtkFileSelection *selector, gpointer user_data)
 	// FIXME: shouldn't this be MACHINE ?
 	ui_white = ui_black = NONE;
 	menu_put_player (FALSE);
-	state_player = WHITE;
+	cur_pos.player = WHITE;
 	game_set_init_pos (&cur_pos);
 	board_redraw_all ();
 	sb_message ("Opened file", FALSE);
@@ -713,7 +713,7 @@ void menu_back_forw (gpointer data, guint what)
 			}
 			board_apply_refresh (move, NULL);
 			if (!game_single_player)
-				state_player = (state_player == WHITE ? BLACK : WHITE);
+				cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves --;
 			if (game_single_player && !game_allow_undo)
 			{
@@ -743,7 +743,7 @@ void menu_back_forw (gpointer data, guint what)
 			}
 			board_apply_refresh (move, NULL);
 			if (!game_single_player)
-				state_player = (state_player == WHITE ? BLACK : WHITE);
+				cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 			cur_pos.num_moves ++;
 			ui_check_who_won ();
 			if (game_reset_uistate) game_reset_uistate();
@@ -919,7 +919,7 @@ void sb_update ()
 		if (ui_black == MACHINE) player[2] = 'M';
 		gtk_label_set_text (GTK_LABEL(sb_player_label), 
 				ui_white != NONE ? player : "File");
-		gtk_label_set_text (GTK_LABEL(sb_who_label), state_player == WHITE ? 
+		gtk_label_set_text (GTK_LABEL(sb_who_label), cur_pos.player == WHITE ? 
 				game_white_string : game_black_string);
 	}
 	gtk_label_set_text (GTK_LABEL(sb_score_label), sb_score_str);
