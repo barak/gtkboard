@@ -66,7 +66,7 @@ PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 VERSION = @VERSION@
 
-EXTRA_DIST = index.html header.html devel/ doxygen/doxygen_config doxygen/header.html doxygen/footer.html 
+EXTRA_DIST = index.html devel/ doxygen/doxygen_config doxygen/header.html doxygen/footer.html 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
