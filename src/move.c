@@ -144,7 +144,7 @@ byte *move_fread (FILE *fin)
 byte *move_fread_ack (FILE *fin)
 {
 	fgets (linebuf, 4096, fin);
-	//printf ("%s\n", linebuf);
+	printf ("%s\n", linebuf);
 	if (strncasecmp (linebuf, "ACK", 3))
 		return NULL;
 	return move_read (linebuf + 4);

@@ -32,7 +32,7 @@
 
 GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
-	*menu_main;
+	*menu_main, *menu_info_bar, *menu_info_separator;
 GtkWidget *sb_game_separator, *sb_who_separator, *sb_score_separator,
 	*sb_player_separator, *sb_time_separator, *sb_turn_separator;
 #define SB_MESSAGE_STRLEN 64
@@ -794,12 +794,16 @@ void menu_start_game ()
 		for (cnt = 0; game_levels[cnt].name; cnt++)
 			;
 		level_items = g_new0 (GtkItemFactoryEntry, cnt);
-		level_item.path = "/Game/Levels";
+
+/*		level_item.path = "/Game/Levels";
 		level_item.accelerator = NULL;
 		level_item.callback = NULL;
 		level_item.item_type = "<Branch>";
 		gtk_item_factory_create_item (menu_factory, &level_item, NULL, 1);
-		
+*/		
+		gtk_widget_show (gtk_item_factory_get_item (menu_factory,
+			"/Game/Levels"));
+			
 		for (i=0; i<cnt; i++)
 		{
 			level_items[i].path = g_strdup_printf ("/Game/Levels/%s",
@@ -832,8 +836,17 @@ void menu_cleanup_var_menus ()
 	}
 
 	if (game_levels)
-		// FIXME: do we need to delete recursively?
-		gtk_item_factory_delete_item (menu_factory, "/Game/Levels");
+	{
+		gchar *tmp;
+		int i;
+		for (i = 0; game_levels[i].name; i++)
+		{
+			gtk_item_factory_delete_item (menu_factory, 
+					tmp = g_strdup_printf ("/Game/Levels/%s", game_levels[i].name));
+			g_free (tmp);
+		}
+		gtk_widget_hide (gtk_item_factory_get_widget (menu_factory, "/Game/Levels"));
+	}
 }
 
 void menu_set_game (gpointer data, guint which, GtkWidget *widget)
@@ -1100,7 +1113,22 @@ void menu_update ()
 		gtk_widget_show (gtk_item_factory_get_widget (menu_factory,
 					"/Settings/Enable Sound"));
 	}
-		
+
+	if (no_game)
+	{
+		gtk_widget_hide (menu_info_bar);
+		gtk_widget_hide (menu_info_separator);
+	}
+	else
+	{
+		gtk_widget_show (menu_info_bar);
+		gtk_widget_show (menu_info_separator);
+	}
+	if (game_levels)
+		gtk_widget_show (gtk_item_factory_get_item (menu_factory, "/Game/Levels"));
+	else
+		gtk_widget_hide (gtk_item_factory_get_item (menu_factory, "/Game/Levels"));
+	
 }
 	
 //! NOTE: sb_update() is idempotent. When in doubt, call sb_update().

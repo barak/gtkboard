@@ -63,7 +63,7 @@ void sb_set_turn_image ();
 
 extern GtkWidget *sb_message_label, *sb_game_label, *sb_score_label,
 	*sb_who_label, *sb_player_label, *sb_time_label, *sb_turn_image,
-	*menu_main;
+	*menu_main, *menu_info_bar, *menu_info_separator;
 extern GtkWidget *sb_game_separator, *sb_player_separator, *sb_who_separator, 
 	*sb_score_separator, *sb_time_separator, *sb_turn_separator;
 extern GtkItemFactory *menu_factory;

@@ -528,6 +528,12 @@ void ui_send_make_move ()
 		g_io_add_watch (ui_in, G_IO_IN, (GIOFunc) ui_get_machine_move, NULL);
 }
 
+gboolean ui_send_make_move_bg (gpointer data)
+{
+	ui_send_make_move ();
+	return FALSE;
+}
+
 void ui_make_human_move (byte *move, int *rmove)
 {
 	board_apply_refresh (move, rmove);
@@ -901,6 +907,7 @@ void gui_init ()
 		{ "/File/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
+		{ "/Game/_Levels", NULL, NULL, 0, "<Branch>"},
 		{ "/Game/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_New", "<control>N", menu_start_stop_game, MENU_RESET_GAME, "" },
 		{ "/Game/_Start", "<control>G", menu_start_stop_game, MENU_START_GAME, "" },
@@ -908,8 +915,6 @@ void gui_init ()
 		{ "/Game/Sep2", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
-		// FIXME: this separator should go and Game->levels should move up
-		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, MENU_BACK, "" },
 		{ "/Move/_Forward", "<control>F", menu_back_forw, MENU_FORW, "" },
@@ -926,6 +931,7 @@ void gui_init ()
 				"<StockItem>", GTK_STOCK_QUIT },
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
+		{ "/Game/Levels", NULL, NULL, 0, "<Branch>"},
 		{ "/Game/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_New", "<control>N", menu_start_stop_game, MENU_RESET_GAME, 
 				"<StockItem>", GTK_STOCK_NEW },
@@ -937,7 +943,6 @@ void gui_init ()
 		//FIXME: there's a scores stock item but I can't seem to find it
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
-		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, 1, 
 				"<StockItem>", GTK_STOCK_GO_BACK },
@@ -1097,7 +1102,7 @@ void gui_init ()
 		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (main_window), "key_release_event",
 		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
-	hbox = gtk_hbox_new (FALSE, 0);
+	menu_info_bar = hbox = gtk_hbox_new (FALSE, 0);
 	sb_game_label = gtk_label_new (opt_game ? opt_game->name : NULL);
 	gtk_box_pack_start (GTK_BOX (hbox), sb_game_label, FALSE, FALSE, 3);
 	sb_game_separator = gtk_vseparator_new ();
@@ -1126,7 +1131,7 @@ void gui_init ()
 	gtk_box_pack_end (GTK_BOX (hbox), sb_time_separator, FALSE, FALSE, 0);
 	}
 			
-	separator = gtk_hseparator_new ();
+	menu_info_separator = separator = gtk_hseparator_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 	separator = gtk_hseparator_new ();
@@ -1332,7 +1337,8 @@ int main (int argc, char **argv)
 		signal (SIGHUP, ignore);
 		set_game_params ();
 		ui_stopped = FALSE;
-		ui_send_make_move ();
+		sound_set_enabled (FALSE);
+		g_idle_add (ui_send_make_move_bg, NULL);
 #if GLIB_MAJOR_VERSION > 1
 		loop = g_main_loop_new (NULL, TRUE);
 #else
