@@ -176,7 +176,7 @@ Game Mastermind = { MASTERMIND_CELL_SIZE,
 static ResultType mastermind_who_won (Pos *, Player, char **);
 static void mastermind_set_init_pos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
-int mastermind_getmove_kb (Pos *, int , Player, byte **, int **);
+int mastermind_getmove_kb (Pos *, int, byte **, int **);
 void mastermind_reset_uistate ();
 int mastermind_get_cur_row (byte *);
 void mastermind_set_init_render (Pos *);
@@ -383,7 +383,7 @@ int mastermind_getmove
 }
 
 
-int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int mastermind_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[32];
 	static int rmove[7];

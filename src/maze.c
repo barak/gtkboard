@@ -53,8 +53,7 @@ Game Maze = { MAZE_CELL_SIZE, MAZE_BOARD_WID, MAZE_BOARD_HEIT,
 
 static void maze_set_init_pos (Pos *pos);
 static char ** maze_get_pixmap (int idx, int color);
-static int maze_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int maze_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 ResultType maze_who_won (Pos *, Player, char **);
 
 void maze_init ()
@@ -103,7 +102,7 @@ void maze_get_cur_pos (byte *pos, int *x, int *y)
 		}
 }
 
-int maze_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int maze_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	int curx = -1, cury = -1;

@@ -181,15 +181,15 @@ void ui_make_human_move (byte *, int *);
 void set_game_params ();
 
 ResultType (*game_eval) (Pos *, Player, float *) = NULL;
-ResultType (*game_eval_incr) (Pos *, Player, byte *, float *) = NULL;
-gboolean (*game_use_incr_eval) (Pos *, Player) = NULL;
+ResultType (*game_eval_incr) (Pos *, byte *, float *) = NULL;
+gboolean (*game_use_incr_eval) (Pos *) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 void (*game_search) (Pos *, byte **) = NULL;
 byte * (*game_movegen) (Pos *) = NULL;
 InputType (*game_event_handler) (Pos *, GtkboardEvent *, MoveInfo *) = NULL;
 int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
-int (*game_getmove_kb) (Pos *, int, Player, byte **, int **) = NULL;
+int (*game_getmove_kb) (Pos *, int, byte **, int **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
 int (*game_animate) (Pos *, byte **) = NULL;
 char **( *game_get_pixmap) (int, int) = NULL;

@@ -64,7 +64,7 @@ typedef struct
 }Knights_state;
 
 static int knights_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-static int knights_getmove_kb (Pos *, int, Player, byte ** , int **);
+static int knights_getmove_kb (Pos *, int, byte ** , int **);
 void knights_init ();
 static ResultType knights_who_won (Pos *, Player, char **);
 static ResultType knights_eval (Pos *, Player, float *eval);
@@ -144,7 +144,7 @@ ResultType knights_who_won (Pos *pos, Player player, char **commp)
 }
 
 
-int knights_getmove_kb (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp)
+int knights_getmove_kb (Pos *pos, int key, byte ** movp, int **rmovp)
 {
 	int i, j, wx = 0, wy = 0, bx = 0, by = 0;
 	static byte move[1] = {-1};

@@ -136,8 +136,7 @@ Game Pacman = { PACMAN_CELL_SIZE, PACMAN_BOARD_WID, PACMAN_BOARD_HEIT,
 
 static void pacman_set_init_pos (Pos *pos);
 static char ** pacman_get_pixmap (int idx, int color);
-static int pacman_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int pacman_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 static int pacman_animate (Pos *pos, byte **movp);
 
 
@@ -275,7 +274,7 @@ int pacman_animate (Pos *pos, byte **movp)
 }
 
 // TODO
-int pacman_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int pacman_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	int curx = -1, cury = -1;

@@ -130,7 +130,12 @@ typedef struct
 }MoveInfo;
 
 //! values of #game_file_label and #game_rank_label
-typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_TYPE_ALPHA, FILERANK_LABEL_TYPE_ALPHA_CAPS} FILERANK_LABEL_TYPE;
+typedef enum {
+	FILERANK_LABEL_TYPE_NONE, 
+	FILERANK_LABEL_TYPE_NUM,
+	FILERANK_LABEL_TYPE_ALPHA,
+	FILERANK_LABEL_TYPE_ALPHA_CAPS
+} FILERANK_LABEL_TYPE;
 
 #define FILERANK_LABEL_TYPE_MASK 0x3
 
@@ -301,10 +306,10 @@ extern ResultType (*game_eval) (Pos *pos, Player player, float *eval);
  premature optimization is the root of all evil, it is highly recommended
  that you get your game working and stable before you think of implementing
  this function :)*/
-extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float *eval);
+extern ResultType (*game_eval_incr) (Pos *pos, byte *move, float *eval);
 
 //! Should we use the incr eval function
-extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
+extern gboolean (*game_use_incr_eval) (Pos *pos);
 
 //! A function to search and return the best move - for games for which minimax is not appropriate
 extern void (*game_search) (Pos *pos, byte **move);
@@ -348,7 +353,7 @@ extern InputType (*game_event_handler) (Pos *pos, GtkboardEvent *event, MoveInfo
 	@param movp a pointer to the move. The game must allocate memory for this (statically).
 	@param rmovp pointer to rendering change
 */
-extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp);
+extern int (*game_getmove_kb) (Pos *pos, int key, byte ** movp, int **rmovp);
 
 //! Checks if the game is over, and if so, who has won
 /** This function is called after every move, both for single player and two player games. 
@@ -391,6 +396,7 @@ extern void (*game_free) ();
  clicked the back button, for example. Then the game must forget the saved clicks.*/
 extern void (*game_reset_uistate) ();
 
+//! Globals for convenience.
 extern int board_wid, board_heit, cell_size, num_pieces;
 
 //! Are we a single player game or a two-player game? DEFAULT: FALSE.

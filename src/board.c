@@ -357,7 +357,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 		}
 		else //(if game_getmove_kb)
 			status = game_getmove_kb (&cur_pos, 
-				((GdkEventKey *)event)->keyval, cur_pos.player, &move, &rmove);
+				((GdkEventKey *)event)->keyval, &move, &rmove);
 	}
 	else
 	{

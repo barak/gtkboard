@@ -438,7 +438,7 @@ static int wordtris_wordcmp (const void *p1, const void *p2)
 
 static void wordtris_init ();
 int wordtris_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int wordtris_getmove_kb (Pos *, int, Player, byte **, int **);
+int wordtris_getmove_kb (Pos *, int, byte **, int **);
 void wordtris_free ();
 ResultType wordtris_who_won (Pos *, Player , char **);
 int wordtris_animate (Pos *pos, byte **movp);
@@ -668,7 +668,7 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 	return TRUE;
 }
 
-int wordtris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int wordtris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static int rmove[10];
 	static byte move[10];

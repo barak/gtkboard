@@ -58,15 +58,15 @@ int othello6x6_init_pos [6*6] =
 
 
 int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp);
+int othello_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp);
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 ResultType othello_eval (Pos *, Player, float *);
-ResultType othello_eval_incr (Pos *, Player, byte *, float *);
+ResultType othello_eval_incr (Pos *, byte *, float *);
 byte * othello_movegen (Pos *);
 char ** othello_get_pixmap (int, int);
 guchar *othello_get_rgbmap (int, int);
-gboolean othello_use_incr_eval (Pos *pos, Player player);
+gboolean othello_use_incr_eval (Pos *pos);
 
 Game Othello = { OTHELLO_CELL_SIZE, 8, 8,
 	OTHELLO_NUM_PIECES, 
@@ -190,11 +190,11 @@ static gboolean hasmove (Pos *pos, Player player)
 	return found;
 }
 
-int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp)
+int othello_getmove_kb (Pos *pos, int key,  byte **movp, int **rmovp)
 {
 	static byte move[1];
 	if (key != GDK_space) return -1;
-	if (hasmove (pos, player)) return -1;
+	if (hasmove (pos, pos->player)) return -1;
 	move[0] = -1;
 	*movp = move;
 	return 1;	
@@ -550,7 +550,7 @@ ResultType othello_eval (Pos *pos, Player player, float *eval)
 	return RESULT_NOTYET;
 }
 
-ResultType othello_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+ResultType othello_eval_incr (Pos *pos, byte *move, float *eval)
 {
 	int i;
 	for (i=0; move[3*i] != -1; i++)
@@ -558,11 +558,12 @@ ResultType othello_eval_incr (Pos *pos, Player player, byte *move, float *eval)
 	if (i == 0) 
 		*eval = 0;
 	else
-		*eval = (player == WHITE ? (2 * i - 1) : - (2 * i - 1));
+		*eval = (pos->player == WHITE ? (2 * i - 1) : - (2 * i - 1));
 	return RESULT_NOTYET;
 }
 
-gboolean othello_use_incr_eval (Pos *pos, Player player)
+gboolean othello_use_incr_eval (Pos *pos)
 {
+	// TODO: use different threshold for Othello6x6
 	return pos->num_moves > 50 ? TRUE : FALSE;
 }

@@ -171,6 +171,7 @@ float ab_with_tt (Pos *pos, int player, int level,
 	return player == WHITE ? alpha : beta;
 }
 
+#if 0
 // TODO: this is currently unused, and must be merged with the previous function 
 float ab_with_tt_incr (Pos *pos, int player, int level, 
 		float eval, float alpha, float beta, byte *best_movep)
@@ -275,6 +276,7 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 		free (oldstate);
 	return player == WHITE ? alpha : beta;
 }
+#endif 
 
 static void catch_USR1 (int sig)
 {

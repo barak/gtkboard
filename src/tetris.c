@@ -60,8 +60,7 @@ char *tetris_score_field_names[] = {"User", "Score", "Date", NULL};
 
 static void tetris_set_init_pos (Pos *pos);
 static char ** tetris_get_pixmap (int idx, int color);
-static int tetris_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int tetris_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 static int tetris_animate (Pos *pos, byte **movp);
 static ResultType tetris_who_won (Pos *pos, Player to_play, char **commp);
 static void *tetris_newstate (Pos *, byte *);
@@ -308,7 +307,7 @@ int tetris_animate (Pos *pos, byte **movp)
 }
 
 
-int tetris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int tetris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[32];
 	byte *mp = move;

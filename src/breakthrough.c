@@ -63,7 +63,7 @@ static int breakthrough_getmove_kb (Pos *, int, Player, byte ** , int **);
 void breakthrough_init ();
 static ResultType breakthrough_who_won (Pos *, Player, char **);
 static ResultType breakthrough_eval (Pos *, Player, float *eval);
-static ResultType breakthrough_eval_incr (Pos *, Player, byte *, float *);
+static ResultType breakthrough_eval_incr (Pos *, byte *, float *);
 static byte * breakthrough_movegen (Pos *);
 static void *breakthrough_newstate (Pos *, byte *);
 
@@ -223,11 +223,11 @@ static ResultType breakthrough_eval (Pos *pos, Player player, float *eval)
 	return RESULT_NOTYET;
 }
 
-static ResultType breakthrough_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+static ResultType breakthrough_eval_incr (Pos *pos, byte *move, float *eval)
 {
 	byte *board = pos->board;
 	if (move[0] == move[3]) *eval = 0;
-	else *eval = (player == WHITE ? 1 : -1);
+	else *eval = (pos->player == WHITE ? 1 : -1);
 	*eval += 0.01 * random() / RAND_MAX;
 	return RESULT_NOTYET;
 }
