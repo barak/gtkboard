@@ -41,6 +41,18 @@ int movcpy (byte *dest, byte *src)
 	return i;
 }
 
+gboolean movcmp_literal (byte *move1, byte *move2)
+{
+	int i;
+	assert (move1);
+	assert (move2);
+	for (i=0; ; i++)
+	{
+		if (move1[i] == -1 && move2[i] == -1) return TRUE;
+		if (move1[i] != move2[i]) return FALSE;
+	}
+}
+
 byte *movlist_next (byte *move)
 {
 	while (*move != -1)

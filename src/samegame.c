@@ -66,6 +66,7 @@ static char **samegame_get_pixmap (int , int);
 static void *samegame_newstate (Pos *, byte *);
 static ResultType samegame_who_won (Pos *, Player, char **);
 static void samegame_search (Pos *pos, Player player, byte **movp);
+static void samegame_getxy (byte *board, int *x, int *y);
 
 static int anim_curx=-1, anim_cury=-1;
 
@@ -381,6 +382,15 @@ char ** samegame_get_pixmap (int idx, int color)
 	return pixmap_header_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg);
 }
 
+void samegame_search (Pos *pos, Player player, byte **movp)
+{
+	int x, y;
+	int retval;
+	samegame_getxy (pos->board, &x, &y);
+	retval = getmove_real (pos, x, y, movp);
+	assert (retval > 0);
+}
+
 void samegame_getxy (byte *board, int *x, int *y)
 {
 	int i, j;
@@ -397,13 +407,4 @@ void samegame_getxy (byte *board, int *x, int *y)
 			return;
 		}
 	}
-}
-
-void samegame_search (Pos *pos, Player player, byte **movp)
-{
-	int x, y;
-	int retval;
-	samegame_getxy (pos->board, &x, &y);
-	retval = getmove_real (pos, x, y, movp);
-	assert (retval > 0);
 }

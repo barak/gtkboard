@@ -481,11 +481,12 @@ static float othello_eval_weights (Pos *pos)
 ResultType othello_eval (Pos *pos, Player player, float *eval)
 {
 	assert (board_wid == 8 && board_heit == 8);
-	if (pos->num_moves > 50)
+/*	if (pos->num_moves > 50)
 	{
 		*eval = othello_eval_material (pos);
 		return RESULT_NOTYET;
 	}
+*/
 	*eval = 
 		10 * othello_eval_liberty (pos) 
 		+ 100 * othello_eval_safe (pos) 

@@ -22,7 +22,6 @@
 #include <math.h>
 
 #include "game.h"
-#include "move.h"
 #include "aaball.h"
 
 #define INFILTRATE_CELL_SIZE 40

@@ -53,7 +53,7 @@ void rgb_init (void);
 static byte * rgb_movegen (Pos *, Player);
 static ResultType rgb_eval (Pos *, Player, float *eval);
 
-static char ** rgb_get_pixmap (int idx, int color);
+static unsigned char * rgb_get_rgbmap (int idx, int color);
 
 void rgb_init ()
 {
@@ -62,7 +62,7 @@ void rgb_init ()
 	game_getmove = rgb_getmove;
 	game_who_won = rgb_who_won;
 	game_set_init_pos = rgb_set_init_pos;
-	game_get_pixmap = rgb_get_pixmap;
+	game_get_rgbmap = rgb_get_rgbmap;
 	game_draw_cell_boundaries = TRUE;
 	game_doc_about = 
 		"Rgb\n"
@@ -174,11 +174,11 @@ static int rgb_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player t
 	return 1;
 }
 
-static char ** rgb_get_pixmap (int idx, int color)
+static unsigned char * rgb_get_rgbmap (int idx, int color)
 {
 	int fg = 0, bg, i;
 	char *colors;
-	static char pixbuf[RGB_CELL_SIZE*(RGB_CELL_SIZE+1)];
+	static char rgbbuf[3 * RGB_CELL_SIZE * RGB_CELL_SIZE];
 	colors = rgb_colors;
 	if (idx == RGB_RP) fg = 255 << 16;
 	else if (idx == RGB_GP) fg = 255 << 8;
@@ -186,7 +186,8 @@ static char ** rgb_get_pixmap (int idx, int color)
 	else { return NULL;}
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
-	return pixmap_ball_gen(RGB_CELL_SIZE, pixbuf, fg, bg, 17.0, 30.0);
+	rgbmap_ball_shadow_gen(55, rgbbuf, fg, bg, 17.0, 35.0, 3);
+	return rgbbuf;
 }
 
 

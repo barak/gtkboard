@@ -31,6 +31,7 @@
 #define CHESS_BOARD_WID 8
 #define CHESS_BOARD_HEIT 8
 
+#define CHESS_EMPTY 0
 #define CHESS_WK 1
 #define CHESS_WQ 2
 #define CHESS_WR 3

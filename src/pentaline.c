@@ -55,6 +55,13 @@ unsigned char * pentaline_get_rgbmap (int idx, int color);
 ResultType pentaline_eval_incr (Pos *, Player, byte *, float *);
 byte * pentaline_movegen (Pos *, Player);
 ResultType pentaline_eval (Pos *, Player, float *);
+void *pentaline_newstate (Pos *pos, byte *move);
+
+typedef struct 
+{
+	// length, open/closed, white/black
+	byte chains[5][2][2];
+} Pentaline_state;
 
 
 void pentaline_init ()
@@ -65,9 +72,12 @@ void pentaline_init ()
 	game_who_won = pentaline_who_won;
 	game_get_rgbmap = pentaline_get_rgbmap;
 	game_draw_cell_boundaries = TRUE;
-	game_eval_incr = pentaline_eval_incr;
+//	game_eval_incr = pentaline_eval_incr;
 	game_white_string = "Red";
 	game_black_string = "Blue";
+	game_stateful = TRUE;
+	game_state_size = sizeof (Pentaline_state);
+	game_newstate = pentaline_newstate;
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
@@ -76,7 +86,8 @@ void pentaline_init ()
 	game_doc_rules = 
 		"Pentaline rules\n"
 		"\n"
-		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n";
+		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n\n"
+		"This game is the same as the free-style variant of GoMoku.\n";
 }
 
 byte * pentaline_movegen (Pos *pos, Player player)
@@ -132,8 +143,8 @@ byte * pentaline_movegen (Pos *pos, Player player)
 	}
 	if (movp == movbuf) // empty board
 	{
-		*movp++ = random () % board_wid;
-		*movp++ = random () % board_heit;
+		*movp++ = board_wid / 2 - random() % 2;
+		*movp++ = board_heit / 2 - random() % 2;
 		*movp++ = (player == WHITE ? PENTALINE_RP : PENTALINE_BP);
 		*movp++ = -1;
 	}
@@ -161,10 +172,27 @@ ResultType pentaline_who_won (Pos *pos, Player to_play, char **commp)
 			if (val == PENTALINE_EMPTY) {found = 0; break; }
 			if (val != pos->board [j * board_wid + i]) { found = 0; break; }
 		}
-		if (found) {*commp = (to_play == WHITE ? "Red won" : "Blue won");
+		if (found) {*commp = (to_play == WHITE ? "Blue won" : "Red won");
 			return (to_play == WHITE ? RESULT_BLACK : RESULT_WHITE);}
 	}
 	*commp = NULL;
+	{
+		int len, open, color;
+		for (color = 0; color < 2 && pos->state; color++)
+		{
+			printf ("player = %s:   ", color==0?"Red ":"Blue");
+			for (open = 0; open < 2; open++)
+			{
+				printf ("open=%d: ", open+1);
+				for (len = 0; len < 5; len++)
+				printf ("%d ", 
+						((Pentaline_state *)pos->state)->chains[len][open][color]);
+				printf ("\t");
+			}
+			printf ("\n");
+		}
+		printf ("\n");
+	}
 	return RESULT_NOTYET;
 }
 
@@ -251,30 +279,217 @@ static float eval_runs (byte *board)
 	for (i=0; i<board_wid; i++)
 	for (j=0; j<board_heit; j++)
 	{
-		if (board [j * board_heit + i] == PENTALINE_EMPTY)
+		if (board [j * board_wid + i] == PENTALINE_EMPTY)
 			continue;
 		for (k=0; k<4; k++)
 			eval += eval_line (board, i, j, incx[k], incy[k]);
 	}
-	return eval + 0.1 * random() / RAND_MAX;
+	return eval;
 }
+
+static int incx[4] = { 0, 1, 1, -1 };
+static int incy[4] = { 1, 0, 1,  1 };
 
 ResultType pentaline_eval_incr (Pos *pos, Player to_play, byte *move, float *eval)
 {
 	int  k;
-	int incx[4] = { 0, 1, 1, -1 };
-	int incy[4] = { 1, 0, 1,  1 };
 	float val = 0;
 	pos->board [move[1] * board_wid + move[0]] = move[2];
 	for (k=0; k<4; k++)
 		val += eval_line_bidir (pos->board, move[0], move[1], incx[k], incy[k]);
 	pos->board [move[1] * board_wid + move[0]] = 0;
-	*eval = val + 0.01 * random() / RAND_MAX;
+	*eval = val;
 	return RESULT_NOTYET;
 }
 
-ResultType pentaline_eval (Pos *pos, Player to_play, float *eval)
+ResultType pentaline_eval (Pos *pos, Player player, float *eval)
 {
-	*eval = eval_runs (pos->board);
+#define FIRST_WON { *eval = player == WHITE ? (1 << 20) : - (1 << 20); return player == WHITE ? RESULT_WHITE : RESULT_BLACK; }
+#define SECOND_WON { *eval = player == WHITE ? - (1 << 20) : (1 << 20); return player == WHITE ? RESULT_BLACK : RESULT_WHITE; }
+	int color = player == WHITE ? 0 : 1;
+	int len, open;
+	Pentaline_state *state;
+	*eval = 0;
+	state = ((Pentaline_state *)pos->state);
+	
+	// 5 in a row
+	if (state->chains[4][1][color] > 0 || state->chains[4][0][color] > 0)
+	{
+		*eval = player == WHITE ? (1 << 20) : - (1 << 20);
+		return player == WHITE ? RESULT_WHITE : RESULT_BLACK;
+	}
+	
+	// opponent: 5-in-a-row
+	if (state->chains[4][1][1-color] > 0 || state->chains[4][0][1-color] > 0)
+	{
+		*eval = player == WHITE ? - (1 << 20) : (1 << 20);
+		return player == WHITE ? RESULT_BLACK : RESULT_WHITE;
+	}
+	
+	// 4-in-a-row
+	if (state->chains[3][1][color] > 0 || state->chains[3][0][color] > 0)
+	{
+		*eval = player == WHITE ? (1 << 20) : - (1 << 20);
+		return player == WHITE ? RESULT_WHITE : RESULT_BLACK;
+	}
+	
+	// opponent: 4-in-a-row, both sides open
+	if (state->chains[3][1][1-color] > 0)
+		*eval += (player == WHITE ? -(1 << 18) : (1 << 18));
+	
+	// opponent: 2 4-in-a-row's
+	if (state->chains[3][0][1-color] > 1)
+		*eval += (player == WHITE ? -(1 << 18) : (1 << 18));
+	
+	// 3-in-a-row, both sides open; opponent doesn't have 4-in-a-row
+	if (state->chains[2][1][color] > 0 && state->chains[3][0][1-color] == 0)
+		*eval += (player == WHITE ? (1 << 16) : - (1 << 16));
+	
+	// opponent: 2 3-in-a-row's, both sides open 
+	if (state->chains[2][1][1-color] > 1)
+		*eval += (player == WHITE ? -(1 << 14) : (1 << 14));
+	
+	// opponent: a 4 and a doubly open 3
+	if (state->chains[3][0][1-color] > 0 && state->chains[2][1][1-color] > 0)
+		*eval += (player == WHITE ? - (1 << 12) : (1 << 12));
+
+	// These seem to be all the winning patterns. Can't find any more.
+	
+	*eval = 0;
+	for (len = 0; len < 4; len++)
+	for (open = 0; open < 2; open++)
+	{
+		*eval += state->chains[len][open][0] * (1 + open) * (1 + open) * (1 << len);
+		*eval -= state->chains[len][open][1] * (1 + open) * (1 + open) * (1 << len);
+	}
 	return RESULT_NOTYET;
+}
+
+
+// given a square and a direction, find the length of the chain it defines {0, 1, ... 4}  and the number of ends of the chain that are unoccupied {0, 1, 2}
+static void get_chain_info (byte *board, int x, int y, int dx, int dy,
+	   	int *len, int *open, int *color)
+{
+	int i;
+	int val = board [y * board_wid + x];
+	*open = 0;
+	*len = 0;
+	if (!ISINBOARD (x, y))
+		return;
+	if (val == PENTALINE_EMPTY)
+		return;
+	*color = (val == PENTALINE_RP ? 0 : 1);
+		
+	do
+	{
+		x -= dx;
+		y -= dy;
+	}
+	while (ISINBOARD (x, y)	&& board [y * board_wid + x] == val);
+	if (ISINBOARD (x, y) && board [y * board_wid + x] == PENTALINE_EMPTY) (*open)++;
+	
+	do
+	{
+		x += dx;
+		y += dy;
+		(*len)++;
+	}
+	while (ISINBOARD (x, y)	&& board [y * board_wid + x] == val);
+	if (ISINBOARD (x, y) && board [y * board_wid + x] == PENTALINE_EMPTY) (*open)++;
+	(*len)--;
+}
+
+static void update_state (byte chains[5][2][2], int len, int open, int color, int inc)
+{
+	if (len == 0) return;
+	if (len >= 5)
+	{ 
+		len = 5;
+		open = 1;
+	}
+	if (open == 0) return;
+	if (inc == -1) assert (chains[len-1][open-1][color] > 0);
+	chains[len-1][open-1][color] += inc;
+}
+
+void *pentaline_newstate (Pos *pos, byte *move)
+{
+	int k=0;
+	static Pentaline_state state;
+	Pentaline_state def_state = 
+		{{{{0, 0},{0, 0}},{{0, 0},{0, 0}},{{0, 0},{0, 0}},{{0, 0},{0, 0}},
+	}};
+	int len, open;
+	int newcolor, oldcolor;
+	int val = move[2];
+	if (pos->state)
+		memcpy (&state, pos->state, sizeof (Pentaline_state));
+	else
+		memcpy (&state, &def_state, sizeof (Pentaline_state));
+	for (k=0; k<4; k++)
+	{
+		get_chain_info (pos->board, move[0] + incx[k], move[1] + incy[k], 
+				incx[k], incy[k], &len, &open, &oldcolor);
+/*		if (len != 0 && len <= 5 && open != 0)
+		{
+			if (len > 5) len = 5;
+			assert (state.chains[len-1][open-1][oldcolor] > 0);
+			state.chains[len-1][open-1][oldcolor]--;
+		}
+*/
+		update_state (state.chains, len, open, oldcolor, -1);
+		get_chain_info (pos->board, move[0] - incx[k], move[1] - incy[k], 
+				-incx[k], -incy[k], &len, &open, &oldcolor);
+/*		if (len != 0 && len <= 5 && open != 0)
+		{
+			if (len > 5) len = 5;
+			assert (state.chains[len-1][open-1][oldcolor] > 0);
+			state.chains[len-1][open-1][oldcolor]--;
+		}
+*/
+		update_state (state.chains, len, open, oldcolor, -1);
+	}
+
+	pos->board [move[1] * board_wid + move[0]] = move[2]; 
+	for (k=0; k<4; k++)
+	{
+		int x = move[0], y = move[1];
+		if (ISINBOARD (x + incx[k], y + incy[k]) 
+				&& pos->board [(y + incy[k]) * board_wid + (x + incx[k])] != val)
+		{
+			get_chain_info (pos->board, move[0] + incx[k], move[1] + incy[k], 
+					incx[k], incy[k], &len, &open, &oldcolor);
+/*			if (len != 0 && len <= 5 && open != 0)
+			{
+				if (len > 5) len = 5;
+				state.chains[len-1][open-1][oldcolor]++;
+			}
+*/
+			update_state (state.chains, len, open, oldcolor, +1);
+		}
+		if (ISINBOARD (x - incx[k], y - incy[k]) 
+				&& pos->board [(y - incy[k]) * board_wid + (x - incx[k])] != val)
+		{
+			get_chain_info (pos->board, move[0] - incx[k], move[1] - incy[k], 
+					-incx[k], -incy[k], &len, &open, &oldcolor);
+/*			if (len != 0 && len <= 5 && open != 0)
+			{
+				if (len > 5) len = 5;
+				state.chains[len-1][open-1][oldcolor]++;
+			}
+*/
+			update_state (state.chains, len, open, oldcolor, +1);
+		}
+		get_chain_info (pos->board, move[0], move[1], 
+				incx[k], incy[k], &len, &open, &newcolor);
+/*		if (len != 0 && len <= 5 && open != 0)
+		{
+			if (len > 5) len = 5;
+			state.chains[len-1][open-1][newcolor]++;
+		}
+*/
+		update_state (state.chains, len, open, newcolor, +1);
+	}
+	pos->board [move[1] * board_wid + move[0]] = 0; 
+	return &state;
 }

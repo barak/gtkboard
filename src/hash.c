@@ -22,6 +22,8 @@
 #include <assert.h>
 #include <glib.h>
 
+#include "move.h"
+
 /** \file hash.c
    \brief hash table which implements transposition tables.
 
@@ -68,6 +70,7 @@ typedef struct
 	int depth:8;
 	int free:1;
 	int stale:1;
+	byte *best_move;
 } hash_t;
 
 static int hash_table_size = 1 << 16;
@@ -76,7 +79,8 @@ static int num_hash_coeffts = 1024;
 static uint *hash_coeffts = NULL;
 static hash_t *hash_table = NULL;
 static int hash_filled = 0;
-static int hash_hits = 0, hash_misses = 0;
+static int hash_eval_hits = 0, hash_eval_misses = 0;
+static int hash_move_hits = 0, hash_move_misses = 0;
 
 static void hash_init ()
 	/* malloc the stuff */
@@ -119,7 +123,8 @@ static uint get_check (byte *pos, int poslen)
 }
 
 // FIXME: hash should work with state as well
-void hash_insert (byte *pos, int poslen, int num_moves, int depth, float eval)
+void hash_insert (byte *pos, int poslen, int num_moves, int depth, float eval, 
+		byte *move)
 {
 	uint start = get_hash (pos, poslen) % hash_table_size;
 	uint check = get_check (pos, poslen);
@@ -142,12 +147,15 @@ void hash_insert (byte *pos, int poslen, int num_moves, int depth, float eval)
 		if (hash_filled >= hash_table_max && depth > hash_table[idx].depth)
 			break;
 	}
+	if (hash_table[idx].free == 0 && hash_table[idx].best_move)
+		free (hash_table[idx].best_move);
 	hash_table[idx].free = 0;
 	hash_table[idx].check = check;
 	hash_table[idx].num_moves = num_moves;
 	hash_table[idx].eval = eval;
 	hash_table[idx].depth = depth;
 	hash_table[idx].stale = 0;
+	hash_table[idx].best_move = (move ? movdup (move) : NULL);
 }
 
 int hash_get_eval (byte *pos, int poslen, int num_moves, int depth, float *evalp)
@@ -168,32 +176,58 @@ int hash_get_eval (byte *pos, int poslen, int num_moves, int depth, float *evalp
 				if (evalp)
 					*evalp = hash_table[idx].eval;
 				hash_table[idx].stale = 0;
-				hash_hits++;
+				hash_eval_hits++;
 				return 1;
 			}
 			break;
 		}
 	}
 	/* found a free slot before encountering this pos */
-	hash_misses++;
+	hash_eval_misses++;
 	return 0;
+}
+
+byte * hash_get_move (byte *pos, int poslen, int num_moves)
+{
+	uint idx = get_hash (pos, poslen) % hash_table_size;
+	uint check = get_check (pos, poslen);
+	for (; hash_table[idx].free == 0; idx = (idx+1) % hash_table_size)
+	{
+		if (hash_table[idx].check == check)	/* found it */
+		{
+			if (hash_table[idx].num_moves == num_moves)
+			{
+				hash_table[idx].stale = 0;
+				hash_move_hits++;
+				return hash_table[idx].best_move;
+			}
+			break;
+		}
+	}
+	/* found a free slot before encountering this pos */
+	hash_move_misses++;
+	return NULL;
 }
 
 void hash_clear ()
 {
 	int i;
 	for (i=0; i<hash_table_size; i++)
+	{
+		if (hash_table[i].free == 0 && hash_table[i].best_move)
+			free (hash_table[i].best_move);
 		hash_table[i].free = 1;
+	}
 	hash_filled = 0;
 }
 
 void hash_print_stats ()
 {
 	int i, stale=0;
-	if (opt_verbose) printf ("hashtable: size=%d \tfilled=%d \thits=%d \tmisses=%d \t",
-			hash_table_size, hash_filled, hash_hits, hash_misses);
-	hash_hits = 0;
-	hash_misses = 0;
+	if (opt_verbose) printf ("hashtable: size=%d \tfilled=%d \teval_hits=%d \teval_misses=%d \tmove_hits=%d \tmove_misses=%d \t",
+			hash_table_size, hash_filled, 
+			hash_eval_hits, hash_eval_misses, hash_move_hits, hash_move_misses);
+	hash_eval_hits = hash_eval_misses = hash_move_hits = hash_move_misses = 0;
 	for (i=0; i<hash_table_size; i++)
 	{
 		if (!hash_table[i].free && hash_table[i].stale)

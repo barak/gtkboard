@@ -29,139 +29,71 @@
 
 extern gboolean engine_stop_search;
 
-static int ab_tree_exhausted = 0;
+static gboolean ab_tree_exhausted = FALSE;
 
 static int ab_leaf_cnt;  // how many leaves were eval'd
 
 extern int hash_get_eval (byte *, int, int, int, float *);
 extern void hash_print_stats ();
-extern void hash_insert (byte *, int, int, int, float);
+extern void hash_insert (byte *, int, int, int, float, byte *move);
 extern void hash_clear ();
+extern void hash_insert_move (byte *, int, int, byte *);
+extern byte * hash_get_move (byte *, int, int);
 
 extern gboolean opt_verbose;
-
 	
-// This function is deprecated
-float game_ab (Pos *pos, int player, int level, 
-		float alpha, float beta, byte **ret_movep)
-	/* level is the number of ply to search */
-{
-	int to_play = player;
-	float val, best= 0;
-	int first = 1;
-	byte *movlist, *move;
-	byte best_move [1024];
-	static byte ret_move [1024];
-	Pos newpos;
-	if (engine_stop_search) { ab_tree_exhausted = 0; return 0; }
-	newpos.board = (char *) malloc (board_wid * board_heit);
-	assert (newpos.board);
-	memcpy (newpos.board, pos->board, board_wid * board_heit);
-	if (game_stateful)
-	{
-		newpos.state = (void *) malloc (game_state_size);
-		assert (newpos.state);
-		memcpy (newpos.state, pos->state, game_state_size);
-	}
-	movlist = game_movegen (pos, player);
-	if (movlist[0] == -2)		/* we have no move left */
-	{
-		if (ret_movep && !engine_stop_search)
-			*ret_movep = NULL;
-		free (newpos.board);
-		if (game_stateful) free (newpos.state);
-		free (movlist);
-		game_eval (pos, to_play, &val);
-		return val;
-	}
-	move = movlist;
-	do
-	{
-		memcpy (newpos.board, pos->board, board_wid * board_heit);
-		if (game_stateful) 
-		{
-			void *newstate = game_newstate (pos, move);
-			memcpy (newpos.state, newstate, game_state_size);
-		}
-		move_apply (newpos.board, move);
-		if (level == 0)
-		{
-			ab_tree_exhausted = 0;
-			game_eval (&newpos, to_play, &val);
-		}
-		else 
-		{
-			if (player == WHITE)
-				val = game_ab (&newpos, BLACK, level-1, alpha, beta, NULL);
-			else
-				val = game_ab (&newpos, WHITE, level-1, alpha, beta, NULL);
-		}
-		if (first || 
-			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
-		{
-			if (ret_movep)	movcpy (best_move, move);
-			if (player == WHITE) alpha = val; else beta = val;
-			first = 0;
-		}
-		if (alpha >= beta)
-			break;
-		move = movlist_next (move);
-	}
-	while (move[0] != -2);
-	if (ret_movep && !engine_stop_search)
-	{
-		movcpy (ret_move, best_move);
-		*ret_movep = ret_move;
-	}
-	free (newpos.board);
-	if (game_stateful) free (newpos.state);
-	free (movlist);
-	return player == WHITE ? alpha : beta;
-}
-
-	
+// FIXME: this function is too complicated
 float ab_with_tt (Pos *pos, int player, int level, 
-		float alpha, float beta, byte **ret_movep, int depth)
+		float alpha, float beta, byte *best_movep)
 	/* level is the number of ply to search */
 {
 	int to_play = player;
 	float val, cacheval, best= 0, retval;
-	int first = 1;
+	gboolean first = TRUE;
 	byte *movlist, *move;
-	byte best_move [1024];
-	static byte ret_move [1024];
+	byte best_move [4096];
 	Pos newpos;
+	gboolean hashed_move = TRUE;
+	float local_alpha = -1e+16, local_beta = 1e+16;
+	byte *orig_move;
+	best_move [0] = -1;
 	
 	engine_poll ();
-	if (engine_stop_search) { ab_tree_exhausted = 0; return 0; }
-
+	if (engine_stop_search) { ab_tree_exhausted = FALSE; return 0; }
 
 	movlist = game_movegen (pos, player);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
-		if (ret_movep && !engine_stop_search)
-			*ret_movep = NULL;
-	//	free (newpos.board);
-	//	if (game_stateful) free (newpos.state);
 		free (movlist);
 		game_eval (pos, to_play, &val);
-		hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, val);
+		hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, val, 
+				NULL);
 		return val;
 	}
-	move = movlist;
+	move = NULL;
+	orig_move = NULL;
+	if (level > 0)
+		move = hash_get_move (pos->board, board_wid * board_heit, pos->num_moves);
+	if (!move)
+	{
+		move = movlist;
+		hashed_move = FALSE;
+	}
+	// origmove is the owning pointer and move is the aliasing pointer
+	else orig_move = move = movdup (move);
 	
 	newpos.board = (char *) malloc (board_wid * board_heit);
 	assert (newpos.board);
-//	memcpy (newpos.board, pos->board, board_wid * board_heit);
 	if (game_stateful)
 	{
 		newpos.state = (void *) malloc (game_state_size);
 		assert (newpos.state);
-//		memcpy (newpos.state, pos->state, game_state_size);
 	}
 
 	do
 	{
+		if (!orig_move || hashed_move || !movcmp_literal (orig_move, move))
+		{
 		ResultType result = RESULT_NOTYET;
 		memcpy (newpos.board, pos->board, board_wid * board_heit);
 		if (game_stateful)
@@ -178,8 +110,9 @@ float ab_with_tt (Pos *pos, int player, int level,
 		if (level == 0)
 		{
 			ab_leaf_cnt ++;
-			ab_tree_exhausted = 0;
-			hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
+			ab_tree_exhausted = FALSE;
+			hash_insert (newpos.board, board_wid * board_heit, 
+					pos->num_moves, level, val, NULL);
 		}
 		else 
 		{
@@ -191,59 +124,58 @@ float ab_with_tt (Pos *pos, int player, int level,
 				;
 			else
 			{
-				if (player == WHITE)
-					val = ab_with_tt 
-						(&newpos, BLACK, level-1, alpha, beta, NULL, depth+1);
-				else
-					val = ab_with_tt 
-						(&newpos, WHITE, level-1, alpha, beta, NULL, depth+1);
-				hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
+				val = ab_with_tt (&newpos, player == WHITE ? BLACK : WHITE, 
+							level-1, alpha, beta, best_move);
 			}
 		}
-		if (first) 
+		if((player == WHITE && val > local_alpha) 
+				|| (player == BLACK && val < local_beta))
 		{
-			if (ret_movep)	movcpy (best_move, move);
-			first = 0;
+			if (best_movep)	movcpy (best_movep, move);
+			if (player == WHITE) local_alpha = val; else local_beta = val;
 		}
-		if((player == WHITE && val > alpha) || (player == BLACK && val < beta))
-		{
-			if (ret_movep)	movcpy (best_move, move);
-			if (player == WHITE) alpha = val; else beta = val;
-		}
+
+		if((player == WHITE && val > alpha))
+			alpha = val;
+		if ((player == BLACK && val < beta))
+			beta  = val;
 		if (alpha >= beta)
 			break;
-		move = movlist_next (move);
+		}
+		if (hashed_move)
+		{
+//			free (move);
+			move = movlist;
+		}
+		else
+			move = movlist_next (move);
+		hashed_move = FALSE;
 	}
 	while (move[0] != -2);
-	if (ret_movep && !engine_stop_search)
-	{
-		movcpy (ret_move, best_move);
-		*ret_movep = ret_move;
-	}
 	free (newpos.board);
 	if (game_stateful) free (newpos.state);
 	free (movlist);
-/*	if (depth == 0) 
-		printf ("ab_with_tt: eval = %f\n", player == WHITE ? alpha : beta);
-*/
+	free (orig_move);
+	hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, 
+			player == WHITE ? alpha : beta, best_movep);
 	return player == WHITE ? alpha : beta;
 }
 
+// TODO: this must be merged with the previous function
 float ab_with_tt_incr (Pos *pos, int player, int level, 
-		float eval, float alpha, float beta, byte **ret_movep, int depth)
+		float eval, float alpha, float beta, byte *best_movep)
 	/* level is the number of ply to search */
 {
 	int to_play = player;
 	float val, cacheval, best= 0, retval;
 	int first = 1;
 	byte *movlist, *move;
-	byte best_move [1024];
-	static byte ret_move [1024];
+	byte best_move [4096];
 	void *oldstate = NULL; // use the recursion to implement stack of states
 	engine_poll ();
 	if (engine_stop_search) 
 	{ 
-		ab_tree_exhausted = 0; 
+		ab_tree_exhausted = FALSE; 
 		return 0; 
 	}
 	if (game_stateful)
@@ -254,8 +186,6 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 	movlist = game_movegen (pos, player);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
-		if (ret_movep && !engine_stop_search)
-			*ret_movep = NULL;
 		free (movlist);
 		game_eval (pos, to_play, &val);
 		return val;
@@ -271,7 +201,7 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 		if (level == 0)
 		{
 			ab_leaf_cnt ++;
-			ab_tree_exhausted = 0;
+			ab_tree_exhausted = FALSE;
 			val = neweval;
 		}
 		else if (fabs (incr_eval) >= GAME_EVAL_INFTY 
@@ -304,10 +234,10 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 			if (!found)
 				val = ab_with_tt_incr
 					(pos, player == WHITE ? BLACK : WHITE, 
-						level-1, neweval, alpha, beta, NULL, depth+1);
+						level-1, neweval, alpha, beta, best_move);
 			if (level >= 1)
 				hash_insert (pos->board, board_wid * board_heit, 
-						pos->num_moves, level, val);
+						pos->num_moves, level, val, NULL);
 			move_apply (pos->board, movinv);
 			free (movinv);
 			memcpy (pos->state, oldstate, game_state_size);
@@ -315,12 +245,12 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 		}
 		if (first)
 		{
-			if (ret_movep)	movcpy (best_move, move);
+			if (best_movep) movcpy (best_movep, move);
 			first = 0;
 		}
 		if ((player == WHITE && val > alpha) || (player == BLACK && val < beta))
 		{
-			if (ret_movep)	movcpy (best_move, move);
+			if (best_movep) movcpy (best_movep, move);
 			if (player == WHITE) alpha = val; else beta = val;
 		}
 		if (alpha >= beta)
@@ -328,11 +258,6 @@ float ab_with_tt_incr (Pos *pos, int player, int level,
 		move = movlist_next (move);
 	}
 	while (move[0] != -2);
-	if (ret_movep && !engine_stop_search)
-	{
-		movcpy (ret_move, best_move);
-		*ret_movep = ret_move;
-	}
 	free (movlist);
 	if (game_stateful)
 		free (oldstate);
@@ -347,10 +272,12 @@ static void catch_USR1 (int sig)
 
 byte * ab_dfid (Pos *pos, int player)
 {
-	byte *best_move;
+	byte best_move[4096];
+	byte local_best_move[4096];
 	int ply;
 	float val = 0, eval = 0, oldval = 0;
 	gboolean use_incr_eval = FALSE;
+	gboolean found = FALSE;
 	engine_stop_search = 0;
 	if (!game_movegen || !game_eval)
 		return NULL;
@@ -363,12 +290,17 @@ byte * ab_dfid (Pos *pos, int player)
 	for (ply = 0; !engine_stop_search; ply++)
 	{
 		oldval = val;
-		ab_tree_exhausted = 1;
+		ab_tree_exhausted = TRUE;
 		if (use_incr_eval)
 			val = ab_with_tt_incr (pos, player, ply, 
-					eval, -1e+16, 1e+16, &best_move, 0);
+					eval, -1e+16, 1e+16, local_best_move);
 		else
-			val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, &best_move, 0);
+			val = ab_with_tt (pos, player, ply, -1e+16, 1e+16, local_best_move);
+		if (!engine_stop_search)
+		{
+			movcpy (best_move, local_best_move);
+			found = TRUE;
+		}
 		if (ab_tree_exhausted)
 			break;
 	}
@@ -381,5 +313,5 @@ byte * ab_dfid (Pos *pos, int player)
 		printf ("ab_dfid(): move= "); 
 		move_fwrite (best_move, stdout); 
 	}
-	return best_move;
+	return found ? best_move : NULL;
 }

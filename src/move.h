@@ -45,6 +45,8 @@
 /** The new move is malloc()d and so must be free()d by the caller.*/
 byte *movdup (byte *);
 
+//! Compares two moves byte by byte. Literal not semantic comparison. Returns TRUE if the moves are equal
+gboolean movcmp_literal (byte *move1, byte *move2);
 
 //! Makes the move src to the move dest.
 /** Memory is assumed to have already been allocated for dest. */

@@ -842,7 +842,7 @@ void gui_init ()
 		{ "/Settings/_Flip Board", "<control>T", menu_board_flip_cb, 0, "" },
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
-		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
+//		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
 		// TODO: implement context help
 //		{ "/Help/_Context help", NULL, ui_set_context_help, 0, ""},
 	};

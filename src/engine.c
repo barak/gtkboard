@@ -54,9 +54,6 @@ extern void reset_game_params ();
 extern void set_game_params ();
 extern void game_set_init_pos_def (Pos *);
 
-//! The minimax search function (using depth first iterative deepening). SHOULD NOT BE USED.
-extern byte *game_minimax_dfid (Pos *, int);
-
 //! Alpha-beta search function (using depth first iterative deepening).
 extern byte *ab_dfid (Pos *, int);
 
