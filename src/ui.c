@@ -1159,7 +1159,7 @@ void gui_init ()
 
 	if (opt_game) menu_start_game ();
 	menu_put_player (TRUE);
-	if (!opt_game) sb_message ("Select a game from the Game menu", FALSE);
+//	if (!opt_game) sb_message ("Select a game from the Game menu", FALSE);
 	sb_update ();
 }
 

@@ -32,6 +32,7 @@
 #include "ui.h"
 #include "menu.h"
 #include "sound.h"
+#include "../pixmaps/splash.xpm"
 
 //! for showing names of rows and columns
 static GtkWidget *board_rowbox_real = NULL, *board_colbox_real = NULL;
@@ -270,7 +271,18 @@ gboolean board_redraw (GtkWidget *widget, GdkEventExpose *event)
 {
 	int x, y;
 	int xmin = 0, ymin = 0, xmax = board_wid, ymax = board_heit;
-	if (!opt_game) return TRUE;
+	if (!opt_game)
+	{
+		GdkPixmap *splash_pixmap;
+		splash_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
+				gdk_colormap_get_system (), NULL, NULL, splash_xpm);
+		gdk_draw_pixmap ((GdkDrawable *)board_area->window, 
+				board_area->style->bg_gc[GTK_STATE_NORMAL],
+				(GdkDrawable *)splash_pixmap, 
+				0, 0, 0, 0, -1, -1);
+		gdk_pixmap_unref (splash_pixmap);
+		return TRUE;
+	}
 	if (event)
 	{
 		xmin = event->area.x / cell_size;
@@ -532,7 +544,6 @@ void board_init ()
 #else
 		gtk_widget_set_size_request (GTK_WIDGET (board_area), 300, 300);
 #endif
-		gdk_draw_rectangle ((GdkDrawable *)board_area->window, def_gc, TRUE, 0, 0, 300, 300);
 		return;
 	}
 	

@@ -23,7 +23,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include <gconf/gconf.h>
 
 #include "prefs.h"
 #include "ui_common.h"
