@@ -11,6 +11,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 
+extern gboolean opt_verbose;
+
 Mix_Music *music = NULL;
 
 #endif
@@ -37,18 +39,38 @@ void sound_enable_pref_cb (gchar *key, gchar *value)
 	sound_enabled = prefs_get_bool_val (value);
 }
 
+// default list of directories to search for sound. This is obviously stupid, but I don't have a better idea.
+static char * default_sound_dirs[] = 
+{
+	"/usr/share/sounds/gtkboard",
+	"/usr/local/share/sounds/gtkboard",
+	"/opt/share/sounds/gtkboard",
+	"sounds",
+	"../sounds",
+	NULL
+};
+
 static void find_sound_dir ()
 {
+	int i;
 	sound_dir = prefs_get_config_val ("sound_dir");
 	if (!sound_dir)
 		sound_dir = g_strdup_printf ("%s/sounds/gtkboard", DATADIR);
 #if GLIB_MAJOR_VERSION > 1
 	if (!g_file_test (sound_dir, G_FILE_TEST_IS_DIR))
-	{
-		fprintf (stderr, "Sound directory %s not found\n", sound_dir);
 		g_free (sound_dir);
-		sound_dir = NULL;
+	for (i=0; default_sound_dirs[i]; i++)
+	{ 
+		sound_dir = default_sound_dirs[i];
+		if (g_file_test (sound_dir, G_FILE_TEST_IS_DIR))
+		{
+			if (opt_verbose) fprintf (stderr, "Using sound directory %s\n", sound_dir);
+			return;
+		}
 	}
+	fprintf (stderr, "Sound directory not found, sounds will be disabled\n");
+	sound_dir = NULL;
+	
 #endif
 }
 
