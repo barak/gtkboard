@@ -71,8 +71,6 @@ void rgb_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("rgb");
 	game_doc_rules = 
-		"Rgb rules\n"
-		"\n"
 		"Rgb, short for red-green-blue, is a harder version of tic-tac-toe. The goal is to get 3 balls in a line (row, column, or diagonal) of any one color. Clicking on an empty square puts a red ball on it, clicking on a red ball turns it green, and clicking on a green ball turns it blue.";
 }
 

@@ -85,8 +85,6 @@ void fifteen_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("fifteen");
 	game_doc_rules = 
-		"Fifteen puzzle rules\n"
-		"\n"
 		"The classic fifteen puzzle (Sam Loyd, c.a. 1870). On each turn you move to the empty square one of the adjacent pieces. The objective is to complete the pattern. In the gtkboard implementation the pattern is a pair of concentric circles.\n";
 }
 

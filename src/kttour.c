@@ -72,7 +72,6 @@ void kttour_init ()
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL("kttour");
 	game_doc_rules = 
-		"Kttour rules\n\n"
 		"  Complete the knight's tour of the chessboard.\n"
 		"\n"
 		"  In the initial position click on any square to start the tour on that square. "

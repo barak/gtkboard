@@ -100,7 +100,6 @@ void samegame_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("samegame");
 	game_doc_rules = 
-		" Samegame rules\n\n"
 		"  * Two or more balls of the same color that form a connected region constitute a block.\n"
 		"  * Hovering the mouse over a ball will highlight the block that the ball belongs to.\n" 
 		"  * Clicking on a ball removes that ball's block.\n"
@@ -109,7 +108,6 @@ void samegame_init ()
 		"  * The goal is to maximize your score.\n"
 		"  * As balls are removed, balls above fall down to take their place. If a column is removed, the column to its right moves to the left.\n"	;
 	game_doc_strategy = 
-		" Samegame tips\n\n"
 		"  * Try to identify the color which occurs the most number of times.\n"
 		"  * Remove balls of the other 2 colors until all the balls of the most frequent color (or as many of them as possible) form a single block.\n"
 		"  * Remove this block. Now do the same with the remaining two colors.\n"

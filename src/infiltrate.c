@@ -78,8 +78,6 @@ void infiltrate_init ()
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL ("infiltrate");
 	game_doc_rules = 
-		"Infiltrate rules\n"
-		"\n"
 		"The pieces move diagonally, one square at a time. The objective is to get all your pieces to the starting squares of your opponent's pieces.\n";
 }
 

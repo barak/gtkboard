@@ -160,7 +160,6 @@ static void flw_init ()
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL("flw");
 	game_doc_rules = 
-		" Four Letter Words rules\n\n"
 		" This is a simple game in which the objective is to change the word at the top to the word at the bottom by changing one letter at a time. All intermediate words must be legal.\n"
 		" To start playing, hit enter. This will make a copy of the top word on the second row. Click on the letter you want to change and change it by typing the new letter. Now hit enter. Repeat until all the rows are filled.";
 }

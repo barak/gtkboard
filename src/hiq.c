@@ -146,8 +146,6 @@ void hiq_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("hiq");
 	game_doc_rules = 
-		"Hiq rules\n"
-		"\n"
 		"The objective is to eliminate as many balls as possible.\n"
 		"\n"
 		"Each move consists of clicking on a filled square and then clicking on an empty square with exactly one square in between, which must be filled. The ball on the original square goes to the empty square and the middle ball disappears. Diagonal moves are not allowed.\n"

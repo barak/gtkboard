@@ -166,8 +166,6 @@ void memory_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("memory");
 	game_doc_rules = 
-		"Memory rules\n"
-		"\n"
 		"There are 36 pairs of images. Your goal is to match these pairs in as few turns as possible.\n"
 		"In each turn you click on two squares. If they match they stay uncovered for the rest of the game. If not they go back to being hidden.";
 }

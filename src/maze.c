@@ -73,8 +73,6 @@ void maze_init ()
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("maze");
 	game_doc_rules = 
-		"Maze rules\n"
-		"\n"
 		"Your objective is to lead the man (or mouse or whatever) trapped in the maze from the lower left corner to the upper right.\n"
 		"\n"
 		"The maze is randomly generated, and is currently not very good at generating particularly hard-to-solve mazes.\n";

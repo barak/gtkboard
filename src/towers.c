@@ -259,7 +259,6 @@ void towers_init (Game *game)
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("towers");
 	game_doc_rules = 
-		" Towers rules\n\n"
 		" Transfer all the rings from the first pole to the last. A ring can never lie on a smaller one.";
 		;
 

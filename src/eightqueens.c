@@ -78,7 +78,6 @@ void eightqueens_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("eightqueens");
 	game_doc_rules = 
-		"Eightqueens rules\n\n"
 		"Place 8 non-attacking queens on the chessboard";
 		;
 }

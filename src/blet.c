@@ -78,11 +78,9 @@ void blet_init ()
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL("blet");
 	game_doc_rules = 
-		"Blet rules\n\n"
 		"If a ball is surrounded by balls of the opposite color, you can click on the middle ball to flip all three.\n\n"
 		"The goal is to get 23 green balls in as few flips as possible\n";
 	game_doc_strategy = 
-		"Blet strategy\n\n"
 		"Blet was invented by Villegas, Sadun and Voloch. A research paper showing the optimal strategy as well as an online version of the game (which requires a tcl browser plugin) can be found at: http://www.ma.utexas.edu/users/voloch/blet.html";
 }
 

@@ -85,8 +85,6 @@ void pentaline_init ()
 		"Status: Fully implemented (But AI needs improvement)\n"
 		"URL: "GAME_DEFAULT_URL("pentaline");
 	game_doc_rules = 
-		"Pentaline rules\n"
-		"\n"
 		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n\n"
 		"This game is the same as the free-style variant of GoMoku.\n";
 }

@@ -84,8 +84,6 @@ void hypermaze_init ()
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("hypermaze");
 	game_doc_rules = 
-		"Hypermaze rules\n"
-		"\n"
 		"Your goal is to get from the lower left corner to the upper right. But you can travel only along the arrows. Beware - the arrows are one-way! You can easily get trapped in a blind end from which there is no escape."
 		"\n"
 		"To move with the mouse, click on the square to which you want to move. To move with the keyboard, use the NumPad keys.\n";

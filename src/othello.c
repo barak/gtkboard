@@ -105,8 +105,6 @@ void othello_init (Game *game)
 			"Status: Fully implemented\n"
 			"URL: "GAME_DEFAULT_URL ("othello6x6");
 	game_doc_rules = 
-		"Othello rules\n"
-		"\n"
 		"Two players take turns in placing balls of either color. The objective is to get as many balls of your color as possible.\n"
 		"\n"
 		"When you place a ball in such a way that two of your balls sandwich one or more of the opponent's balls along a line (horizontal, vertical, or diagonal), then the sandwiched balls change to your color. You must move in such a way that at least one switch happens.\n"
@@ -114,8 +112,6 @@ void othello_init (Game *game)
 		"If you don't have a move, you pass by hitting space or clicking on an empty square."
 		;
 	game_doc_strategy = 
-		"Othello tips\n"
-		"\n"
 		"The number of balls of either color at a given time is, paradoxically, a _very_ poor indicator of who has the advantage. This is because balls can flip color en masse and wildly, especially during the last few moves.\n"
 		"\n"
 		"Indeed, in the beginning you should try to minimize the number of balls you have. The key is mobility. You must strive to maximize your number of legal moves so that you can try to force your opponent into making bad moves.\n"

@@ -206,8 +206,6 @@ void mastermind_init ()
 		"Status: Completely implemented\n"
 		"URL: "GAME_DEFAULT_URL ("mastermind");
 	game_doc_rules = 
-		"Mastermind rules\n"
-		"\n"
 		"The objective is to find the colors of 4 hidden squares in as few tries as possible.\n\n"
 		"Select a color by clicking on one of the balls on the extreme right. Place any 4 colors of your choice on the middle 4 squares of the bottom row and hit enter. You will get two numbers on the left. The number of black balls indicates how many balls you've got in the correct position. The number of white balls indicates how many balls you've got n the wrong position. Now try again on the second row. Repeat until you get all four black balls.";
 	

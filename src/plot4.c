@@ -79,8 +79,6 @@ void plot4_init ()
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("plot4");
 	game_doc_rules = 
-		"Plot4 rules\n"
-		"\n"
 		"Two players alternate in placing balls of either color on a 7x6 board. Not exactly placing, because the balls have gravity and fall down to the lowest unoccupied square on the column. The goal is to get as many 4-in-a-row's as possible. A 5-in-a-row counts as two, 6 as 3, and 7 as 4.\n";
 }
 

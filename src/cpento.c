@@ -194,8 +194,6 @@ static void cpento_init()
     "URL: " GAME_DEFAULT_URL("cpento")
     ;
     game_doc_rules =
-    "Capture Pentominoes rules\n"
-    "\n"
     "The objective is to be the last player able to move.\n"
     "\n"
     "Each move consists of selecting a piece from the pool"

@@ -87,8 +87,6 @@ void quarto_init ()
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL ("quarto");
 	game_doc_rules = 
-		"Quarto rules\n"
-		"\n"
 		"Two players take turns in placing the pieces from the right side of the board to the left side. Get 4 in a line (horizontal, vertical, diagonal) of any one type -- big, small, square, circle, hole, no hole, red or blue";
 }
 

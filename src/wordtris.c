@@ -562,7 +562,6 @@ static void wordtris_init ()
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL("wordtris");
 	game_doc_rules = 
-		" Wordtris rules\n\n"
 		"Press Ctrl+G to start the game.\n\n"
 		" Click one of the letters of the word at the bottom and type the letter on one of the falling blocks to change that letter to the new letter. The new word must be legal.\n"
 		"The smiley face acts as a wildcard and can be used as an arbitrary letter.\n"
