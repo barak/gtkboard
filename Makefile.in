@@ -59,6 +59,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 
 EXEEXT = @EXEEXT@
 OBJEXT = @OBJEXT@
@@ -73,6 +75,9 @@ GTK_LIBS = @GTK_LIBS@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
+SDL_CFLAGS = @SDL_CFLAGS@
+SDL_CONFIG = @SDL_CONFIG@
+SDL_LIBS = @SDL_LIBS@
 STRIP = @STRIP@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -99,8 +104,8 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README $(noinst_HEADERS) AUTHORS COPYING ChangeLog \
 	INSTALL Makefile.am Makefile.in NEWS TODO aclocal.m4 \
-	config.h.in configure configure.in depcomp install-sh missing \
-	mkinstalldirs
+	config.guess config.h.in config.sub configure configure.in \
+	depcomp install-sh missing mkinstalldirs
 DIST_SUBDIRS = $(SUBDIRS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
