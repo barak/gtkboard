@@ -53,8 +53,8 @@ void menu_cleanup_var_menus ();
 
 static char * menu_paths_sens_machine_thinking[] = 
 {
-	"/File/Load game",
-	"/File/Save game",
+//	"/File/Load game",
+//	"/File/Save game",
 	"/Game/Start",
 	"/Game/New",
 	"/Game/Select Game",
@@ -70,7 +70,7 @@ static char * menu_paths_sens_no_game[] =
 	"/Game/New",
 	"/Game/Highscores",
 	"/Game/Zap Highscores",
-	"/File/Save game",
+//	"/File/Save game",
 	"/Move/Back",
 	"/Move/Forward",
 	"/Settings/Flip Board",
@@ -307,10 +307,11 @@ void menu_show_pause_dialog ()
 {
 	GtkWidget *dialog, *okay_button, *label;
 	gchar *title = "Game paused - gtkboard";
+	gchar *msg = "Game paused. Click OK to continue";
 
 	board_hide();
 
-	label = gtk_label_new ("Game paused. Click OK to continue");
+	label = gtk_label_new (msg);
 #if GTK_MAJOR_VERSION == 1
 	dialog = gtk_dialog_new();
 	gtk_window_set_title (GTK_WINDOW (dialog), title);
@@ -322,18 +323,24 @@ void menu_show_pause_dialog ()
 			GTK_SIGNAL_FUNC (menu_pause_cb), (gpointer) dialog);
 	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
 			okay_button);
+	gtk_widget_grab_focus (okay_button);
+
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
+	gtk_widget_show_all (dialog);
 #else
-	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
+	dialog = gtk_message_dialog_new (GTK_WINDOW (main_window), 
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_INFO,
+			GTK_BUTTONS_OK,
+			msg);
+/*	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
 			GTK_DIALOG_MODAL, NULL);
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
 	okay_button = gtk_dialog_add_button (GTK_DIALOG (dialog), 
 			GTK_STOCK_OK, GTK_RESPONSE_NONE);
 	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+*/
 #endif
-	gtk_widget_grab_focus (okay_button);
-
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
-	gtk_widget_show_all (dialog);
 
 #if GTK_MAJOR_VERSION > 1
 	gtk_dialog_run (GTK_DIALOG (dialog));
@@ -345,15 +352,25 @@ void menu_show_about_dialog (gpointer data)
 {
 #ifdef HAVE_GNOME
 	GtkWidget *about;
-	GdkPixmap *logo_pixmap = gdk_pixmap_create_from_xpm_d (main_window->window, NULL, NULL, logo48_xpm);
-	GdkPixbuf *logo_pixbuf = gdk_pixbuf_get_from_drawable (NULL, logo_pixmap, 
-			gdk_colormap_get_system (), 0, 0, 0, 0, -1, -1);
+	GdkPixmap *logo_pixmap;
+	GdkPixbuf *logo_pixbuf;
 	const gchar *authors[] = {"Arvind Narayanan <arvindn@users.sourceforge.net>", "Ron Hale-Evans <rwhe@ludism.org>", NULL};
+	gchar *logo_filename;
+	logo_filename = g_strdup_printf ("%s/pixmaps/gtkboard.png", DATADIR);
+	logo_pixbuf = gdk_pixbuf_new_from_file (logo_filename, NULL);
+	if (!logo_pixbuf)
+	{
+		fprintf (stderr, "Warning: couldn't load icon from file %s\n", logo_filename);
+		logo_pixmap = gdk_pixmap_create_from_xpm_d (main_window->window, NULL, NULL, logo48_xpm);
+		logo_pixbuf = gdk_pixbuf_get_from_drawable (NULL, logo_pixmap, 
+				gdk_colormap_get_system (), 0, 0, 0, 0, -1, -1);
+		gdk_pixmap_unref (logo_pixmap);
+	}
+	g_free (logo_filename);
 	about = gnome_about_new (PACKAGE, VERSION, 
 			"Copyright (C) 2003 Arvind Narayanan",
 			NULL, authors, NULL, NULL, logo_pixbuf);
 	gtk_widget_show (about);
-	gdk_pixmap_unref (logo_pixmap);
 #else
 	menu_show_dialog ("About gtkboard", 
 			"gtkboard " VERSION "\n"
@@ -629,7 +646,6 @@ void menu_show_game_doc (gpointer data, guint which)
 					impl, 
 					opt_game->name
 					);
-//			if (game_doc_about) msgstr = game_doc_about;
 			menu_show_dialog (titlestr, msgstr);
 			g_free (msgstr);
 			return;
@@ -1039,7 +1055,22 @@ void menu_enable_sound_cb (gpointer data, guint what)
 	sound_set_enabled (what == 0 ? FALSE : TRUE);
 	sb_update ();
 }
-	
+
+void sb_message_dialog_show (char *msg, gboolean error)
+{
+	GtkWidget *dialog;
+#if GTK_MAJOR_VERSION > 1
+	dialog = gtk_message_dialog_new (GTK_WINDOW (main_window), 
+			GTK_DIALOG_MODAL,
+			error ? GTK_MESSAGE_ERROR : GTK_MESSAGE_INFO,
+			GTK_BUTTONS_OK,
+			"%s", msg);
+	gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy (dialog);		
+#else
+	menu_show_dialog ("Error - gtkboard", msg);
+#endif
+}	
 void sb_error (char *msg, gboolean serious)
 {
 	if (!state_gui_active)
@@ -1048,7 +1079,8 @@ void sb_error (char *msg, gboolean serious)
 		exit (2);
 	}
 	if (serious)
-		menu_show_dialog ("Error - gtkboard", msg);
+		//menu_show_dialog ("Error - gtkboard", msg);
+		sb_message_dialog_show (msg, TRUE);
 	else
 		sb_messagebar_message (msg);
 }
@@ -1058,7 +1090,13 @@ void sb_message (char *msg, gboolean serious)
 	if (!state_gui_active)
 		fprintf (stderr, "%s\n", msg);
 	else
-		sb_error (msg, serious);
+	{
+		if (serious)
+			//sb_error (msg, serious);
+			sb_message_dialog_show (msg, FALSE);
+		else
+			sb_messagebar_message (msg);
+	}
 }
 
 gchar *sb_ftime(int temps)

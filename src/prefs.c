@@ -425,7 +425,7 @@ gboolean prefs_add_highscore (gchar *score, int temps)
 void prefs_zap_highscores ()
 {
 	gchar *tempstr;
-	GtkWidget *dialog, *label;
+	GtkWidget *dialog;
 	gint result;
 	if (!gamename) return;
 #if GTK_MAJOR_VERSION == 1
@@ -433,23 +433,17 @@ void prefs_zap_highscores ()
 			tempstr = g_strdup_printf ("Zapped %s highscores", gamename));
 	g_free (tempstr);
 #else
-	dialog = gtk_dialog_new_with_buttons ("Zap highscores?", 
-			GTK_WINDOW (main_window), GTK_DIALOG_MODAL, 
-			GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
-			GTK_STOCK_NO, GTK_RESPONSE_REJECT,
-			NULL);
-	tempstr = g_strdup_printf (
-			"<b>Warning</b>: This will clear your %s highscores.\n"
-	   "Your highscores in other games will be unaffected.\nProceed?", gamename);
-	label = gtk_label_new (NULL);
-	gtk_label_set_markup (GTK_LABEL (label), tempstr);
-	g_free (tempstr);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
-	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
+	dialog = gtk_message_dialog_new (
+			GTK_WINDOW (main_window),
+			GTK_DIALOG_MODAL, 
+			GTK_MESSAGE_WARNING,
+			GTK_BUTTONS_OK_CANCEL,
+			"This will clear your %s highscores.\n"
+		   "Your highscores in other games will be unaffected.\nProceed?", gamename);
 	gtk_widget_show_all (dialog);
 	result = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
-	if (result == GTK_RESPONSE_REJECT)
+	if (result != GTK_RESPONSE_OK)
 		return;
 #endif
 	num_highscores = 0;

@@ -170,6 +170,8 @@ int knights_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player play
 	byte *mp = move;
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
+	if (pos->board[y * board_wid + x] == (player == WHITE ? KNIGHTS_WN : KNIGHTS_BN))
+		return 0;
 	if (pos->board[y * board_wid + x] != KNIGHTS_EMPTY)
 		return -1;
 	get_cur_pos (pos->board, player, &curx, &cury);

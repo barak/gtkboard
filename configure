@@ -2771,7 +2771,7 @@ fi;
 
 found_gtk2=0;
 
-if test $enable_gtk2 = "yes" ; then
+if test "$enable_gtk2" = "yes" ; then
 
   succeeded=no
 
@@ -3190,7 +3190,7 @@ else
   enable_sdl="yes"
 fi;
 
-if test $enable_sdl = "yes" ; then
+if test "$enable_sdl" = "yes" ; then
 		SDL_VERSION=1.2.0
 
 # Check whether --with-sdl-prefix or --without-sdl-prefix was given.
@@ -4505,7 +4505,7 @@ fi
 done
 
 
-                                        ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile sounds/Makefile"
+                                                  ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile sounds/Makefile pixmaps/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -5058,6 +5058,7 @@ do
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "sounds/Makefile" ) CONFIG_FILES="$CONFIG_FILES sounds/Makefile" ;;
+  "pixmaps/Makefile" ) CONFIG_FILES="$CONFIG_FILES pixmaps/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -5819,26 +5820,26 @@ fi
 
 echo " "
 
-if test $enable_gtk2 = "yes" ; then
-	echo "$as_me:$LINENO: result: GTK2 enabled." >&5
-echo "${ECHO_T}GTK2 enabled." >&6
+if test "$enable_gtk2" = "yes" ; then
+	echo "$as_me:$LINENO: result:     GTK2 enabled." >&5
+echo "${ECHO_T}    GTK2 enabled." >&6
 else
-	echo "$as_me:$LINENO: result: GTK2 disabled." >&5
-echo "${ECHO_T}GTK2 disabled." >&6
+	echo "$as_me:$LINENO: result:     GTK2 disabled." >&5
+echo "${ECHO_T}    GTK2 disabled." >&6
 fi
 
-if test $enable_sdl = "yes" ; then
-	echo "$as_me:$LINENO: result: SDL enabled." >&5
-echo "${ECHO_T}SDL enabled." >&6
+if test "$enable_sdl" = "yes" ; then
+	echo "$as_me:$LINENO: result:      SDL enabled." >&5
+echo "${ECHO_T}     SDL enabled." >&6
 else
-	echo "$as_me:$LINENO: result: SDL disabled." >&5
-echo "${ECHO_T}SDL disabled." >&6
+	echo "$as_me:$LINENO: result:      SDL disabled." >&5
+echo "${ECHO_T}     SDL disabled." >&6
 fi
-if test $enable_gnome = "yes" ; then
-	echo "$as_me:$LINENO: result: GNOME enabled." >&5
-echo "${ECHO_T}GNOME enabled." >&6
+if test "$enable_gnome" = "yes" ; then
+	echo "$as_me:$LINENO: result:    GNOME enabled." >&5
+echo "${ECHO_T}   GNOME enabled." >&6
 else
-	echo "$as_me:$LINENO: result: GNOME disabled." >&5
-echo "${ECHO_T}GNOME disabled." >&6
+	echo "$as_me:$LINENO: result:    GNOME disabled." >&5
+echo "${ECHO_T}   GNOME disabled." >&6
 fi
 

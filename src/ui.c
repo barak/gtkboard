@@ -912,10 +912,11 @@ void gui_init ()
 	GtkItemFactoryEntry items[] = 
 	{
 #if GTK_MAJOR_VERSION == 1
-		{ "/_File", NULL, NULL, 0, "<Branch>" },
+/*		{ "/_File", NULL, NULL, 0, "<Branch>" },
 		{ "/File/_Load game", "<control>L", menu_load_file_dialog, 0, "" },
 		{ "/File/_Save game", NULL, NULL, 0, "" },
 		{ "/File/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
+*/
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Game/_Levels", NULL, NULL, 0, "<Branch>"},
@@ -926,6 +927,8 @@ void gui_init ()
 		{ "/Game/Sep2", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
+		{ "/Game/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, MENU_BACK, "" },
 		{ "/Move/_Forward", "<control>F", menu_back_forw, MENU_FORW, "" },
@@ -933,13 +936,14 @@ void gui_init ()
 		{ "/Move/_Move Now", "<control>M", 
 			(GtkItemFactoryCallback) ui_move_now_cb, 0, "" },
 #else
-		{ "/_File", NULL, NULL, 0, "<Branch>" },
+/*		{ "/_File", NULL, NULL, 0, "<Branch>" },
 		{ "/File/_Load game", "<control>L", menu_load_file_dialog, 0, 
 				"<StockItem>", GTK_STOCK_OPEN },
 		{ "/File/_Save game", NULL, menu_save_file_dialog, 0, 
 				"<StockItem>", GTK_STOCK_SAVE },
 		{ "/File/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, 
 				"<StockItem>", GTK_STOCK_QUIT },
+*/
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
 		{ "/Game/Levels", NULL, NULL, 0, "<Branch>"},
@@ -954,6 +958,8 @@ void gui_init ()
 		//FIXME: there's a scores stock item but I can't seem to find it
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
+		{ "/Game/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, 1, 
 				"<StockItem>", GTK_STOCK_GO_BACK },
@@ -1003,7 +1009,7 @@ void gui_init ()
 		{ "/_Help", NULL, NULL, 0, "<Branch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
 #ifdef HAVE_GNOME
-		{ "/Help/_Home Page", NULL, menu_help_home_page, 0, ""},
+		{ "/Help/_Home Page", NULL, menu_help_home_page, 0, "<StockItem>", GTK_STOCK_HOME},
 #endif
 		// TODO: implement context help
 //		{ "/Help/_Context help", NULL, ui_set_context_help, 0, ""},

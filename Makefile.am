@@ -1,6 +1,4 @@
 
-SUBDIRS=doc src sounds
-
-noinst_HEADERS = pixmaps
+SUBDIRS=doc src sounds pixmaps
 
 EXTRA_DIST = gtkboard.spec 
