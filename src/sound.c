@@ -123,7 +123,7 @@ void sound_play (SoundEvent event)
 			file = "/usr/lib/openoffice/share/gallery/sounds/applause.wav";
 			break;
 		case SOUND_WON:
-			file = "/usr/share/sounds/KDE_Beep_RimShot.wav";
+			file = "/usr/share/sounds/KDE_Window_Open.wav";
 			break;
 		case SOUND_USER_MOVE:
 			file = "/usr/share/sounds/KDE_Click.wav";
