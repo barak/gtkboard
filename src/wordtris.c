@@ -126,7 +126,7 @@ static const int lava_xpm_header_size = 253+1;
 static char * lava_xpm_header[] = 
 {
 "144 504 253 2",
-"  	c None",
+"  	c #d7d7d7",
 ". 	c #FFD800",
 "+ 	c #FFAC00",
 "@ 	c #FFA800",
@@ -491,8 +491,8 @@ static char ** wordtris_getbgxpm ()
 {
 	int i;
 	static char *xpm[lava_xpm_header_size + WORDTRIS_CELL_SIZE * WORDTRIS_BOARD_HEIT];
-	static char emptyline[WORDTRIS_CELL_SIZE * WORDTRIS_BOARD_WID];
-	for (i=0; i<WORDTRIS_CELL_SIZE * WORDTRIS_BOARD_WID; i++)
+	static char emptyline[WORDTRIS_CELL_SIZE * WORDTRIS_BOARD_WID * 2];
+	for (i=0; i<WORDTRIS_CELL_SIZE * WORDTRIS_BOARD_WID * 2; i++)
 		emptyline[i] = ' ';
 	for (i=0; i<lava_xpm_header_size; i++)
 		xpm[i] = lava_xpm_header[i];
@@ -646,7 +646,8 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 			int val = board [j * board_wid + i];
 			if (val == letter || val == WORDTRIS_WILDCARD)
 			{
-				if (j < miny 
+				if ((j < miny 
+						&& (val != WORDTRIS_WILDCARD || minval == WORDTRIS_WILDCARD))
 						|| (minval == WORDTRIS_WILDCARD && val != WORDTRIS_WILDCARD))
 				{
 					minx = i;

@@ -84,7 +84,12 @@
 	* flw.c: implemented render
 	* wordtris: fixed starting with words without any neighbor
 
-2003-08-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+2003-08-02	Arvind Narayanan	<arvindn@users.sourceforge.net>
 
 	* Makefile.am: changed CFLAGS to AM_CFLAGS as suggested by Frank Gevaerts
 	* move.h: changed byte from char to gint8 to fix powerpc crash. Patch by Frank Gevaerts.
+	
+2003-08-03	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* board.c: fixed bug where bgimage wouldn't get drawn on non-empty squares 
+	* wordtris.c: fixed bug where blank would sometimes be chosen in preference to non-blank
