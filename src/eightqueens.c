@@ -36,8 +36,8 @@
 #define EIGHTQUEENS_QUEEN 1
 #define EIGHTQUEENS_CONTROLLED 2
 
-#define ABS(x) ((x) < 0 ? -(x) : (x))
-#define ATTACKS(i, j, x, y) ((i)==(x) || (j)==(y) || ABS((i)-(x)) == ABS((j)-(y)))
+#define abs(x) ((x) < 0 ? -(x) : (x))
+#define ATTACKS(i, j, x, y) ((i)==(x) || (j)==(y) || abs((i)-(x)) == abs((j)-(y)))
 
 char eightqueens_colors[6] = {200, 200, 160, 200, 200, 160};
 
