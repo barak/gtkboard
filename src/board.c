@@ -41,11 +41,17 @@ GdkColor board_colors[6];
 //! Colors for highlighting
 GdkColor board_highlight_colors[3];
 
+//! Colors for turning pixmaps into buttons
+GdkColor board_buttonize_colors[2];
+
 //! gcs for light squares, dark squares and lines
 GdkGC *board_gcs[3] = {NULL, NULL, NULL};
 
 //! gcs for highlighting
 GdkGC *board_highlight_gcs[3] = {NULL, NULL, NULL};
+
+//! gcs for drawing buttons
+GdkGC *board_buttonize_gcs[3] = {NULL, NULL, NULL};
 
 //! Images representing the pieces
 static GdkPixmap **pieces = NULL;
@@ -109,18 +115,19 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 {
 	GdkGC *gc;
 	int parity = (board_wid * board_heit + x + y + 1) % 2;
+	int thepiece;
 	if (opt_quiet) return;
 	gc = board_area->style->bg_gc[GTK_STATE_NORMAL];
 	gdk_gc_set_clip_mask (gc, NULL);
 	gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
+	thepiece = cur_pos.board[y * board_wid + x] -1 + num_pieces * parity;
+	if ((cur_pos.render[y * board_wid + x] & 0xFF) == RENDER_REPLACE)
+		thepiece = (cur_pos.render[y * board_wid + x] >> 8) -1 + num_pieces * parity;
 	if ((cur_pos.board[y * board_wid + x] != 0
 			|| (cur_pos.render[y * board_wid + x] & 0xFF) == RENDER_REPLACE)
 			&& !board_suspended)
 	{
 		/* FIXME: current impl is that if bgimage is set then bgcolor is irrelevant. Maybe we should change it so that bgimage is layered on top of bgcolor */
-		int thepiece = cur_pos.board[y * board_wid + x] -1 + num_pieces * parity;
-		if ((cur_pos.render[y * board_wid + x] & 0xFF) == RENDER_REPLACE)
-			thepiece = (cur_pos.render[y * board_wid + x] >> 8) -1 + num_pieces * parity;
 		if (board_bgimage)
 		{
 			gdk_draw_pixmap (board_area->window,
@@ -164,6 +171,8 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 				real_x * cell_size, real_y * cell_size,
 				(real_x + 1) * cell_size, real_y * cell_size);
 	}
+	
+	// TODO: do HIGHLIGHT2 and 3 also
 	if (cur_pos.render[y * board_wid + x] == RENDER_HIGHLIGHT1 && !board_suspended)
 	{
 		int incr = game_draw_cell_boundaries ? 1 : 0;
@@ -180,7 +189,43 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 			real_x * cell_size + incr, (real_y + 1) * cell_size - 1,
 			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
 	}
-
+	
+	if (cur_pos.render[y * board_wid + x] == RENDER_BUTTONIZE && !board_suspended)
+	{
+		int incr = game_draw_cell_boundaries ? 1 : 0;
+		gdk_draw_line (board_area->window, board_buttonize_gcs[0],
+			real_x * cell_size + incr, real_y * cell_size + incr,
+			real_x * cell_size + incr, (real_y + 1) * cell_size - 1);
+		gdk_draw_line (board_area->window, board_buttonize_gcs[0],
+			real_x * cell_size + incr, real_y * cell_size + incr,
+			(real_x + 1) * cell_size - 1, real_y * cell_size + incr);
+		gdk_draw_line (board_area->window, board_buttonize_gcs[1],
+			(real_x + 1) * cell_size - 1, real_y * cell_size + incr,
+			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
+		gdk_draw_line (board_area->window, board_buttonize_gcs[1],
+			real_x * cell_size + incr, (real_y + 1) * cell_size - 1,
+			(real_x + 1) * cell_size - 1, (real_y + 1) * cell_size - 1);
+	}
+	
+	if (cur_pos.render[y * board_wid + x] == RENDER_SHADE1			
+			&& cur_pos.board[y * board_wid + x] != 0
+		   	&& !board_suspended)
+	{
+		GdkPixbuf *pixbuf;
+		int i;
+		guchar *pixels;
+		pixbuf = gdk_pixbuf_get_from_drawable (NULL, pieces[thepiece], NULL,
+				0, 0, 0, 0, cell_size, cell_size);
+		pixels = gdk_pixbuf_get_pixels (pixbuf);
+		for (i=0; i<3*cell_size*cell_size; i++)
+			pixels[i] = (pixels[i] + 127)/2;
+		gdk_pixbuf_render_to_drawable (pixbuf, board_area->window, gc, 0, 0,
+				real_x * cell_size, real_y * cell_size, cell_size, cell_size,
+				GDK_RGB_DITHER_NONE, 0, 0);
+		// FIXME: find out the  correct way to free it
+		g_free (pixels);
+		g_free (pixbuf);
+	}
 }
 
 //! A wrapper around board_refresh_cell_real() to take care of whether the board is flipped
@@ -505,6 +550,12 @@ void board_init ()
 			board_color_init (&game_highlight_colors[3*i],
 					&board_highlight_colors[i], &board_highlight_gcs[i], 
 					board_colormap, board_area);
+	{
+	char buttonize_colors [6] = {240, 240, 240, 128, 128, 128};
+	for (i=0; i<2; i++)
+	board_color_init (&buttonize_colors[3*i], &board_buttonize_colors[i],
+			&board_buttonize_gcs[i], board_colormap, board_area);
+	}
 
 	g_assert (num_pieces);
 	for (i=0; i<2*num_pieces; i++)

@@ -135,6 +135,8 @@ typedef enum
 	RENDER_HIGHLIGHT1, RENDER_HIGHLIGHT2, RENDER_HIGHLIGHT3,
 	//! Shade the square. Not yet implemented
 	RENDER_SHADE1, RENDER_SHADE2, RENDER_SHADE3,
+	//! Make the square look like a button
+	RENDER_BUTTONIZE,
 	//! Hide the square (show the background color)
 	RENDER_HIDE,
 	//! Use a different pixmap. 

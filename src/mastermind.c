@@ -225,10 +225,15 @@ ResultType mastermind_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
 	int j;
-	gboolean over = 
-		pos->board [(board_heit - 1) * board_wid+ MASTERMIND_MAIN_COL_START] 
+	gboolean over = FALSE;
+	char *scorestr;
+/*		pos->board [(board_heit - 1) * board_wid+ MASTERMIND_MAIN_COL_START] 
 			<= 8 ? TRUE : FALSE;
-	char *scorestr = over ? "You won! Tries:" : "Tries:";
+*/
+	for (j=0; j<board_heit-1; j++)
+		if (pos->board[j * board_wid] == 20) // FIXME: don't hard code
+			over = TRUE;
+	scorestr = over ? "You won! Tries:" : "Tries:";
 	if (!over && mastermind_get_cur_row (pos->board) == board_heit - 1)
 	{
 		snprintf (comment, 32, "You lost. Tries: %d", board_heit - 1);
@@ -294,8 +299,8 @@ char ** mastermind_get_pixmap (int idx, int color)
 			return pixmap_ball_gen
 				(MASTERMIND_CELL_SIZE, pixbuf, fg, bg, 10.0, 30.0);
 		}
-		return  pixmap_ball_header_gen 
-			(MASTERMIND_CELL_SIZE, pixbuf, fg, bg, 10.0, 30.0);
+		return  pixmap_header_gen 
+			(MASTERMIND_CELL_SIZE, pixbuf, fg, bg);
 	}
 	else if (idx < 25)
 	{
@@ -456,7 +461,7 @@ int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, 
 	nwhite -= nblack;
 	*mp++ = 0; *mp++ = cur_row; *mp++ = (nblack ? nblack + 16 : 25);
 	*mp++ = 1; *mp++ = cur_row; *mp++ = (nwhite ? nwhite + 20 : 25);
-	if (nblack == 4)
+	if (nblack == 4 || cur_row == board_heit - 2)
 		for (i=MASTERMIND_MAIN_COL_START;i<=MASTERMIND_MAIN_COL_END;i++)
 		{
 			*mp++ = i; *mp++ = board_heit - 1; 

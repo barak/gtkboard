@@ -36,7 +36,7 @@
 
 #define ATAXX_MOVEGEN_PLAUSIBLE 0
 
-static char ataxx_colors[6] = {120, 120, 120, 200, 200, 200};
+static char ataxx_colors[6] = {140, 160, 140, 200, 200, 200};
 
 static int ataxx_init_pos [ATAXX_BOARD_WID*ATAXX_BOARD_HEIT] = 
 {
@@ -60,7 +60,7 @@ byte *ataxx_movegen (Pos *, Player);
 
 static int ataxx_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType ataxx_who_won (Pos *, Player , char **);
-char ** ataxx_get_pixmap (int, int);
+unsigned char * ataxx_get_rgbmap (int, int);
 void ataxx_reset_uistate ();
 
 
@@ -72,7 +72,7 @@ void ataxx_init ()
 	game_movegen = ataxx_movegen;
 	game_getmove = ataxx_getmove;
 	game_who_won = ataxx_who_won;
-	game_get_pixmap = ataxx_get_pixmap;
+	game_get_rgbmap = ataxx_get_rgbmap;
 	game_white_string = "Red";
 	game_black_string = "Blue";
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
@@ -372,16 +372,17 @@ int ataxx_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pla
 	return 1;
 }
 
-char ** ataxx_get_pixmap (int idx, int color)
+unsigned char * ataxx_get_rgbmap (int idx, int color)
 {
 	int fg, bg, i;
 	char *colors;
-	static char pixbuf[ATAXX_CELL_SIZE*(ATAXX_CELL_SIZE)+1];
+	static char rgbbuf[3 * ATAXX_CELL_SIZE * ATAXX_CELL_SIZE];
 	colors = ataxx_colors;
 	fg = (idx == ATAXX_WP ? 0xee << 16 : 0xee);
 	if (color == BLACK) colors += 3;
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
-	return pixmap_ball_gen(55, pixbuf, fg, bg, 17.0, 30.0);
+	rgbmap_ball_shadow_gen(55, rgbbuf, fg, bg, 17.0, 35.0, 3);
+	return rgbbuf;
 }
 

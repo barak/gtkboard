@@ -369,6 +369,5 @@ char ** samegame_get_pixmap (int idx, int color)
 		return pixmap_ball_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg, 
 			SAMEGAME_CELL_SIZE * 2/7, 24.0);
 	}
-	return pixmap_ball_header_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg,
-			SAMEGAME_CELL_SIZE * 2/7, 24.0);
+	return pixmap_header_gen (SAMEGAME_CELL_SIZE, pixbuf, fg, bg);
 }

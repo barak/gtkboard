@@ -56,6 +56,7 @@ ResultType othello_eval (Pos *, Player, float *);
 ResultType othello_eval_incr (Pos *, Player, byte *, float *);
 byte * othello_movegen (Pos *, Player);
 char ** othello_get_pixmap (int, int);
+guchar *othello_get_rgbmap (int, int);
 gboolean othello_use_incr_eval (Pos *pos, Player player);
 
 Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT, 
@@ -71,7 +72,8 @@ void othello_init ()
 	game_eval_incr = othello_eval_incr;
 	game_use_incr_eval = othello_use_incr_eval;
 	game_movegen = othello_movegen;
-	game_get_pixmap = othello_get_pixmap;
+	//game_get_pixmap = othello_get_pixmap;
+	game_get_rgbmap = othello_get_rgbmap;
 	game_white_string = "Red";
 	game_black_string = "Blue";
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
@@ -113,6 +115,19 @@ char ** othello_get_pixmap (int idx, int color)
 	return pixmap_ball_gen(55, pixbuf, fg, bg, 17.0, 30.0);
 }
 
+guchar *othello_get_rgbmap (int idx, int color)
+{
+	static guchar rgbbuf[3*OTHELLO_CELL_SIZE*OTHELLO_CELL_SIZE];
+	int fg, bg, i;
+	char *colors;
+	colors = othello_colors;
+	fg = (idx == OTHELLO_WP ? 0xee << 16 : 0xee);
+	if (color == BLACK) colors += 3;
+	for(i=0, bg=0;i<3;i++) 
+	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
+	rgbmap_ball_shadow_gen(55, rgbbuf, fg, bg, 17.0, 30.0, 3);
+	return rgbbuf;
+}
 
 static int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
 static int incy[] = { -1, 0, 1, -1, 1, -1, 0, 1};
@@ -457,7 +472,7 @@ ResultType othello_eval (Pos *pos, Player player, float *eval)
 	}
 	*eval = 
 		10 * othello_eval_liberty (pos) 
-		+ 30 * othello_eval_safe (pos) 
+		+ 100 * othello_eval_safe (pos) 
 		+ othello_eval_weights (pos);
 	return RESULT_NOTYET;
 }

@@ -20,7 +20,10 @@
 #define _AABALL_H_
 
 char ** pixmap_ball_gen(int, char *, int, int, float, float);
-char ** pixmap_ball_header_gen(int, char *, int, int, float, float);
+char ** pixmap_header_gen(int, char *, int, int);
 char ** pixmap_die_gen(int, char *, int, int, float, float, int);
+
+void rgbmap_ball_gen(int, unsigned char *, int, int, float, float);
+void rgbmap_ball_shadow_gen(int, unsigned char *, int, int, float, float, int);
 
 #endif

@@ -122,3 +122,9 @@
 	* hash.c: bugfix: added a new field num_moves
 	* board.c: implemented RENDER_REPLACE
 	* ninemm.c: implemented partial move using RENDER_REPLACE
+
+2003-09-02	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* mastermind.c: fixed bug where solution won't be displayed if all 10 tries are wrong
+	* board.c: implemented RENDER_SHADE1
+	* aaball.c: implemented shadow in ball_gen MWAHAHAHAHA
+	* board.c: implemented RENDER_BUTTONIZE

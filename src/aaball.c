@@ -31,11 +31,13 @@
 static char hex[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8' ,
 					'9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-static char *pixmap_get_color(int fg, int bg, float ratio)
+
+static int pixmap_get_color(int fg, int bg, float ratio)
 {
-	static char color[7] = { 0 };
 	int f1, f2, f3, b1, b2, b3, w1, w2, w3;
 	float lw, lf, lb;
+	if (ratio < 0) ratio = 0;
+	if (ratio > 1) ratio = 1;
 	// FIXME: could we have problems with equality of floats?
 	if (ratio == 0)
 	{
@@ -68,15 +70,26 @@ static char *pixmap_get_color(int fg, int bg, float ratio)
 		w2 /= lw; if (w2 > 0xff) w2 = 0xff;
 		w3 /= lw; if (w3 > 0xff) w3 = 0xff;
 	}
-	color[0] = hex[w1/16];
-	color[1] = hex[w1%16];
-	color[2] = hex[w2/16];
-	color[3] = hex[w2%16];
-	color[4] = hex[w3/16];
-	color[5] = hex[w3%16];
-	return color;
+	return (w1 << 16) + (w2 << 8) + w3;
 }
 
+static char *pixmap_get_hex_color(int fg, int bg, float ratio)
+{
+	int red, green, blue, val;
+	static char color[7] = { 0 };
+	val = pixmap_get_color (fg, bg, ratio);
+	red = val >> 16;
+	green = (val >> 8) & 0xff;
+	blue = val & 0xff;
+	color[0] = hex[red/16];
+	color[1] = hex[red%16];
+	color[2] = hex[green/16];
+	color[3] = hex[green%16];
+	color[4] = hex[blue/16];
+	color[5] = hex[blue%16];
+	return color;
+}
+	
 static char *pixmap_map [256];
 
 //! Generates a ball.
@@ -98,7 +111,7 @@ char ** pixmap_ball_gen(int len, char *pixbuf, int fg, int bg, float rad, float 
 	for(i=0; i<16; i++)
 	{
 		g_snprintf (map[i+1], 20, "%c c #%s", hex[i],
-				pixmap_get_color(fg, bg, i / 15.0));
+				pixmap_get_hex_color(fg, bg, i / 15.0));
 	}
 	for (i=0; i<len; i++)
 	{
@@ -119,9 +132,58 @@ char ** pixmap_ball_gen(int len, char *pixbuf, int fg, int bg, float rad, float 
 	return map;
 }
 
+// FIXME: mild variations from bg color occur even well outside the rad of the ball
+static void rgbmap_ball_gen_real (int len, unsigned char *pixbuf, int fg, float rad, float grad, float midx, float midy)
+{
+	int i, j;
+	unsigned char *bufp = pixbuf;
+	for (i=0; i<len; i++)
+	for (j=0; j<len; j++)
+	{
+		float x = i - midx, y = j - midy;
+		float q = (x * x + y * y) / rad / rad;
+		int bg = (bufp[0] << 16) + (bufp[1] << 8) + bufp[2];
+		int color = q < 1 ? fg : pixmap_get_color (fg, bg, (q - 1) * grad / 16);
+		*bufp++ = color >> 16;
+		*bufp++ = (color >> 8) & 0xFF;
+		*bufp++ = color & 0xFF;
+	}
+}
 
-//! Used if you already have the pixmap and only want to generate the header (i.e, different color)
-char ** pixmap_ball_header_gen(int len, char *pixbuf, int fg, int bg, float rad, float grad)
+void rgbmap_ball_gen (int len, unsigned char *pixbuf, int fg, int bg, float rad, float grad)
+{
+	int i, j;
+	unsigned char *bufp = pixbuf;
+	for (i=0; i<len; i++)
+	for (j=0; j<len; j++)
+	{
+		*bufp++ = bg >> 16;
+		*bufp++ = (bg >> 8) & 0xFF;
+		*bufp++ = bg & 0xFF;
+	}
+	rgbmap_ball_gen_real (len, pixbuf, fg, rad, grad, len/2, len/2);
+}
+
+void rgbmap_ball_shadow_gen (int len, unsigned char *pixbuf, int fg, int bg, float rad, float grad, int shadowlen)
+{
+	int i, j;
+	unsigned char *bufp = pixbuf;
+	for (i=0; i<len; i++)
+	for (j=0; j<len; j++)
+	{
+		*bufp++ = bg >> 16;
+		*bufp++ = (bg >> 8) & 0xFF;
+		*bufp++ = bg & 0xFF;
+	}
+	rgbmap_ball_gen_real (len, pixbuf, 0, rad, grad, 
+			(len + shadowlen)/2, (len + shadowlen)/2);
+	rgbmap_ball_gen_real (len, pixbuf, fg, rad, grad, 
+			(len - shadowlen)/2, (len - shadowlen)/2);
+}
+
+	
+//! Used if you already have the pixmap and only want to generate the header (i.e, same shape, different color)
+char ** pixmap_header_gen(int len, char *pixbuf, int fg, int bg)
 {
 	char **map = pixmap_map;
 	char *buf = pixbuf;
@@ -132,7 +194,7 @@ char ** pixmap_ball_header_gen(int len, char *pixbuf, int fg, int bg, float rad,
 	for(i=0; i<16; i++)
 	{
 		g_snprintf (map[i+1], 20, "%c c #%s", hex[i],
-				pixmap_get_color(fg, bg, i / 15.0));
+				pixmap_get_hex_color(fg, bg, i / 15.0));
 	}
 	for (i=0; i<len; i++)
 		map[i+17] = buf + i * (len+1);
@@ -172,7 +234,7 @@ char ** pixmap_die_gen(int len, char *pixbuf, int fg, int bg, float rad, float g
 	for(i=0; i<16; i++)
 	{
 		g_snprintf (map[i+1], 20, "%c c #%s", hex[i],
-				pixmap_get_color(fg, bg, i / 15.0));
+				pixmap_get_hex_color(fg, bg, i / 15.0));
 	}
 	for (i=0; i<len; i++)
 	{
