@@ -136,7 +136,12 @@ typedef enum
 	//! Shade the square. Not yet implemented
 	RENDER_SHADE1, RENDER_SHADE2, RENDER_SHADE3,
 	//! Hide the square (show the background color)
-	RENDER_HIDE
+	RENDER_HIDE,
+	//! Use a different pixmap. 
+	/** The pixmap must be specified in the 8-15th bits, 
+	  i.e, if you want to use the pixmap of the piece p,
+	  then you must set the render value to p << 8 | RENDER_REPLACE */
+	RENDER_REPLACE,
 } RenderType;
 
 //! A struct describing a position in a game.
@@ -204,6 +209,9 @@ extern ResultType (*game_eval) (Pos *pos, Player player, float *eval);
  that you get your game working and stable before you think of implementing
  this function :)*/
 extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float *eval);
+
+//! Should we use the incr eval function
+extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
 
 //! A pointer to the game's move generation function.
 /** Only for two player games. It <b>must</b> be implemented if you want

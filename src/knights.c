@@ -127,6 +127,7 @@ static int knights_getmove_kb (Pos *, int, Player, byte ** , int **);
 void knights_init ();
 static ResultType knights_who_won (Pos *, Player, char **);
 static ResultType knights_eval (Pos *, Player, float *eval);
+static ResultType knights_eval_real (Pos *, Player, float *eval, gboolean);
 static byte * knights_movegen (Pos *, Player);
 static void *knights_newstate (Pos *, byte *);
 
@@ -150,7 +151,7 @@ void knights_init ()
 	game_doc_about = 
 		"Knights\n"
 		"Two player game\n"
-		"Status: Partially implemented\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("knights");
 }
 
@@ -191,7 +192,7 @@ ResultType knights_who_won (Pos *pos, Player player, char **commp)
 {
 	int i=0, j=0, k;
 	float eval;
-	ResultType result = knights_eval (pos, player, &eval);
+	ResultType result = knights_eval_real (pos, player, &eval, TRUE);
 	if (result == RESULT_NOTYET)
 		;
 	else if (result == RESULT_TIE) *commp = "Draw";
@@ -278,15 +279,107 @@ byte * knights_movegen (Pos *pos, Player player)
 	return movlist;
 }
 
-ResultType knights_eval (Pos *pos, Player player, float *eval)
+static gboolean eval_disconnected (byte *theboard)
+{
+	byte board[KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT];
+	int stack[KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT];
+	int stack_top = 0;
+	int i, curx, cury, x, y;
+
+	for (i=0; i<board_wid * board_heit; i++)
+		board[i] = theboard[i];
+
+	get_cur_pos (board, WHITE, &curx, &cury);
+	
+	stack[stack_top++] = cury * board_wid + curx;
+	while (stack_top > 0)
+	{
+		stack_top--;
+		curx = stack[stack_top] % board_wid;
+		cury = stack[stack_top] / board_wid;
+		for (i=0; i<8; i++)
+		{
+			x = curx + incx[i];
+			y = cury + incy[i];
+			if (!ISINBOARD (x, y)) continue;
+			if (board[y * board_wid + x] == KNIGHTS_BN)
+				return FALSE;
+			if (board[y * board_wid + x] != KNIGHTS_EMPTY)
+				continue;
+			board[y * board_wid + x] = KNIGHTS_CLOSED;
+			stack[stack_top++] = y * board_wid + x;
+		}
+	}
+	return TRUE;
+}
+
+// exhaustive DFS to solve the position exactly
+static int eval_max_path_len (byte *theboard, Player player)
+{
+	byte board[KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT];
+	int stack [KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT];
+	int current [KNIGHTS_BOARD_WID * KNIGHTS_BOARD_HEIT];
+	int stack_top = 0;
+	int i, curx, cury, x, y;
+	int max_len = 0;
+
+	for (i=0; i<board_wid * board_heit; i++)
+		board[i] = theboard[i];
+
+	get_cur_pos (board, player, &curx, &cury);
+	
+	current[stack_top] = 0;
+	stack[stack_top] = cury * board_wid + curx;
+
+	while (stack_top >= 0)
+	{
+		if (stack_top > max_len)
+			max_len = stack_top;
+		i = current[stack_top]++;
+		if (i == 8)
+		{
+			stack_top--;
+			continue;
+		}
+		curx = stack[stack_top] % board_wid;
+		cury = stack[stack_top] / board_wid;
+		x = curx + incx[i];
+		y = cury + incy[i];
+		if (!ISINBOARD (x, y)) continue;
+		if (board[y * board_wid + x] != KNIGHTS_EMPTY)
+			continue;
+		board[y * board_wid + x] = KNIGHTS_CLOSED;
+		stack_top++;
+		current[stack_top] = 0;
+		stack[stack_top] = y * board_wid + x;
+	}
+	return max_len;
+}
+
+// We may want to continue the game even when a result is apparent. The
+// parameter strict is for this. who_won() sets it to TRUE and eval() to FALSE.
+static ResultType knights_eval_real (Pos *pos, Player player, float *eval, gboolean strict)
 {
 	int i, j, k;
 	int wcnt = 0, bcnt = 0;
+
 	if (pos->state && ((Knights_state *)pos->state)->num_pauses >= 2)
 	{
 		*eval = 0;
 		return RESULT_TIE;
 	}
+	
+	if (!strict && eval_disconnected (pos->board))
+	{
+		int wlen = 0, blen = 0;
+		wlen = eval_max_path_len (pos->board, WHITE);
+		blen = eval_max_path_len (pos->board, BLACK);
+		*eval = 2 * (wlen - blen) + (player == WHITE ? -1 : 1);
+		if (wlen > blen) return RESULT_WHITE;
+		else if (wlen < blen) return RESULT_BLACK;
+		else return player == WHITE ? RESULT_BLACK : RESULT_WHITE;
+	}
+
 	get_cur_pos (pos->board, WHITE, &i, &j);
 	for (k=0; k<8; k++)
 	{
@@ -295,6 +388,7 @@ ResultType knights_eval (Pos *pos, Player player, float *eval)
 		if (pos->board[y * board_wid + x] == KNIGHTS_EMPTY)
 			wcnt++;
 	}
+
 	get_cur_pos (pos->board, BLACK, &i, &j);
 	for (k=0; k<8; k++)
 	{
@@ -306,13 +400,18 @@ ResultType knights_eval (Pos *pos, Player player, float *eval)
 	*eval = wcnt - bcnt;
 	if (player == WHITE && wcnt == 0)
 	{
-		if (*eval == 0) *eval = -1;
+		if (bcnt == 0) *eval -= 1;
 		return RESULT_BLACK;
 	}
 	if (player == BLACK && bcnt == 0)
 	{
-		if (*eval == 0) *eval = 1;
+		if (wcnt == 0) *eval += 1;
 		return RESULT_WHITE;
 	}
 	return RESULT_NOTYET;
+}
+
+ResultType knights_eval (Pos *pos, Player player, float *eval)
+{
+	return knights_eval_real (pos, player, eval, FALSE);
 }

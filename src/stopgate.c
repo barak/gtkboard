@@ -262,7 +262,7 @@ void stopgate_init ()
 	game_doc_about = 
 		"Stopgate\n"
 		"Two player game\n"
-		"Status: Partially implemented\n"
+		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("stopgate");
 }
 

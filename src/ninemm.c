@@ -129,6 +129,7 @@ int ninemm_init_pos [NINEMM_BOARD_WID*NINEMM_BOARD_HEIT] = {0};
 
 void ninemm_init ();
 int ninemm_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
+void ninemm_reset_uistate ();
 
 Game Ninemm = { NINEMM_CELL_SIZE, NINEMM_BOARD_WID, NINEMM_BOARD_HEIT, 
 	NINEMM_NUM_PIECES, 
@@ -162,6 +163,7 @@ void ninemm_init ()
 	game_black_string = "Red";
 	game_bg_pixmap = ninemm_bg_xpm;
 	game_getmove = ninemm_getmove;
+	game_reset_uistate = ninemm_reset_uistate;
 	game_doc_about = 
 		"Ninemm\n"
 		"Two player game\n"
@@ -169,22 +171,93 @@ void ninemm_init ()
 		"URL: "GAME_DEFAULT_URL ("ninemm");
 }
 
+static int curx = -1, cury = -1;
+
+// does the move (x, y) complete a mill for player
+static gboolean makes_mill (byte *board, Player player, int x, int y)
+{
+	int i, j;
+	int thepiece = player == WHITE ? NINEMM_WP : NINEMM_BP;
+	for (i=x-2; i<=x; i++)
+	{
+		gboolean found = TRUE;
+		if (i < 0 || i >= board_wid-2)
+			continue;
+		for (j=i; j<=i+2; j++)
+			if (j != x && board [y * board_wid + j] != thepiece)
+				found = FALSE;
+		if (found) return TRUE;
+	}
+	
+	for (i=y-2; i<=y; i++)
+	{
+		gboolean found = TRUE;
+		if (i < 0 || i >= board_heit-2)
+			continue;
+		for (j=i; j<=i+2; j++)
+			if (j != y && board [j * board_wid + x] != thepiece)
+				found = FALSE;
+		if (found) return TRUE;
+	}
+
+	return FALSE;
+}
 
 int ninemm_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
 {
 	int val;
-	static byte move[4];
+	static byte move[16];
+	static int rmove[16];
 	if (type != GTKBOARD_BUTTON_RELEASE)
 		return 0;
-	if (pos->board [y * board_wid + x] != NINEMM_EMPTY)
-		return -1;
 	if (!ninemm_allowed [y * board_wid + x]) return -1;
+	if (curx < 0)
+	{
+		if (pos->board [y * board_wid + x] != NINEMM_EMPTY)
+			return -1;
+		if (makes_mill (pos->board, to_play, x, y))
+		{
+			curx = x;
+			cury = y;
+			rmove[0] = x;
+			rmove[1] = y;
+			rmove[2] = RENDER_REPLACE | 
+				((to_play == WHITE ? NINEMM_WP : NINEMM_BP) << 8);
+			rmove[3] = -1;
+			*rmovep = rmove;
+			return 0;
+		}
+		else
+		{
+			move[0] = x;
+			move[1] = y;
+			move[2] = (to_play == WHITE ? NINEMM_WP : NINEMM_BP);
+			move[3] = -1;
+			*movp = move;
+			return 1;			
+		}
+	}
+	if (pos->board [y * board_wid + x] != (to_play == WHITE ? NINEMM_BP : NINEMM_WP))
+		return -1;
+	rmove[0] = curx;
+	rmove[1] = cury;
+	rmove[2] = 0;
+	rmove[3] = -1;
+	*rmovep = rmove;
 	move[0] = x;
 	move[1] = y;
-	move[2] = to_play == WHITE ? NINEMM_WP : NINEMM_BP;
-	move[3] = -1;
-	if (movp)
-		*movp = move;	
+	move[2] = 0;
+	move[3] = curx;
+	move[4] = cury;
+	move[5] = (to_play == WHITE ? NINEMM_WP : NINEMM_BP);
+	move[6] = -1;
+	*movp = move;	
+	curx = -1;
+	cury = -1;
 	return 1;
 }
 
+void ninemm_reset_uistate ()
+{
+	curx = cury = -1;
+}

@@ -113,9 +113,14 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 	gc = board_area->style->bg_gc[GTK_STATE_NORMAL];
 	gdk_gc_set_clip_mask (gc, NULL);
 	gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
-	if (cur_pos.board[y * board_wid + x] != 0 && !board_suspended)
+	if ((cur_pos.board[y * board_wid + x] != 0
+			|| (cur_pos.render[y * board_wid + x] & 0xFF) == RENDER_REPLACE)
+			&& !board_suspended)
 	{
 		/* FIXME: current impl is that if bgimage is set then bgcolor is irrelevant. Maybe we should change it so that bgimage is layered on top of bgcolor */
+		int thepiece = cur_pos.board[y * board_wid + x] -1 + num_pieces * parity;
+		if ((cur_pos.render[y * board_wid + x] & 0xFF) == RENDER_REPLACE)
+			thepiece = (cur_pos.render[y * board_wid + x] >> 8) -1 + num_pieces * parity;
 		if (board_bgimage)
 		{
 			gdk_draw_pixmap (board_area->window,
@@ -124,13 +129,11 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 					real_x * cell_size, real_y * cell_size,
 					cell_size, cell_size
 					);
-			gdk_gc_set_clip_mask (gc, 
-				piece_masks [cur_pos.board[y * board_wid + x] -1 + num_pieces * parity]);
+			gdk_gc_set_clip_mask (gc, piece_masks [thepiece]);
 			gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
 		}
 		gdk_draw_pixmap (board_area->window, 
-				gc, (GdkDrawable *) pieces
-				[cur_pos.board[y * board_wid + x] -1 + num_pieces * parity],
+				gc, (GdkDrawable *) pieces [thepiece],
 				0, 0, real_x * cell_size, real_y * cell_size, 
 				cell_size, cell_size);
 	}

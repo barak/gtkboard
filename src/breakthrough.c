@@ -64,6 +64,7 @@ static int breakthrough_getmove_kb (Pos *, int, Player, byte ** , int **);
 void breakthrough_init ();
 static ResultType breakthrough_who_won (Pos *, Player, char **);
 static ResultType breakthrough_eval (Pos *, Player, float *eval);
+static ResultType breakthrough_eval_incr (Pos *, Player, byte *, float *);
 static byte * breakthrough_movegen (Pos *, Player);
 static void *breakthrough_newstate (Pos *, byte *);
 
@@ -76,6 +77,7 @@ void breakthrough_init ()
 	game_getmove = breakthrough_getmove;
 //	game_who_won = breakthrough_who_won;
 	game_eval = breakthrough_eval;
+	game_eval_incr = breakthrough_eval_incr;
 	game_movegen = breakthrough_movegen;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
@@ -88,7 +90,27 @@ void breakthrough_init ()
 
 static ResultType breakthrough_eval (Pos *pos, Player player, float *eval)
 {
-	*eval = random ();
+	int material = 0;
+	int i, j;
+	for (i=0; i<board_wid; i++)
+	for (j=0; j<board_heit; j++)
+	{
+		int val = pos->board [j * board_wid + i];
+		if (val == BREAKTHROUGH_WP)
+			material++;
+		else if (val == BREAKTHROUGH_BP)
+			material--;
+	}
+	*eval = material + 0.01 * random() / RAND_MAX;
+	return RESULT_NOTYET;
+}
+
+static ResultType breakthrough_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+{
+	byte *board = pos->board;
+	if (move[0] == move[3]) *eval = 0;
+	else *eval = (player == WHITE ? 1 : -1);
+	*eval += 0.01 * random() / RAND_MAX;
 	return RESULT_NOTYET;
 }
 
@@ -104,7 +126,7 @@ static byte * breakthrough_movegen (Pos *pos, Player player)
 		int incx, incy;
 		if (board [j * board_wid + i] != (player == WHITE ? BREAKTHROUGH_WP : BREAKTHROUGH_BP))
 			continue;
-		incy = board [j * board_wid + i] == WHITE ? 1 : -1;
+		incy = board [j * board_wid + i] == BREAKTHROUGH_WP ? 1 : -1;
 		for (incx = -1; incx <= 1; incx += 1)
 		{
 			int val;

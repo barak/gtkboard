@@ -33,9 +33,9 @@ static int ab_tree_exhausted = 0;
 
 static int ab_leaf_cnt;  // how many leaves were eval'd
 
-extern int hash_get_eval (byte *, int, int, float *);
+extern int hash_get_eval (byte *, int, int, int, float *);
 extern void hash_print_stats ();
-extern void hash_insert (byte *, int, int, float);
+extern void hash_insert (byte *, int, int, int, float);
 extern void hash_clear ();
 
 extern gboolean opt_verbose;
@@ -131,30 +131,35 @@ float game_ab_hash (Pos *pos, int player, int level,
 	byte best_move [1024];
 	static byte ret_move [1024];
 	Pos newpos;
+	
 	engine_poll ();
 	if (engine_stop_search) { ab_tree_exhausted = 0; return 0; }
-	newpos.board = (char *) malloc (board_wid * board_heit);
-	assert (newpos.board);
-	memcpy (newpos.board, pos->board, board_wid * board_heit);
-	if (game_stateful)
-	{
-		newpos.state = (void *) malloc (game_state_size);
-		assert (newpos.state);
-		memcpy (newpos.state, pos->state, game_state_size);
-	}
+
+
 	movlist = game_movegen (pos, player);
 	if (movlist[0] == -2)		/* we have no move left */
 	{
 		if (ret_movep && !engine_stop_search)
 			*ret_movep = NULL;
-		free (newpos.board);
-		if (game_stateful) free (newpos.state);
+	//	free (newpos.board);
+	//	if (game_stateful) free (newpos.state);
 		free (movlist);
 		game_eval (pos, to_play, &val);
-		hash_insert (pos->board, board_wid * board_heit, level, val);
+		hash_insert (pos->board, board_wid * board_heit, pos->num_moves, level, val);
 		return val;
 	}
 	move = movlist;
+	
+	newpos.board = (char *) malloc (board_wid * board_heit);
+	assert (newpos.board);
+//	memcpy (newpos.board, pos->board, board_wid * board_heit);
+	if (game_stateful)
+	{
+		newpos.state = (void *) malloc (game_state_size);
+		assert (newpos.state);
+//		memcpy (newpos.state, pos->state, game_state_size);
+	}
+
 	do
 	{
 		ResultType result = RESULT_NOTYET;
@@ -165,7 +170,8 @@ float game_ab_hash (Pos *pos, int player, int level,
 			memcpy (newpos.state, newstate, game_state_size);
 		}
 		move_apply (newpos.board, move);
-		retval = hash_get_eval (newpos.board, board_wid * board_heit,
+		newpos.num_moves = pos->num_moves + 1;
+		retval = hash_get_eval (newpos.board, board_wid * board_heit, pos->num_moves,
 			   level, &cacheval);
 		if (retval && fabs (cacheval) < GAME_EVAL_INFTY) val = cacheval;
 		else result = game_eval (&newpos, to_play == WHITE ? BLACK : WHITE, &val);
@@ -192,7 +198,7 @@ float game_ab_hash (Pos *pos, int player, int level,
 						(&newpos, WHITE, level-1, alpha, beta, NULL, depth+1);
 			}
 		}
-		hash_insert (newpos.board, board_wid * board_heit, level, val);
+		hash_insert (newpos.board, board_wid * board_heit, pos->num_moves, level, val);
 		if (first || 
 			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
 		{
@@ -248,7 +254,6 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 			*ret_movep = NULL;
 		free (movlist);
 		game_eval (pos, to_play, &val);
-		//hash_insert (pos->board, board_wid * board_heit, level, val);
 		return val;
 	}
 	move = movlist;
@@ -263,14 +268,13 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 		{
 			ab_leaf_cnt ++;
 			ab_tree_exhausted = 0;
-			val = neweval;//game_eval (pos, to_play);
+			val = neweval;
 		}
 		else if (fabs (incr_eval) >= GAME_EVAL_INFTY 
 				|| result != RESULT_NOTYET)
 			// one side has won; search no more
 		{
 			ab_leaf_cnt ++;
-			ab_tree_exhausted = 0;
 			val = neweval * (1 + level); // the sooner the better
 		}
 		else 
@@ -284,11 +288,12 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 				memcpy (oldstate, pos->state, game_state_size);
 				memcpy (pos->state, newstate, game_state_size);
 			}
+			pos->num_moves++;
 			val = 0; // stop compiler warning
 			if (level > 1)
 			{
-				retval = hash_get_eval (pos->board, board_wid * board_heit,
-				   level, &cacheval);
+				retval = hash_get_eval (pos->board, board_wid * board_heit, 
+						pos->num_moves, level, &cacheval);
 				if (retval && cacheval < GAME_EVAL_INFTY)  
 					{ val = cacheval; found = 1; }
 			}
@@ -296,11 +301,14 @@ float game_ab_hash_incr (Pos *pos, int player, int level,
 				val = game_ab_hash_incr
 					(pos, player == WHITE ? BLACK : WHITE, 
 						level-1, neweval, alpha, beta, NULL, depth+1);
+			// FIXME: bug is due to hash
 			if (level > 1)
-				hash_insert (pos->board, board_wid * board_heit, level, val);
+				hash_insert (pos->board, board_wid * board_heit, 
+						pos->num_moves, level, val);
 			move_apply (pos->board, movinv);
 			free (movinv);
 			memcpy (pos->state, oldstate, game_state_size);
+			pos->num_moves--;
 		}
 		if (first || 
 			(player == WHITE && val > alpha) || (player == BLACK && val < beta))
@@ -336,16 +344,19 @@ byte * game_ab_dfid (Pos *pos, int player)
 	byte *best_move;
 	int ply;
 	float val = 0, eval = 0, oldval = 0;
+	gboolean use_incr_eval = FALSE;
 	engine_stop_search = 0;
 	signal (SIGUSR1, catch_USR1);
 	ab_leaf_cnt=0;
-	if (game_eval_incr)
+	if (game_eval_incr && (!game_use_incr_eval || game_use_incr_eval (pos, player)))
+		use_incr_eval = TRUE;
+	if (use_incr_eval)
 		game_eval (pos, player, &eval);
 	for (ply = 0; !engine_stop_search; ply++)
 	{
 		oldval = val;
 		ab_tree_exhausted = 1;
-		if (game_eval_incr)
+		if (use_incr_eval)
 			val = game_ab_hash_incr (pos, player, ply, 
 					eval, -1e+16, 1e+16, &best_move, 0);
 		else

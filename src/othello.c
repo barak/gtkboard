@@ -53,8 +53,10 @@ int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 ResultType othello_eval (Pos *, Player, float *);
+ResultType othello_eval_incr (Pos *, Player, byte *, float *);
 byte * othello_movegen (Pos *, Player);
 char ** othello_get_pixmap (int, int);
+gboolean othello_use_incr_eval (Pos *pos, Player player);
 
 Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT, 
 	OTHELLO_NUM_PIECES, 
@@ -66,6 +68,8 @@ void othello_init ()
 	game_getmove = othello_getmove;
 	game_who_won = othello_who_won;
 	game_eval = othello_eval;
+	game_eval_incr = othello_eval_incr;
+	game_use_incr_eval = othello_use_incr_eval;
 	game_movegen = othello_movegen;
 	game_get_pixmap = othello_get_pixmap;
 	game_white_string = "Red";
@@ -110,8 +114,8 @@ char ** othello_get_pixmap (int idx, int color)
 }
 
 
-int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
-int incy[] = { -1, 0, 1, -1, 1, -1, 0, 1};
+static int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
+static int incy[] = { -1, 0, 1, -1, 1, -1, 0, 1};
 
 static int get_sandwich_len (Pos *pos, int x0, int y0, int dx, int dy, byte player)
 {
@@ -194,21 +198,6 @@ ResultType othello_who_won (Pos *pos, Player to_play, char **commp)
 			wscore++;
 		else if (pos->board[i] == OTHELLO_BP)
 			bscore++;
-	/*for (x=0; x<board_wid && !found; x++)
-		for (y=0; y<board_heit && !found; y++)
-		{
-			if (pos->board [y * board_wid + x] != OTHELLO_EMPTY)
-				continue;
-			for (i=0; i<8; i++)
-			{
-				if (get_sandwich_len (pos, x, y ,incx[i], incy[i], 
-						to_play == WHITE ? OTHELLO_WP : OTHELLO_BP) > 0)
-				{
-					found = 1;
-					break;
-				}
-			}
-		}*/
 	if (! (wscore == 0 || bscore == 0 
 				|| wscore + bscore == board_wid * board_heit))
 	{
@@ -234,17 +223,19 @@ byte * othello_movegen (Pos *pos, Player player)
 	byte movbuf [4096];
 	byte *movlist, *movp = movbuf;
 	byte our = player == WHITE ? OTHELLO_WP : OTHELLO_BP;
+	gboolean game_over = TRUE;
 	for (x=0; x<board_wid; x++)
 		for (y=0; y<board_wid; y++)
 		{
-			int found = 0;
+			gboolean found = FALSE;
 			if (pos->board [y * board_wid + x] != OTHELLO_EMPTY)
 				continue;
+			game_over = FALSE;
 			for (i=0; i<8; i++)
 			{
 				sw_len = get_sandwich_len (pos, x, y ,incx[i], incy[i], 
 						player == WHITE ? OTHELLO_WP : OTHELLO_BP);
-				if (sw_len > 0) found = 1;
+				if (sw_len > 0) found = TRUE;
 				for (j=1; j<=sw_len; j++)
 				{
 					*movp++ = x + incx[i] * j;
@@ -260,7 +251,7 @@ byte * othello_movegen (Pos *pos, Player player)
 			*movp++ = -1;
 		}
 	/* if we want to pass, we must return an empty move, NOT no move */
-	if (movp == movbuf)
+	if (movp == movbuf && !game_over)
 		*movp++ = -1;
 	*movp++ = -2;
 	movlist = (byte *) (malloc (movp - movbuf));
@@ -305,6 +296,29 @@ static float othello_eval_mobility (Pos *pos)
 {
 	return othello_eval_mobility_count (pos, WHITE) - 
 		othello_eval_mobility_count (pos, BLACK);
+}
+
+//! Faster approxmiation for mobility
+static float othello_eval_liberty (Pos *pos)
+{
+	int i, j, k;
+	int liberty = 0;
+	for (i=0; i<board_wid; i++)
+	for (j=0; j<board_heit; j++)
+	{
+		if (pos->board [j * board_wid + i] == OTHELLO_EMPTY)
+			continue;
+		for (k=0; k<8; k++)
+		{
+			int x = i + incx[k], y = j + incy[k];
+			int val;
+			if (!ISINBOARD (x, y)) continue;
+			if ((val = pos->board [y * board_wid + x]) == OTHELLO_EMPTY)
+				continue;
+			liberty += (val == OTHELLO_WP ? -1 : 1);
+		}
+	}
+	return liberty;
 }
 
 static int othello_eval_num_moves (Pos *pos)
@@ -368,8 +382,99 @@ static float othello_eval_safe (Pos *pos)
 	return sum;		
 }
 
-ResultType othello_eval (Pos *pos, Player to_play, float *eval)
+/*static float othello_eval_dangerous (Pos *pos)
 {
-	*eval = othello_eval_mobility (pos) + 10 * othello_eval_safe (pos);
+	int i, j;
+	float danger = 0;
+	for (i=1; i<=6; i+=5)
+	for (j=1; j<=6; j+=5)
+	{
+		if (pos->board[j * board_wid + i] == OTHELLO_WP) danger++;
+		else if (pos->board[j * board_wid + i] == OTHELLO_BP) danger--;
+	}
+	for (i=1; i<=6; i+=5)
+	for (j=0; j<=7; j+=7)
+	{
+		if (pos->board[j * board_wid + i] == OTHELLO_WP) danger += 0.3;
+		else if (pos->board[j * board_wid + i] == OTHELLO_BP) danger -= 0.3;
+	}
+	for (i=0; i<=7; i+=7)
+	for (j=1; j<=6; j+=5)
+	{
+		if (pos->board[j * board_wid + i] == OTHELLO_WP) danger += 0.3;
+		else if (pos->board[j * board_wid + i] == OTHELLO_BP) danger -= 0.3;
+	}
+	return -danger;		
+}*/
+
+static float othello_eval_material (Pos *pos)
+{
+	int i, material = 0;
+	for (i=0; i<board_wid * board_heit; i++)
+	{
+		if (pos->board[i] == OTHELLO_WP)
+			material++;
+		else if (pos->board[i] == OTHELLO_BP)
+			material--;
+	}
+	return material;
+}
+
+static float othello_eval_weights (Pos *pos)
+{
+	static int weights [4][4] = 
+	{
+		{ 500, -240, 85, 69 },
+		{ 0  , -130, 49, 23 },
+		{ 0  ,    0,  1,  9 },
+		{ 0  ,    0,  0, 32 },
+	};
+
+	int i, j, wtsum = 0;
+
+	for (i=0; i<board_wid; i++)
+	for (j=0; j<board_heit; j++)
+	{
+		int val = pos->board[j * board_wid + i];
+		int x = i, y = j;
+		if (val == OTHELLO_EMPTY)
+			continue;
+		if (x > 3) x = 7-x;
+		if (y > 3) y = 7-y;
+		if (x > y)  {int tmp = y; y = x; x = tmp;}
+		wtsum += weights [x][y] * (val == OTHELLO_WP ? 1 : -1);
+	}
+	return wtsum;	
+}
+
+ResultType othello_eval (Pos *pos, Player player, float *eval)
+{
+	assert (board_wid == 8 && board_heit == 8);
+	if (pos->num_moves > 50)
+	{
+		*eval = othello_eval_material (pos);
+		return RESULT_NOTYET;
+	}
+	*eval = 
+		10 * othello_eval_liberty (pos) 
+		+ 30 * othello_eval_safe (pos) 
+		+ othello_eval_weights (pos);
 	return RESULT_NOTYET;
+}
+
+ResultType othello_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+{
+	int i;
+	for (i=0; move[3*i] != -1; i++)
+		;
+	if (i == 0) 
+		*eval = 0;
+	else
+		*eval = (player == WHITE ? (2 * i - 1) : - (2 * i - 1));
+	return RESULT_NOTYET;
+}
+
+gboolean othello_use_incr_eval (Pos *pos, Player player)
+{
+	return pos->num_moves > 50 ? TRUE : FALSE;
 }

@@ -57,11 +57,14 @@ extern int opt_verbose;
 /* TODO: use a secondary hash fn of 16 bits to use as increment in case
    of collision. Also use it for 16 of the 48 bits of the check field */
 
+/* TODO: hash the state also. games like chess will need it */
+
 typedef struct
 {
 	guint32 check;	/* should this be 32 or 64 ? */
 				/* hmm.. maybe 48: that would fit nicely into 3 words */
 	float eval;
+	int num_moves:16;
 	int depth:8;
 	int free:1;
 	int stale:1;
@@ -116,7 +119,7 @@ static uint get_check (byte *pos, int poslen)
 }
 
 // FIXME: hash should work with state as well
-void hash_insert (byte *pos, int poslen, int depth, float eval)
+void hash_insert (byte *pos, int poslen, int num_moves, int depth, float eval)
 {
 	uint start = get_hash (pos, poslen) % hash_table_size;
 	uint check = get_check (pos, poslen);
@@ -133,7 +136,7 @@ void hash_insert (byte *pos, int poslen, int depth, float eval)
 		if (hash_table[idx].stale)
 			break;
 		/* even if the same position is already there it should be 
-		   overwritten with the new depth */
+			overwritten with the new depth */
 		if (hash_table[idx].check == check)
 			break;
 		if (hash_filled >= hash_table_max && depth > hash_table[idx].depth)
@@ -141,12 +144,13 @@ void hash_insert (byte *pos, int poslen, int depth, float eval)
 	}
 	hash_table[idx].free = 0;
 	hash_table[idx].check = check;
+	hash_table[idx].num_moves = num_moves;
 	hash_table[idx].eval = eval;
 	hash_table[idx].depth = depth;
 	hash_table[idx].stale = 0;
 }
 
-int hash_get_eval (byte *pos, int poslen, int depth, float *evalp)
+int hash_get_eval (byte *pos, int poslen, int num_moves, int depth, float *evalp)
 	/* get the eval of a pos if it is there in the hash table 
 	   retval = was it found
 	   eval = answer*/
@@ -158,7 +162,8 @@ int hash_get_eval (byte *pos, int poslen, int depth, float *evalp)
 		if (hash_table[idx].check == check)	/* found it */
 		{
 			/* don't compare 2 evals at different depths*/
-			if (hash_table[idx].depth == depth)
+			if (hash_table[idx].depth == depth 
+					&& hash_table[idx].num_moves == num_moves)
 			{
 				if (evalp)
 					*evalp = hash_table[idx].eval;

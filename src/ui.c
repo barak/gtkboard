@@ -125,6 +125,7 @@ void set_game_params ();
 
 ResultType (*game_eval) (Pos *, Player, float *) = NULL;
 ResultType (*game_eval_incr) (Pos *, Player, byte *, float *) = NULL;
+gboolean (*game_use_incr_eval) (Pos *, Player) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 byte * (*game_movegen) (Pos *, Player) = NULL;
@@ -218,6 +219,7 @@ void reset_game_params ()
 	game_htab = NULL;
 	game_eval = NULL;
 	game_eval_incr = NULL;
+	game_use_incr_eval = NULL;
 	game_eval_white = NULL;
 	game_eval_black = NULL;
 	game_movegen = NULL;
@@ -966,7 +968,7 @@ void gui_init ()
 
 int main (int argc, char **argv)
 {
-	srand (time(0));
+	srandom (time(0));
 	reset_game_params ();
 	parse_opts (argc, argv);
 	ui_start_player ();

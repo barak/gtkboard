@@ -112,5 +112,13 @@
 2003-08-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* breakthrough.c: partially implemented
 
-2003-08-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+2003-08-30	Arvind Narayanan	<arvindn@users.sourceforge.net>
 	* cpento.c: Capture pentominoes by Arthur O'Dwyer
+
+2003-09-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: kickass eval function for knights :)
+	* othello.c: tried several things with the eval function, remains poor as ever
+	* ab.c: bugfixes
+	* hash.c: bugfix: added a new field num_moves
+	* board.c: implemented RENDER_REPLACE
+	* ninemm.c: implemented partial move using RENDER_REPLACE
