@@ -1,3 +1,16 @@
+gtkboard (0.11pre0-5) unstable; urgency=low
+
+  * Accept patch; thanks to Steve Langasek and Matej Vela!  (closes: #333118)
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Mon, 20 Feb 2006 10:30:45 +0000
+
+gtkboard (0.11pre0-4.1) unstable; urgency=medium
+
+  * NMU.
+  * src/menu.c (menu_start_game): Fix array size.  Closes: #333118.
+
+ -- Matej Vela <vela@debian.org>  Sun, 19 Feb 2006 23:28:33 +0100
+
 gtkboard (0.11pre0-4) unstable; urgency=low
 
   * Address doc-base format issues (closes: #287788)

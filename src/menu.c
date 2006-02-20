@@ -827,7 +827,7 @@ void menu_start_game ()
 
 	{
 	int i;
-	GtkItemFactoryEntry help_items [3];
+	GtkItemFactoryEntry help_items [4];
 	help_items[0].path = g_strdup_printf ("/Help/%s", opt_game->name);
 	help_items[0].accelerator = NULL;
 	help_items[0].callback = NULL;
