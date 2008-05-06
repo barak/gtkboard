@@ -412,3 +412,7 @@ void towers_get_render (Pos *pos, byte *move, int **rmovp)
 	*rp++ = -1;
 	*rmovp = rmove;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

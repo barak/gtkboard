@@ -1,3 +1,11 @@
+gtkboard (0.11pre0-6) unstable; urgency=low
+
+  * Break doc-base out into two files (closes: #262913, #422923)
+  * Add gtkboard.desktop file from Ubuntu 0.11pre0-5ubuntu2
+  * Modify gtkboard.desktop by adding ;BoardGame; category (closes: #478913)
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Tue,  6 May 2008 14:01:59 +0100
+
 gtkboard (0.11pre0-5) unstable; urgency=low
 
   * Accept patch; thanks to Steve Langasek and Matej Vela!  (closes: #333118)

@@ -289,3 +289,6 @@ char ** maze_get_pixmap (int idx, int color)
 	//else return pixmap_ball_gen(MAZE_CELL_SIZE, 0xc0c040, bg, 2, 50);
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

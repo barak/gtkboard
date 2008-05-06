@@ -205,3 +205,7 @@ char ** infiltrate_get_pixmap (int idx, int color)
 			8, 24);
 }
 */
+
+// Local Variables:
+// tab-width: 4
+// End:

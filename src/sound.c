@@ -169,3 +169,7 @@ void sound_play (SoundEvent event)
 	sound_play_real (sound_file);
 	g_free (sound_file);
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

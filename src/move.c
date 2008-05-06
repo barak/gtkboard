@@ -180,4 +180,6 @@ byte *mov_getinv (byte *board, byte *move)
 	return inv;
 }
 
-
+// Local Variables:
+// tab-width: 4
+// End:

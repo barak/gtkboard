@@ -447,3 +447,7 @@ void dnb_search (Pos *pos, byte **movp)
 		return;
 	}
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

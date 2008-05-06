@@ -4360,3 +4360,7 @@ static const int num_flwords = sizeof (flwords) / sizeof (flwords[0]);
 
 
 #endif
+
+// Local Variables:
+// tab-width: 4
+// End:

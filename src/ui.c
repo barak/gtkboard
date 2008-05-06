@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <getopt.h>
 
 #include <glib.h>
 
@@ -667,7 +668,25 @@ static void parse_opts (int argc, char **argv)
 {
 	char *wheur = NULL, *bheur = NULL;
 	int c, i;
-	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:Hqvh")) != -1)
+	int option_index = 0;
+	static struct option long_options[] = {
+	  {"game",1,0,'g'},
+	  {"plugin",1,0,'G'},
+	  {"delay",1,0,'d'},
+	  {"file",1,0,'f'},
+	  {"log",1,0,'l'},
+	  {"players",1,0,'p'},
+	  {"w-heuristic",1,0,'w'},
+	  {"b-heuristic",1,0,'b'},
+	  {"html-help",0,0,'H'},
+	  {"hide-board",0,0,'q'},
+	  {"verbose",0,0,'v'},
+	  {"help",0,0,'h'},
+	  {"version",0,0,'V'},
+	  {0, 0, 0, 0}
+	};
+	while ((c = getopt_long (argc, argv, "g:G:d:f:l:p:w:b:HqvhV",
+							 long_options, &option_index)) != -1)
 	{
 		switch (c)
 		{
@@ -787,22 +806,27 @@ static void parse_opts (int argc, char **argv)
 			case 'v':
 				opt_verbose = 1;
 				break;
+			case 'V':
+				printf("gtkboard %s\n", GTKBOARD_VERSION);
+				exit(0);
 			case 'h':
-				printf ("Usage: gtkboard \t[-qvh] "
-						"[-g game] [-G file] [-f file] [-l logfile] [-d msec]\n"
-						"\t\t\t[-p XX] [-w wheur -b bheur] "
+				printf ("Usage: gtkboard \t[-qvhV]"
+						" [-g game] [-G file] [-f file] [-l logfile] [-d msec]"
+						" [-p XX] [-w wheur -b bheur]"
 						"\n"
-						"\t-g\tname of the game\n"
-						"\t-G\tplugin file to load game from\n"
-						"\t-f\tfile to load game from\n"
-						"\t-l\tlog file to record game\n"
-						"\t-q\tdon't show board\n"
-						"\t-d\tdelay in milliseconds\n"
-						"\t-p\thuman or machine players. Each X must be 'h' or 'm'\n"
-						"\t-w\tname of heuristic function for white\n"
-						"\t-b\tname of heuristic function for black\n"
-						"\t-v\tbe verbose\n"
-						"\t-h\tprint this help\n"
+						"\n"
+						"\t-g, --game\tname of the game\n"
+						"\t-G, --plugin\tplugin file to load game from\n"
+						"\t-f, --file\tfile to load game from\n"
+						"\t-l, --log\tlog file to record game\n"
+						"\t-q, --hide-board\tdon't show board\n"
+						"\t-d, --delay\tdelay in milliseconds\n"
+						"\t-p, --players\thuman or machine players. Each X must be 'h' or 'm'\n"
+						"\t-w, --w-heuristic\tname of heuristic function for white\n"
+						"\t-b, --b-heuristic\tname of heuristic function for black\n"
+						"\t-v, --verbose\tbe verbose\n"
+						"\t-V, --version\tprint version and exit\n"
+						"\t-h, --help\tprint this help and exit\n"
 					   );
 				exit (0);
 			default:
@@ -1378,3 +1402,7 @@ int main (int argc, char **argv)
 	}
 	return 0;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

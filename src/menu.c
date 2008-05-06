@@ -1292,3 +1292,7 @@ gboolean sb_update_periodic ()
 	first = FALSE;
 	return TRUE;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

@@ -342,3 +342,6 @@ void flw_free ()
 	flw_curx = flw_cury = -1;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

@@ -433,3 +433,6 @@ byte * engine_search (Pos *pos/*, int player*/)
 	return move;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

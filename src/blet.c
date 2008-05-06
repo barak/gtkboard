@@ -152,3 +152,6 @@ unsigned char * blet_get_rgbmap (int idx, int color)
 	return rgbbuf;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

@@ -409,3 +409,7 @@ void samegame_getxy (byte *board, int *x, int *y)
 		}
 	}
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

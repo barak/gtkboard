@@ -302,3 +302,6 @@ char ** plot4_get_pixmap (int idx, int color)
 	return pixmap_ball_gen(55, pixbuf, fg, bg, 17.0, 30.0);
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

@@ -1,0 +1,9 @@
+Document: gtkboard-dev
+Title: gtkboard Dev Manual
+Author: Arvind Narayanan
+Abstract: This manual describes how to add new games to gtkboard.
+Section: Games/Board
+
+Format: HTML
+Index: /usr/share/doc/gtkboard/html/devel/index.html
+Files: /usr/share/doc/gtkboard/html/devel/*.html

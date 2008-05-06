@@ -56,7 +56,7 @@ endif
 
 	dh_clean
 
-install: build
+install: build manpage
 	dh_testdir
 	dh_clean -k
 	dh_installdirs
@@ -66,6 +66,8 @@ install: build
 	mkdir --parents debian/gtkboard/usr/share/doc/gtkboard/html/devel
 	cp -a doc/index.html       debian/gtkboard/usr/share/doc/gtkboard/html/
 	cp -a doc/devel/devel/index.html debian/gtkboard/usr/share/doc/gtkboard/html/devel/
+	install -d debian/gtkboard/usr/share/applications
+	install -m644 debian/gtkboard.desktop debian/gtkboard/usr/share/applications
 
 
 # Build architecture-independent files here.
@@ -89,7 +91,7 @@ binary-arch: build install
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-	dh_installman
+	dh_installman debian/gtkboard.6
 	dh_link
 	dh_strip
 	dh_compress
@@ -105,3 +107,10 @@ binary-arch: build install
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install
+
+## This will re-generate the man page.
+## Not used during normal build; just a good place to keep this info.
+manpage: debian/gtkboard.6
+debian/gtkboard.6:
+	help2man --name="play a variety of board games" --section=6 --no-info --output=$@ src/gtkboard
+.PHONY: manpage

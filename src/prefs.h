@@ -80,3 +80,7 @@ void prefs_write_config_file ();
 gboolean prefs_get_bool_val (gchar *value);
 extern int (*game_scorecmp) (gchar *, int, gchar*, int);
 #endif
+
+// Local Variables:
+// tab-width: 4
+// End:

@@ -362,3 +362,6 @@ int breakthrough_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player
 	return 1;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

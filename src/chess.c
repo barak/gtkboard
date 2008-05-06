@@ -895,3 +895,7 @@ ResultType chess_eval (Pos * pos, Player player, float *eval)
 	*eval = sum;
 	return RESULT_NOTYET;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

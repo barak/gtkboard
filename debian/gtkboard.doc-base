@@ -4,15 +4,7 @@ Author: Arvind Narayanan
 Abstract: This manual describes what gtkboard is
  and how it can be used to play games.
 Section: Games/Board
+
 Format: HTML
 Index: /usr/share/doc/gtkboard/html/index.html
 Files: /usr/share/doc/gtkboard/html/*.html
-
-Document: gtkboard-dev
-Title: gtkboard Dev Manual
-Author: Arvind Narayanan
-Abstract: This manual describes how to add new games to gtkboard.
-Section: Games/Board
-Format: HTML
-Index: /usr/share/doc/gtkboard/html/devel/index.html
-Files: /usr/share/doc/gtkboard/html/devel/*.html

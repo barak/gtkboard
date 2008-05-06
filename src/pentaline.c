@@ -495,3 +495,7 @@ void *pentaline_newstate (Pos *pos, byte *move)
 	pos->board [move[1] * board_wid + move[0]] = 0; 
 	return &state;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

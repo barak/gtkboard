@@ -192,3 +192,7 @@ void statestack_free ()
 		free (statestack[i]);
 	statestack_max = statestack_ptr = 0;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

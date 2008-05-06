@@ -88,7 +88,7 @@ float ab_with_tt (Pos *pos, int player, int level,
 	// origmove is the owning pointer and move is the aliasing pointer
 	else orig_move = move = movdup (move);
 	
-	newpos.board = (char *) malloc (board_wid * board_heit);
+	newpos.board = malloc (board_wid * board_heit);
 	assert (newpos.board);
 	if (game_stateful)
 	{
@@ -367,3 +367,7 @@ byte * ab_dfid (Pos *pos, int player)
 	}
 	return found ? best_move : NULL;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

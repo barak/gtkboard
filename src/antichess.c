@@ -731,3 +731,7 @@ ResultType antichess_eval_incr (Pos *pos, Player player, byte *move, float *eval
 	}
 	return RESULT_NOTYET;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

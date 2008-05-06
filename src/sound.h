@@ -25,3 +25,7 @@ void sound_set_enabled (gboolean enabled);
 void sound_enable_pref_cb (gchar *key, gchar *value);
 
 #endif
+
+// Local Variables:
+// tab-width: 4
+// End:

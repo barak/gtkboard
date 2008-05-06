@@ -42,3 +42,7 @@ void engine_poll ();
 
 
 #endif
+
+// Local Variables:
+// tab-width: 4
+// End:

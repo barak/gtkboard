@@ -470,3 +470,6 @@ int mastermind_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 	return 1;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

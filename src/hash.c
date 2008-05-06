@@ -236,3 +236,7 @@ void hash_print_stats ()
 	}
 	if (opt_verbose) printf ("stale=%d\n", stale);
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

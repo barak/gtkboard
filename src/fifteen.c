@@ -284,3 +284,7 @@ guchar *fifteen_get_rgbmap (int idx, int color)
 	}
 	return buf;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

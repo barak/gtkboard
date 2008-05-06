@@ -224,3 +224,7 @@ static ResultType rgb_eval (Pos *pos, Player to_play, float *eval)
 	*eval = 0;
 	return RESULT_NOTYET;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

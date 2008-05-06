@@ -263,3 +263,7 @@ void ninemm_reset_uistate ()
 {
 	curx = cury = -1;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

@@ -505,3 +505,6 @@ char ** tetris_get_pixmap (int idx, int color)
 	return pixmap;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

@@ -563,3 +563,7 @@ void prefs_read_config_file ()
 	
 	fclose (in);
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

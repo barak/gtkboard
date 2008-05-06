@@ -367,3 +367,7 @@ ResultType knights_eval (Pos *pos, Player player, float *eval)
 {
 	return knights_eval_real (pos, player, eval, FALSE);
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

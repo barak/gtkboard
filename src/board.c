@@ -676,4 +676,6 @@ void board_init ()
 	gdk_gc_destroy (def_gc);
 }
 
-
+// Local Variables:
+// tab-width: 4
+// End:

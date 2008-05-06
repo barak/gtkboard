@@ -300,3 +300,7 @@ char ** checkers_get_pixmap (int idx, int color)
 			CHECKERS_ISWHITE(idx) ? 0xffffff : 0x0000ff, bg, 
 			(idx == CHECKERS_WP || idx == CHECKERS_BP) ? 8 : 12, 24);
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

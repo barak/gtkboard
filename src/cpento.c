@@ -576,3 +576,6 @@ static int cpento_getmove(Pos *pos, int x, int y,
     }
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

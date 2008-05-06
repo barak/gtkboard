@@ -302,3 +302,6 @@ int memory_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_pl
 	return 1;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:

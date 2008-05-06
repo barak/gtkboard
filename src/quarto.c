@@ -312,4 +312,6 @@ unsigned char * quarto_get_rgbmap (int idx, int color)
 	
 }
 
-
+// Local Variables:
+// tab-width: 4
+// End:

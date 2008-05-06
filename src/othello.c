@@ -564,3 +564,7 @@ gboolean othello_use_incr_eval (Pos *pos)
 	// TODO: use different threshold for Othello6x6
 	return pos->num_moves > 50 ? TRUE : FALSE;
 }
+
+// Local Variables:
+// tab-width: 4
+// End:

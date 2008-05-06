@@ -27,6 +27,8 @@
   This is the only file that the games need to include.
 */
 
+#define GTKBOARD_VERSION "0.11pre0"
+
 //! Both moves and positions are arrays of <tt>byte</tt>s
 #ifndef byte 
 #define byte gint8
@@ -518,3 +520,7 @@ extern int (*game_scorecmp_def_iscore) (gchar *, int, gchar*, int);
 extern int (*game_scorecmp_def_time) (gchar *, int, gchar*, int);
 
 #endif
+
+// Local Variables:
+// tab-width: 4
+// End:

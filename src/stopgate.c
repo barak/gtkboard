@@ -527,5 +527,6 @@ int stopgate_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_
 	return 1;
 }
 
-
-
+// Local Variables:
+// tab-width: 4
+// End:

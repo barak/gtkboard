@@ -297,3 +297,6 @@ char ** pixmap_die_gen(int len, char *pixbuf, int fg, int bg, float rad, float g
 	return map;
 }
 
+// Local Variables:
+// tab-width: 4
+// End:
