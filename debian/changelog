@@ -1,3 +1,9 @@
+gtkboard (0.11pre0-7) unstable; urgency=low
+
+  * lintian issues, policy-related revs
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Tue, 19 Aug 2008 12:42:11 +0100
+
 gtkboard (0.11pre0-6) unstable; urgency=low
 
   * Break doc-base out into two files (closes: #262913, #422923)
