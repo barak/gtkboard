@@ -1,3 +1,10 @@
+gtkboard (0.11pre0-8) unstable; urgency=low
+
+  * Move gtkboard executable from /usr/bin to /usr/games
+  * Minor Debian packaging updates, dh 7, rev policy
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Sat, 30 Aug 2008 19:44:22 +0100
+
 gtkboard (0.11pre0-7) unstable; urgency=low
 
   * lintian issues, policy-related revs

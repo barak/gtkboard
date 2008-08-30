@@ -1,0 +1,2 @@
+?package(gtkboard):needs="X11" section="Games/Board"\
+   title="GTK Board" command="/usr/games/gtkboard"

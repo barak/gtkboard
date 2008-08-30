@@ -8,5 +8,5 @@ Exec=gtkboard
 Icon=gtkboard
 Terminal=false
 Type=Application
-Categories=GNOME;GTK;Game;BoardGame;
+Categories=GNOME;GTK;Application;Game;LogicGame;BoardGame;
 StartupNotify=true

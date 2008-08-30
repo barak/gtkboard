@@ -1,2 +1,0 @@
-?package(gtkboard):needs=X11 section=Apps/Board\
-  title="gtkboard" command="/usr/bin/gtkboard"
