@@ -1,3 +1,11 @@
+gtkboard (0.11pre0-9) unstable; urgency=low
+
+  * shrink/modernize debian/rules
+  * versioned ref in debian/copyright
+  * rev deb std
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Tue, 29 Sep 2009 15:08:42 -0400
+
 gtkboard (0.11pre0-8) unstable; urgency=low
 
   * Move gtkboard executable from /usr/bin to /usr/games

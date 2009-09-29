@@ -1,0 +1,4 @@
+gtkboard
+*.debhelper
+*.substvars
+files
