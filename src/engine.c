@@ -19,6 +19,8 @@
 /** \file engine.c
  \brief The engine forms the backend that does the number crunching
  */
+#include "config.h"
+
 #include "game.h"
 #include "move.h"
 #include "stack.h"
@@ -138,6 +140,7 @@ void engine_make_move ()
 void engine_new_game (char *gamename)
 {
 	int i, len;
+	Game *old_game = opt_game;
 	opt_game = NULL;
 	// strip trailing newline
 	if (gamename[len = strlen(gamename) - 1] == '\n')
@@ -150,13 +153,27 @@ void engine_new_game (char *gamename)
 		}
 	if (!opt_game)
 	{
+		// FIXME: isn't there a more elegant way to do this?
+		GameLevel *level = game_levels;
+		assert (level);
+		while (level->name)
+		{
+			if (!strcmp (level->game->name, gamename))
+			{
+				opt_game = level->game;
+				break;
+			}
+			level++;
+		}
+	}
+	if (!opt_game)
+	{
 		fprintf (stderr, "engine: unknown game: %s\n", gamename);
 		exit(1);
 	}
 	reset_game_params ();
-//	state_player = WHITE;	
 	if (opt_game->game_init)
-		opt_game->game_init();
+		opt_game->game_init(opt_game);
 	set_game_params ();
 	if (game_set_init_pos != game_set_init_pos_def) 
 	{
@@ -382,6 +399,7 @@ void engine_main (int infd, int outfd)
 	char *line;
 	engine_flag = TRUE;
 	signal (SIGHUP, ignore);
+	signal (SIGINT, ignore);
 	engine_fin = fdopen (infd, "r");
 	engine_fout = fdopen (outfd, "w");
 	assert (engine_fin);

@@ -57,7 +57,7 @@ void quarto_init ();
 
 Game Quarto = { QUARTO_CELL_SIZE, QUARTO_BOARD_WID, QUARTO_BOARD_HEIT, 
 	QUARTO_NUM_PIECES,
-	quarto_colors, quarto_init_pos, NULL, "Quarto", quarto_init};
+	quarto_colors, quarto_init_pos, NULL, "Quarto", "k-in-a-row", quarto_init};
 
 
 static int quarto_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
@@ -81,14 +81,13 @@ void quarto_init ()
 	game_reset_uistate = quarto_reset_uistate;
 	game_get_render = quarto_get_render;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Quarto\n"
 		"Two player game\n"
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL ("quarto");
 	game_doc_rules = 
-		"Quarto rules\n"
-		"\n"
 		"Two players take turns in placing the pieces from the right side of the board to the left side. Get 4 in a line (horizontal, vertical, diagonal) of any one type -- big, small, square, circle, hole, no hole, red or blue";
 }
 

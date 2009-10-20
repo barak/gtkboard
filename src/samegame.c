@@ -45,7 +45,7 @@ void samegame_init ();
 Game Samegame = { SAMEGAME_CELL_SIZE, SAMEGAME_BOARD_WID, SAMEGAME_BOARD_HEIT, 
 	SAMEGAME_NUM_PIECES, 
 	samegame_colors, NULL, /*samegame_pixmaps*/ NULL, 
-	"Samegame", 
+	"Samegame", "Arcade",
 	samegame_init};
 
 typedef struct
@@ -94,13 +94,13 @@ void samegame_init ()
 	game_scorecmp = game_scorecmp_def_dscore;
 	game_score_fields =  samegame_score_fields;
 	game_score_field_names = samegame_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Samegame\n"
 		"Single player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("samegame");
 	game_doc_rules = 
-		" Samegame rules\n\n"
 		"  * Two or more balls of the same color that form a connected region constitute a block.\n"
 		"  * Hovering the mouse over a ball will highlight the block that the ball belongs to.\n" 
 		"  * Clicking on a ball removes that ball's block.\n"
@@ -109,7 +109,6 @@ void samegame_init ()
 		"  * The goal is to maximize your score.\n"
 		"  * As balls are removed, balls above fall down to take their place. If a column is removed, the column to its right moves to the left.\n"	;
 	game_doc_strategy = 
-		" Samegame tips\n\n"
 		"  * Try to identify the color which occurs the most number of times.\n"
 		"  * Remove balls of the other 2 colors until all the balls of the most frequent color (or as many of them as possible) form a single block.\n"
 		"  * Remove this block. Now do the same with the remaining two colors.\n"
@@ -161,6 +160,8 @@ void *samegame_newstate (Pos *pos, byte *move)
 			bonus = TRUE;
 		if (move[3*i+2] == 0)
 			score++;
+		else if (pos->board[move[3*i+1] * board_wid + move[3*i]] == 0)
+			score--;
 	}
 	score -= 2; score *= score;
 	if (score < 0) score = 0;

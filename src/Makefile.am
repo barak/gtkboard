@@ -1,8 +1,8 @@
-AM_CFLAGS = -Wall -g -O3 -Wno-unused
+AM_CFLAGS = -Wall -Wno-unused -DDATADIR=\"$(datadir)\"
 
-INCLUDES = @GTK_CFLAGS@
+INCLUDES = @GTK_CFLAGS@ @GNOME_CFLAGS@
 
-LDADD = @GTK_LIBS@
+LDADD = @GTK_LIBS@ @GNOME_LIBS@
 
 bin_PROGRAMS = gtkboard
 
@@ -16,6 +16,7 @@ gtkboard_SOURCES = 	\
 	board.c\
 	menu.c\
 	prefs.c\
+	sound.c\
 	ui.c\
 	\
 	aaball.c\
@@ -66,6 +67,7 @@ noinst_HEADERS =  \
 	move.h\
 	prefs.h\
 	stack.h\
+	sound.h\
 	ui_common.h\
 	ui.h\
 	\

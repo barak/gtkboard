@@ -170,13 +170,13 @@ char ** mastermind_get_pixmap (int idx, int color);
 Game Mastermind = { MASTERMIND_CELL_SIZE, 
 	MASTERMIND_BOARD_WID, MASTERMIND_BOARD_HEIT, 
 	MASTERMIND_NUM_PIECES,	mastermind_colors,  
-	NULL, 	NULL, "Mastermind", mastermind_init};
+	NULL, 	NULL, "Mastermind", NULL, mastermind_init};
 
 
 static ResultType mastermind_who_won (Pos *, Player, char **);
 static void mastermind_set_init_pos (Pos *pos);
 int mastermind_getmove (Pos *, int, int, GtkboardEventType, Player, byte**, int **);
-int mastermind_getmove_kb (Pos *, int , Player, byte **, int **);
+int mastermind_getmove_kb (Pos *, int, byte **, int **);
 void mastermind_reset_uistate ();
 int mastermind_get_cur_row (byte *);
 void mastermind_set_init_render (Pos *);
@@ -200,14 +200,13 @@ void mastermind_init ()
 	game_highlight_colors = mastermind_highlight_colors;
 	game_set_init_render = mastermind_set_init_render;
 	game_free = mastermind_free;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Mastermind\n"
 		"Single player game\n"
 		"Status: Completely implemented\n"
 		"URL: "GAME_DEFAULT_URL ("mastermind");
 	game_doc_rules = 
-		"Mastermind rules\n"
-		"\n"
 		"The objective is to find the colors of 4 hidden squares in as few tries as possible.\n\n"
 		"Select a color by clicking on one of the balls on the extreme right. Place any 4 colors of your choice on the middle 4 squares of the bottom row and hit enter. You will get two numbers on the left. The number of black balls indicates how many balls you've got in the correct position. The number of white balls indicates how many balls you've got n the wrong position. Now try again on the second row. Repeat until you get all four black balls.";
 	
@@ -383,7 +382,7 @@ int mastermind_getmove
 }
 
 
-int mastermind_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int mastermind_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[32];
 	static int rmove[7];

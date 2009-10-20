@@ -43,7 +43,7 @@ void rgb_init ();
 
 Game Rgb = { RGB_CELL_SIZE, RGB_BOARD_WID, RGB_BOARD_HEIT, 
 	RGB_NUM_PIECES,
-	rgb_colors,  NULL, NULL, "Rgb", rgb_init};
+	rgb_colors,  NULL, NULL, "Rgb", "k-in-a-row", rgb_init};
 
 
 static int rgb_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
@@ -65,14 +65,13 @@ void rgb_init ()
 	game_get_rgbmap = rgb_get_rgbmap;
 	game_draw_cell_boundaries = TRUE;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Rgb\n"
 		"Two player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("rgb");
 	game_doc_rules = 
-		"Rgb rules\n"
-		"\n"
 		"Rgb, short for red-green-blue, is a harder version of tic-tac-toe. The goal is to get 3 balls in a line (row, column, or diagonal) of any one color. Clicking on an empty square puts a red ball on it, clicking on a red ball turns it green, and clicking on a green ball turns it blue.";
 }
 

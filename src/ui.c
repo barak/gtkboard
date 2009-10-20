@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <ctype.h>
+#include <libgen.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -35,6 +37,11 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+#ifdef HAVE_GNOME
+#include <libgnome/libgnome.h>
+#include <libgnomeui/libgnomeui.h>
+#endif
+
 #include "config.h"
 #include "ui.h"
 #include "prefs.h"
@@ -42,6 +49,7 @@
 #include "menu.h"
 #include "ui_common.h"
 #include "board.h"
+#include "sound.h"
 
 //! Default thinking time per move
 #define DEF_TIME_PER_MOVE 2000
@@ -53,17 +61,52 @@ extern Game
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
 	Ninemm, Stopgate, Knights, Breakthrough, 
 	CapturePento, Towers, Quarto, Kttour, Eightqueens, Dnb,
-	Blet
+	Blet, Othello6x6
 	;
 
-// TODO: these should be sorted at runtime instead of by hand
 Game *games[] = { 
-	&Antichess, &Ataxx, &Blet, &Breakthrough, &Checkers, &Chess, 
-	&CapturePento, &Dnb, &Eightqueens, &Fifteen, &Flw, &Hiq,
-	&Hypermaze, &Infiltrate, &Knights, &Kttour, &Mastermind,
-	&Maze, &Memory, &Ninemm, &Othello, &Pacman, &Pentaline,
-	&Plot4, &Quarto, &Rgb, &Samegame, &Stopgate, &Tetris, &Towers,
-	&Wordtris};
+	&Chess, 
+	&Antichess, 
+	&Breakthrough, 
+	
+	&Pacman, 
+	&Fifteen, 
+	&Samegame, 
+	&Tetris, 
+
+	&Blet, 
+	&Eightqueens, 
+	&Towers,
+	&Hiq,
+	
+	&Plot4, 
+	&Quarto, 
+	&Rgb, 
+	&Pentaline,
+	
+	&Dnb, 
+	&Stopgate, 
+	&CapturePento, 
+	&Knights, 
+
+	&Othello, 
+	&Othello6x6, 
+	
+	&Wordtris,
+	&Flw, 
+		
+	&Maze, 
+	&Hypermaze, 
+	
+	&Infiltrate, 
+	&Kttour, 
+	&Mastermind,
+	&Ataxx, 
+	&Checkers, 
+	&Memory, 
+	&Ninemm, 
+		
+};
 
 const int num_games = sizeof (games) / sizeof (games[0]);
 
@@ -74,7 +117,7 @@ FILE *move_fin, *move_fout;
 
 static GIOChannel *ui_in = NULL;
 
-Pos cur_pos = {NULL, NULL, WHITE, NULL, 0, NULL};
+Pos cur_pos = {NULL, NULL, NULL, WHITE, NULL, NULL, 0, 0};
 
 int board_wid, board_heit;
 
@@ -94,6 +137,9 @@ int game_animation_time = 0;
 gchar *game_doc_about = NULL;
 gchar *game_doc_rules = NULL;
 gchar *game_doc_strategy = NULL;
+gchar *game_doc_history = NULL;
+CompletionStatus game_doc_about_status = STATUS_NONE;
+ 
 
 gchar *game_white_string = "White", *game_black_string = "Black";
 
@@ -110,6 +156,7 @@ gboolean game_file_label = 0,  game_rank_label = 0;
 char *game_highlight_colors = NULL;
 char game_highlight_colors_def[9] = {0xff, 0xff, 0, 0, 0, 0, 0, 0, 0};
 
+GameLevel *game_levels = NULL;
 HeurTab *game_htab = NULL;
 int game_state_size = 0;
 
@@ -128,6 +175,7 @@ int opt_black = NONE;
 int ui_white = NONE;
 int ui_black = NONE;
 int opt_verbose = 0;
+static gboolean opt_html_help = FALSE;
 
 extern void engine_main (int, int);
 extern ResultType engine_eval (Pos *, Player, float *);
@@ -141,15 +189,15 @@ void ui_make_human_move (byte *, int *);
 void set_game_params ();
 
 ResultType (*game_eval) (Pos *, Player, float *) = NULL;
-ResultType (*game_eval_incr) (Pos *, Player, byte *, float *) = NULL;
-gboolean (*game_use_incr_eval) (Pos *, Player) = NULL;
+ResultType (*game_eval_incr) (Pos *, byte *, float *) = NULL;
+gboolean (*game_use_incr_eval) (Pos *) = NULL;
 float (*game_eval_white) (Pos *, int) = NULL;
 float (*game_eval_black) (Pos *, int) = NULL;
 void (*game_search) (Pos *, byte **) = NULL;
 byte * (*game_movegen) (Pos *) = NULL;
 InputType (*game_event_handler) (Pos *, GtkboardEvent *, MoveInfo *) = NULL;
 int (*game_getmove) (Pos *, int, int, GtkboardEventType, Player, byte **, int **) = NULL;
-int (*game_getmove_kb) (Pos *, int, Player, byte **, int **) = NULL;
+int (*game_getmove_kb) (Pos *, int, byte **, int **) = NULL;
 ResultType (*game_who_won) (Pos *, Player, char **) = NULL;
 int (*game_animate) (Pos *, byte **) = NULL;
 char **( *game_get_pixmap) (int, int) = NULL;
@@ -169,11 +217,14 @@ GtkWidget *main_window, *board_area = NULL;
 GtkWidget *board_rowbox = NULL, *board_colbox = NULL;
 
 static void ignore() {}
+static void html_help_gen ();
 
 void ui_cleanup ()
 {
 	if (opt_game)
 		ui_terminate_game();
+	sound_stop ();
+	prefs_write_config_file ();
 	signal (SIGCHLD, ignore);
 	if (engine_pid > 0)
 		kill (engine_pid, SIGKILL);
@@ -196,10 +247,13 @@ void ui_child_cleanup ()
 {
 	int status;
 	waitpid (engine_pid, &status, WNOHANG | WUNTRACED);
-	if (WIFSTOPPED (status))
+	if (!WIFSIGNALED (status))
 		return;
-	fprintf (stderr, "gtkboard: engine appears to have died, exiting.\n");
-	exit (1);
+	if (WTERMSIG (status) == SIGSEGV)
+	{
+		fprintf (stderr, "gtkboard: engine appears to have died, exiting.\n");
+		exit (1);
+	}
 }
 
 
@@ -236,6 +290,7 @@ void game_set_init_pos_def (Pos *pos)
 void reset_game_params ()
 {
 	if (game_free) game_free ();
+	game_levels = NULL;
 	game_htab = NULL;
 	game_eval = NULL;
 	game_eval_incr = NULL;
@@ -261,9 +316,11 @@ void reset_game_params ()
 	game_allow_back_forw = TRUE;
 	game_single_player = FALSE;
 	game_allow_undo = FALSE;
+	game_doc_about_status = STATUS_NONE;
 	game_doc_about = NULL;
 	game_doc_rules = NULL;
 	game_doc_strategy = NULL;
+	game_doc_history = NULL;
 	game_white_string = "White";
 	game_black_string = "Black";
 	//state_player = WHITE;
@@ -283,11 +340,13 @@ void reset_game_params ()
 	game_bg_pixmap = NULL;
 	if (cur_pos.board) free (cur_pos.board);
 	if (cur_pos.render) free (cur_pos.render);
+	cur_pos.game = NULL;
 	cur_pos.board = NULL;
 	cur_pos.render = NULL;
 	cur_pos.state = NULL;
 	cur_pos.ui_state = NULL;
 	cur_pos.num_moves = 0;
+	cur_pos.search_depth = 0;
 }
 
 void ui_terminate_game ()
@@ -299,7 +358,7 @@ void ui_terminate_game ()
 		animate_tag = -1;
 	}
 	if (game_single_player)
-		prefs_save_scores (opt_game->name);
+		prefs_save_scores (menu_get_game_name_with_level());
 	board_free ();
 	reset_game_params ();
 	if (opt_infile)
@@ -316,8 +375,9 @@ void ui_terminate_game ()
 
 void ui_start_game ()
 {
+	cur_pos.game = opt_game;
 	if (opt_game->game_init)
-		opt_game->game_init();
+		opt_game->game_init(opt_game);
 	if (game_single_player)
 	{
 		ui_white = HUMAN;
@@ -342,10 +402,16 @@ void ui_start_game ()
 	menu_put_player (FALSE);
 	menu_set_eval_function ();
 	if (game_single_player)
-		prefs_load_scores (opt_game->name);
+		prefs_load_scores (menu_get_game_name_with_level());
 	ui_check_who_won();
 	if (game_single_player && game_start_immediately)
 		ui_stopped = FALSE;
+	if (state_gui_active)
+	{
+		gchar *tempstr = g_strdup_printf ("%s - gtkboard", menu_get_game_name());
+		gtk_window_set_title (GTK_WINDOW (main_window), tempstr);
+		g_free (tempstr);
+	}
 }
 
 
@@ -429,7 +495,29 @@ void ui_check_who_won()
 		ui_cleanup();
 	sb_update ();
 	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "WON", 3))
-		prefs_add_highscore (line, sb_get_human_time ());
+	{
+		gboolean retval;
+		retval = prefs_add_highscore (line, sb_get_human_time ());
+		if (retval)
+			sound_play (SOUND_HIGHSCORE);
+		else 
+			sound_play (SOUND_WON);
+		if (game_levels)
+		{
+			GameLevel *next_level = game_levels;
+			while (next_level->name)
+			{
+				if (next_level->game == opt_game)
+					break;
+				next_level++;
+			}
+			next_level++;
+			if (next_level->name)
+				menu_put_level (next_level->name);
+		}
+	}
+	if (game_single_player && !ui_cheated && !g_strncasecmp(who_str, "LOST", 4))
+		sound_play (SOUND_LOST);
 }
 
 void ui_send_make_move ()
@@ -449,6 +537,12 @@ void ui_send_make_move ()
 
 	else
 		g_io_add_watch (ui_in, G_IO_IN, (GIOFunc) ui_get_machine_move, NULL);
+}
+
+gboolean ui_send_make_move_bg (gpointer data)
+{
+	ui_send_make_move ();
+	return FALSE;
 }
 
 void ui_make_human_move (byte *move, int *rmove)
@@ -501,6 +595,7 @@ int ui_get_machine_move ()
 	if (!game_single_player)
 		cur_pos.player = (cur_pos.player == WHITE ? BLACK : WHITE);
 	cur_pos.num_moves ++;
+	sound_play (SOUND_MACHINE_MOVE);
 	ui_check_who_won ();
 	sb_update ();
 	ui_send_make_move ();
@@ -515,6 +610,7 @@ int ui_move_now_cb ()
 	fprintf (move_fout, "MOVE_NOW \n");
 	fflush (move_fout);
 	ui_get_machine_move ();
+	return FALSE;
 }
 
 void ui_cancel_move ()
@@ -571,7 +667,7 @@ static void parse_opts (int argc, char **argv)
 {
 	char *wheur = NULL, *bheur = NULL;
 	int c, i;
-	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:qvh")) != -1)
+	while ((c = getopt (argc, argv, "g:G:d:f:l:p:w:b:Hqvh")) != -1)
 	{
 		switch (c)
 		{
@@ -582,8 +678,8 @@ static void parse_opts (int argc, char **argv)
 					if (!strcasecmp (optarg, games[i]->name))
 					{
 						opt_game = games[i];
-						if (opt_game->game_init)
-							opt_game->game_init();
+//						if (opt_game->game_init)
+//							opt_game->game_init(opt_game);
 						found = 1;
 					}
 				if (!found)
@@ -610,18 +706,16 @@ static void parse_opts (int argc, char **argv)
 				}
 
 				if (!g_module_symbol (module, "plugin_game", (gpointer *) &game))
-				//if ((error = dlerror()) != NULL)
 				{
 					fprintf (stderr, 
 							"Failed to load plugin from file \"%s\": %s\n",
 							optarg, g_module_error ());
 					exit(1);
 				}
-				//dlclose(handle);
 				printf ("Successfully loaded game %s\n", (*game)->name);
 				opt_game = *game;
-				if (opt_game->game_init)
-					opt_game->game_init();
+//				if (opt_game->game_init)
+//					opt_game->game_init(opt_game);
 				}
 				break;
 			/* FIXME : make these long options */
@@ -683,6 +777,9 @@ static void parse_opts (int argc, char **argv)
 				opt_delay = atoi (optarg);
 				if (opt_delay <= 0)
 					opt_delay = 3000;
+				break;
+			case 'H':
+				opt_html_help = TRUE;
 				break;
 			case 'q':
 				opt_quiet = 1;
@@ -798,6 +895,12 @@ static void parse_opts (int argc, char **argv)
 	}
 	ui_white = opt_white;
 	ui_black = opt_black;
+
+	if (opt_html_help)
+	{
+		html_help_gen ();
+		exit (0);
+	}
 }
 
 void gui_init ()
@@ -809,12 +912,14 @@ void gui_init ()
 	GtkItemFactoryEntry items[] = 
 	{
 #if GTK_MAJOR_VERSION == 1
-		{ "/_File", NULL, NULL, 0, "<Branch>" },
+/*		{ "/_File", NULL, NULL, 0, "<Branch>" },
 		{ "/File/_Load game", "<control>L", menu_load_file_dialog, 0, "" },
 		{ "/File/_Save game", NULL, NULL, 0, "" },
 		{ "/File/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
+*/
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
+		{ "/Game/_Levels", NULL, NULL, 0, "<Branch>"},
 		{ "/Game/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_New", "<control>N", menu_start_stop_game, MENU_RESET_GAME, "" },
 		{ "/Game/_Start", "<control>G", menu_start_stop_game, MENU_START_GAME, "" },
@@ -822,6 +927,8 @@ void gui_init ()
 		{ "/Game/Sep2", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
+		{ "/Game/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, MENU_BACK, "" },
 		{ "/Move/_Forward", "<control>F", menu_back_forw, MENU_FORW, "" },
@@ -829,15 +936,17 @@ void gui_init ()
 		{ "/Move/_Move Now", "<control>M", 
 			(GtkItemFactoryCallback) ui_move_now_cb, 0, "" },
 #else
-		{ "/_File", NULL, NULL, 0, "<Branch>" },
+/*		{ "/_File", NULL, NULL, 0, "<Branch>" },
 		{ "/File/_Load game", "<control>L", menu_load_file_dialog, 0, 
 				"<StockItem>", GTK_STOCK_OPEN },
 		{ "/File/_Save game", NULL, menu_save_file_dialog, 0, 
 				"<StockItem>", GTK_STOCK_SAVE },
 		{ "/File/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, 
 				"<StockItem>", GTK_STOCK_QUIT },
+*/
 		{ "/_Game", NULL, NULL, 0, "<Branch>" },
 		{ "/Game/Select _Game", NULL, NULL, 0, "<LastBranch>" },
+		{ "/Game/Levels", NULL, NULL, 0, "<Branch>"},
 		{ "/Game/Sep1", NULL, NULL, 0, "<Separator>" },
 		{ "/Game/_New", "<control>N", menu_start_stop_game, MENU_RESET_GAME, 
 				"<StockItem>", GTK_STOCK_NEW },
@@ -849,6 +958,8 @@ void gui_init ()
 		//FIXME: there's a scores stock item but I can't seem to find it
 		{ "/Game/_Highscores", NULL, prefs_show_scores, 0, ""},
 		{ "/Game/_Zap Highscores", NULL, prefs_zap_highscores, 0, ""},
+		{ "/Game/Sep3", NULL, NULL, 0, "<Separator>" },
+		{ "/Game/_Quit", "<control>Q", (GtkSignalFunc) ui_cleanup, 0, "" },
 		{ "/_Move", NULL, NULL, 0, "<Branch>" },
 		{ "/Move/_Back", "<control>B", menu_back_forw, 1, 
 				"<StockItem>", GTK_STOCK_GO_BACK },
@@ -872,6 +983,8 @@ void gui_init ()
 //		{ "/Settings/_Eval function/_White", NULL, NULL, 0, "<Branch>" },
 //		{ "/Settings/_Eval function/_Black", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Flip Board", "<control>T", menu_board_flip_cb, 0, "" },
+		{ "/Settings/_Enable Sound", NULL, menu_enable_sound_cb, 1, ""},
+		{ "/Settings/_Disable Sound", NULL, menu_enable_sound_cb, 0, ""},
 		{ "/Settings/_Time per move", NULL, NULL, 0, "<Branch>" },
 		{ "/Settings/_Time per move/Default", NULL, 
 			menu_set_delay_cb, DEF_TIME_PER_MOVE, "<RadioItem>" },
@@ -893,9 +1006,11 @@ void gui_init ()
 			menu_set_delay_cb, 30000, "/Settings/Time per move/Default" },
 		{ "/Settings/Time per move/1 minute", NULL, 
 			menu_set_delay_cb, 600000, "/Settings/Time per move/Default" },
-		{ "/_Help", NULL, NULL, 0, "<LastBranch>" },
+		{ "/_Help", NULL, NULL, 0, "<Branch>" },
 		{ "/Help/_About", NULL, menu_show_about_dialog, 0, ""},
-//		{ "/Help/_Begging", NULL, menu_show_begging_dialog, 0, ""},
+#ifdef HAVE_GNOME
+		{ "/Help/_Home Page", NULL, menu_help_home_page, 0, "<StockItem>", GTK_STOCK_HOME},
+#endif
 		// TODO: implement context help
 //		{ "/Help/_Context help", NULL, ui_set_context_help, 0, ""},
 	};
@@ -905,7 +1020,7 @@ void gui_init ()
 	gtk_window_set_policy (GTK_WINDOW (main_window), FALSE, FALSE, TRUE);
 	gtk_signal_connect (GTK_OBJECT (main_window), "delete_event",
 		GTK_SIGNAL_FUNC(ui_cleanup), NULL);
-	gtk_window_set_title (GTK_WINDOW (main_window), "GTKBoard");
+	gtk_window_set_title (GTK_WINDOW (main_window), "Gtkboard");
 
 	ag = gtk_accel_group_new();
 	menu_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", ag);
@@ -915,8 +1030,25 @@ void gui_init ()
 			sizeof (items) / sizeof (items[0]), items, NULL);
 	for (i=0; i<=num_games; i++)
 	{
-		game_items[i].path = g_strdup_printf ("/Game/Select Game/%s",  
-				i ? games[i-1]->name : "none");
+		if (i==0) 
+			game_items[i].path = "/Game/Select Game/none";
+		else 
+		{
+			if (games[i-1]->group)
+			{
+				GtkItemFactoryEntry group_item = {NULL, NULL, NULL, 0, "<Branch>"};
+				group_item.path = g_strdup_printf ("/Game/Select Game/%s",
+						games[i-1]->group);
+				// FIXME: this is O(N^2) where N is the number of games
+				if (gtk_item_factory_get_widget (menu_factory, group_item.path) == NULL)
+					gtk_item_factory_create_item (menu_factory, &group_item, NULL, 1);
+				game_items[i].path = g_strdup_printf ("/Game/Select Game/%s/%s",
+					games[i-1]->group ? games[i-1]->group : "", games[i-1]->name);
+			}
+			else
+				game_items[i].path = g_strdup_printf ("/Game/Select Game/%s",
+						games[i-1]->name);
+		}
 		game_items[i].accelerator = NULL;
 		game_items[i].callback = menu_set_game;
 		game_items[i].callback_action = i-1;
@@ -930,6 +1062,17 @@ void gui_init ()
 	menu_main = gtk_item_factory_get_widget (menu_factory, "<main>");
 	gtk_widget_set_state (gtk_item_factory_get_widget (menu_factory, 
 				"/Settings/Player/File"), GTK_STATE_INSENSITIVE);
+
+	for (i=1; i<=NUM_RECENT_GAMES; i++)
+	{
+		gchar *tmp;
+		gchar *gamename;
+		gamename = prefs_get_config_val (tmp = g_strdup_printf ("recent_game_%d", i));
+		g_free (tmp);
+		if (gamename && gamename[0] != '\0')
+			menu_insert_game_item (gamename, i);
+	}
+
 	menu_set_eval_function ();
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox), menu_main, FALSE, FALSE, 0);
@@ -978,7 +1121,7 @@ void gui_init ()
 		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
 	gtk_signal_connect (GTK_OBJECT (main_window), "key_release_event",
 		GTK_SIGNAL_FUNC (board_signal_handler), NULL);
-	hbox = gtk_hbox_new (FALSE, 0);
+	menu_info_bar = hbox = gtk_hbox_new (FALSE, 0);
 	sb_game_label = gtk_label_new (opt_game ? opt_game->name : NULL);
 	gtk_box_pack_start (GTK_BOX (hbox), sb_game_label, FALSE, FALSE, 3);
 	sb_game_separator = gtk_vseparator_new ();
@@ -1007,10 +1150,14 @@ void gui_init ()
 	gtk_box_pack_end (GTK_BOX (hbox), sb_time_separator, FALSE, FALSE, 0);
 	}
 			
-	separator = gtk_hseparator_new ();
+	menu_info_separator = separator = gtk_hseparator_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 	separator = gtk_hseparator_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
+	menu_warning_bar = gtk_label_new ("Warning: this game has not yet been completely implemented.");
+	gtk_box_pack_start (GTK_BOX (vbox), menu_warning_bar, FALSE, FALSE, 0);
+	sb_warning_separator = separator = gtk_hseparator_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
 	separator = gtk_hseparator_new ();
@@ -1035,14 +1182,166 @@ void gui_init ()
 
 	if (opt_game) menu_start_game ();
 	menu_put_player (TRUE);
-	if (!opt_game) sb_message ("Select a game from the Game menu", FALSE);
+//	if (!opt_game) sb_message ("Select a game from the Game menu", FALSE);
 	sb_update ();
+}
+
+void html_help_gen_format (FILE *fout, gchar *outfile, gchar *title, gchar *string)
+{
+	gchar *tmpfilename = "tmp";
+	FILE *ftmp = fopen (tmpfilename, "w");
+	gchar *command;
+	if (!string) return;
+	if (!ftmp)
+	{
+		fprintf (stderr, "couldn't open %s for writing", tmpfilename);
+		perror (NULL);
+		exit(1);
+	}
+	fprintf (ftmp, string);
+	fclose (ftmp);
+	fprintf (fout, "<h2> %s </h2>\n\n <pre>", title);
+	fflush (fout);
+	command = g_strdup_printf ("lynx -dump -dont_wrap_pre \"%s\" | fmt -s >> \"%s\"", tmpfilename, outfile);
+	if (system (command) < 0)
+	{
+		fprintf (stderr, "failed to execute command %s: ", command);
+		perror (NULL);
+		exit (1);
+	}
+	fseek (fout, 0, SEEK_END);
+	fprintf (fout, "\n</pre>\n");
+	g_free (command);
+}
+
+void html_help_gen_game (Game *game)
+{
+	FILE *fout;
+	gchar *filename;
+	mkdir (filename = g_strdup_printf ("%s", game->name), 0777);
+	g_free (filename);
+	filename = g_strdup_printf ("%s/index.html", game->name);
+	fout = fopen (filename, "w");
+	if (!fout)
+	{
+		fprintf (stderr, "couldn't open %s for writing: ", filename);
+		perror (NULL);
+		g_free (filename);
+		return;
+	}
+	reset_game_params ();
+	opt_game = game;
+	game->game_init(game);
+	fprintf (fout, 
+			"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+			"<html> \n <head> \n"
+			"<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \n"
+			"<title>%s - gtkboard </title> \n"
+			"<link rel=\"stylesheet\" type=\"text/css\" href=\"/styles/default.css\"> \n"
+			"</head>\n"
+			"<body>\n"
+			"<!--#include virtual=\"/header.html\"-->\n",
+			game->name);
+	fprintf (fout, "<h1 align=\"center\"> %s </h1>\n\n", game->name);
+	fprintf (fout, "<table width=\"100%%\"> \n <tr> \n <td width=\"2%%\"></td> \n <td width=\"75%%\" valign=\"top\"> \n");
+	fprintf (fout, "%s<br>\n", game_single_player ? "Single player game" : "Two player game");
+	html_help_gen_format (fout, filename, "Rules", game_doc_rules);
+	html_help_gen_format (fout, filename, "Strategy", game_doc_strategy);
+	html_help_gen_format (fout, filename, "History", game_doc_history);
+	fprintf (fout, "<h2> Screenshot </h2>\n <p align=\"center\">" 
+			"<img  src=\"/screenshots/%s default.png\" alt=\"%s screenshot\"/> </p>\n", 
+			game->name, game->name);
+	fprintf (fout, "</td> \n <td width=\"3%%\"></td> \n" 
+			"<td width=\"20%%\" valign=\"top\"> \n <!--#include virtual=\"/gamelist.html\"-->\n" 
+			"</td> \n</tr>\n </table>"
+			"<hr/> \n<!--#include virtual=\"/footer.html\"-->\n"			
+			"</body> \n</html>");
+	g_free (filename);
+	fclose (fout);
+}
+
+void html_help_gen_gamelist ()
+{
+	int i;
+	static GSList *group_list = NULL;
+	gchar *group;
+	FILE *fout;
+	fout = fopen ("gamelist.html", "w");
+	if (!fout)
+	{
+		fprintf (stderr, "couldn't open gamelist.html for writing: ");
+		perror (NULL);
+		exit (1);
+	}
+	for (i=0; i<num_games; i++)
+	{
+		if (!games[i]->group) games[i]->group = "";
+		if (!g_slist_find (group_list, games[i]->group))
+			group_list = g_slist_append (group_list, games[i]->group);
+	}
+
+	fprintf (fout, "<h2> Games </h2> \n\n<ul>");
+	while ((group = g_slist_nth_data (group_list, 0)))
+	{
+		if (group[0] != '\0')
+			fprintf (fout, "<li> %s <ul>\n", group);
+		for (i=0; i<num_games; i++)
+		{
+			if (strcmp (games[i]->group, group)) continue;
+			fprintf (fout, "<li> <a href=\"/games/%s/\">%s</a> </li>\n", games[i]->name, games[i]->name);
+		}
+		if (group[0] != '\0')
+			fprintf (fout, "</ul> </li>\n");
+			
+		group_list = g_slist_nth (group_list, 1);
+	}
+	fprintf (fout, "</ul>\n\n");
+	fclose (fout);
+}
+
+void html_help_gen ()
+{
+	int i;
+	char dirbuf[1024];
+	getcwd (dirbuf, 1024);
+	if (strcmp (basename (dirbuf), "games"))
+	{
+		fprintf (stderr, "To generate html help, you must be in the \"games\" directory.\n");
+		exit (1);
+	}
+	if (opt_game)
+	{
+		html_help_gen_game (opt_game);
+		return;
+	}
+	html_help_gen_gamelist ();
+	for (i=0; i<num_games; i++)
+		html_help_gen_game (games[i]);
+}
+
+static int get_seed ()
+{
+	GTimeVal timeval;
+	g_get_current_time (&timeval);
+	return timeval.tv_usec;
+}
+                         
+//! A wrapper around sound_init so that we can return a value to g_idle_add
+gboolean ui_sound_init (gpointer data)
+{
+	sound_init ();
+	sound_play (SOUND_PROGRAM_START);
+	return FALSE;
 }
 
 int main (int argc, char **argv)
 {
-	srandom (time(0));
+#ifdef HAVE_GNOME
+	GnomeProgram *app;
+#endif
+	srandom (get_seed());
 	reset_game_params ();
+	prefs_read_config_file ();
 	parse_opts (argc, argv);
 	ui_start_player ();
 	
@@ -1054,7 +1353,11 @@ int main (int argc, char **argv)
 	{
 		gtk_init(&argc,&argv);    
 		gdk_rgb_init();
+#ifdef HAVE_GNOME
+		app = gnome_program_init (PACKAGE, VERSION, LIBGNOME_MODULE, argc, argv, GNOME_PARAM_NONE);
+#endif
 		gui_init ();
+		g_idle_add ((GSourceFunc) ui_sound_init, NULL);
 		gtk_main ();
 	}
 	else	// background mode
@@ -1063,7 +1366,8 @@ int main (int argc, char **argv)
 		signal (SIGHUP, ignore);
 		set_game_params ();
 		ui_stopped = FALSE;
-		ui_send_make_move ();
+		sound_set_enabled (FALSE);
+		g_idle_add (ui_send_make_move_bg, NULL);
 #if GLIB_MAJOR_VERSION > 1
 		loop = g_main_loop_new (NULL, TRUE);
 #else

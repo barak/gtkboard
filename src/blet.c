@@ -55,7 +55,7 @@ void blet_init ();
 
 Game Blet = { BLET_CELL_SIZE, BLET_BOARD_WID, BLET_BOARD_HEIT, 
 	BLET_NUM_PIECES,
-	blet_colors, blet_init_pos, NULL, "Blet", blet_init};
+	blet_colors, blet_init_pos, NULL, "Blet", "Logic puzzles", blet_init};
 
 static int blet_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
 static ResultType blet_who_won (Pos *, Player , char **);
@@ -72,17 +72,16 @@ void blet_init ()
 	game_score_fields = blet_score_fields;
 	game_score_field_names = blet_score_field_names;
 	game_event_handler = blet_event_handler;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Blet\n"
 		"Single player game\n"
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL("blet");
 	game_doc_rules = 
-		"Blet rules\n\n"
 		"If a ball is surrounded by balls of the opposite color, you can click on the middle ball to flip all three.\n\n"
 		"The goal is to get 23 green balls in as few flips as possible\n";
 	game_doc_strategy = 
-		"Blet strategy\n\n"
 		"Blet was invented by Villegas, Sadun and Voloch. A research paper showing the optimal strategy as well as an online version of the game (which requires a tcl browser plugin) can be found at: http://www.ma.utexas.edu/users/voloch/blet.html";
 }
 

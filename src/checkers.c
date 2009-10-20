@@ -71,7 +71,7 @@ void checkers_reset_uistate ();
 Game Checkers = 
 	{ CHECKERS_CELL_SIZE, CHECKERS_BOARD_WID, CHECKERS_BOARD_HEIT, 
 	CHECKERS_NUM_PIECES,
-	checkers_colors, checkers_init_pos, NULL, "Checkers",
+	checkers_colors, checkers_init_pos, NULL, "Checkers", NULL,
 	checkers_init};
 
 void checkers_init ()
@@ -85,6 +85,7 @@ void checkers_init ()
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Checkers\n"
 		"Two player game\n"

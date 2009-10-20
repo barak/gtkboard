@@ -246,7 +246,7 @@ byte * stopgate_movegen (Pos *);
 
 Game Stopgate = { STOPGATE_CELL_SIZE, STOPGATE_BOARD_WID, STOPGATE_BOARD_HEIT, 
 	STOPGATE_NUM_PIECES, 
-	stopgate_colors, NULL, stopgate_pixmaps, "Stopgate", stopgate_init};
+	stopgate_colors, NULL, stopgate_pixmaps, "Stopgate", "Nimlike games", stopgate_init};
 
 static int stopgate_curx = - 1, stopgate_cury = -1;
 
@@ -257,13 +257,11 @@ void stopgate_init ()
 	game_who_won = stopgate_who_won;
 	game_eval = stopgate_eval;
 	game_movegen = stopgate_movegen;
-	game_white_string = "White";
-	game_black_string = "Black";
-	game_doc_about = 
-		"Stopgate\n"
-		"Two player game\n"
-		"Status: Fully implemented\n"
-		"URL: "GAME_DEFAULT_URL ("stopgate");
+	game_white_string = "Vertical";
+	game_black_string = "Horizontally";
+	game_doc_about_status = STATUS_COMPLETE;
+	game_doc_rules = "Two players take turns in placing dominoes on the board. The first player places them vertically and the second horizontally. To place a domino, press the mouse button on a square, drag the mouse to the adjacent square and release the mouse button. The goal is to be the last player to place a domino; the game ends when it becomes obvious who the winner is.";
+	game_doc_strategy = "Make parallel columns of dominoes such that you will be able to play in between the columns but the opponent won't.";
 }
 
 static int incx[] = { -1, -1, -1, 0, 0, 1, 1, 1};
@@ -278,21 +276,7 @@ ResultType stopgate_who_won (Pos *pos, Player player, char ** commp)
 	result = stopgate_eval (pos, player, &eval);
 	if (result == RESULT_WHITE) *commp = who_str[0];
 	if (result == RESULT_BLACK) *commp = who_str[1];
-	printf ("%f\n", eval);
 	return result;
-/*	if (abs (eval) < GAME_EVAL_INFTY)
-		return RESULT_NOTYET;
-	if (eval > 0)
-	{
-		*commp = who_str[0];
-		return RESULT_WHITE;
-	}
-	else
-	{
-		*commp = who_str[1];
-		return RESULT_BLACK;
-	}
-	*/
 }
 
 #define EVAL_ISEMPTY(x, y) ((ISINBOARD((x), (y))) && (board[(y) * board_wid + (x)] == STOPGATE_EMPTY))

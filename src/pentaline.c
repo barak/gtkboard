@@ -45,7 +45,7 @@ void pentaline_init ();
 
 Game Pentaline = { PENTALINE_CELL_SIZE, PENTALINE_BOARD_WID, PENTALINE_BOARD_HEIT, 
 	PENTALINE_NUM_PIECES,
-	pentaline_colors,  NULL, NULL, "Pentaline", pentaline_init};
+	pentaline_colors,  NULL, NULL, "Pentaline", "k-in-a-row", pentaline_init};
 
 
 static int pentaline_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
@@ -79,14 +79,13 @@ void pentaline_init ()
 	game_state_size = sizeof (Pentaline_state);
 	game_newstate = pentaline_newstate;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Pentaline\n"
 		"Two player game\n"
 		"Status: Fully implemented (But AI needs improvement)\n"
 		"URL: "GAME_DEFAULT_URL("pentaline");
 	game_doc_rules = 
-		"Pentaline rules\n"
-		"\n"
 		"Two players take turns in placing balls of either color. The first to get 5 balls in a row wins.\n\n"
 		"This game is the same as the free-style variant of GoMoku.\n";
 }

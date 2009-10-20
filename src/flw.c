@@ -112,7 +112,7 @@ void flw_find_chain (char chain[FLW_LEN+1][FLW_LEN+1])
 
 static void flw_init ();
 int flw_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int flw_getmove_kb (Pos *, int, Player, byte **, int **);
+int flw_getmove_kb (Pos *, int, byte **, int **);
 void flw_free ();
 ResultType flw_who_won (Pos *, Player , char **);
 
@@ -120,6 +120,7 @@ Game Flw = { FLW_CELL_SIZE, FLW_BOARD_WID, FLW_BOARD_HEIT,
 	FLW_NUM_PIECES, 
 	flw_colors, NULL, flw_pixmaps, 
 	"Four Letter Words", 
+	"Word games",
 	flw_init};
 
 
@@ -153,13 +154,13 @@ static void flw_init ()
 	game_score_fields = flw_score_fields;
 	game_score_field_names = flw_score_field_names;
 	game_highlight_colors = flw_highlight_colors;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Four letter words\n"
 		"Single player game\n"
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL("flw");
 	game_doc_rules = 
-		" Four Letter Words rules\n\n"
 		" This is a simple game in which the objective is to change the word at the top to the word at the bottom by changing one letter at a time. All intermediate words must be legal.\n"
 		" To start playing, hit enter. This will make a copy of the top word on the second row. Click on the letter you want to change and change it by typing the new letter. Now hit enter. Repeat until all the rows are filled.";
 }
@@ -230,7 +231,7 @@ int flw_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 	return 0;
 }
 
-int flw_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int flw_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static int rmove[7];
 	int *rp = rmove;

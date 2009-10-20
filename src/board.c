@@ -31,6 +31,8 @@
 #include "ui_common.h"
 #include "ui.h"
 #include "menu.h"
+#include "sound.h"
+#include "../pixmaps/splash.xpm"
 
 //! for showing names of rows and columns
 static GtkWidget *board_rowbox_real = NULL, *board_colbox_real = NULL;
@@ -135,6 +137,7 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 	int parity = (board_wid * board_heit + x + y + 1) % 2;
 	int thepiece;
 	if (opt_quiet) return;
+	if (!cur_pos.board) return;
 	gc = board_area->style->bg_gc[GTK_STATE_NORMAL];
 	gdk_gc_set_clip_mask (gc, NULL);
 	gdk_gc_set_clip_origin (gc, real_x * cell_size, real_y * cell_size);
@@ -256,8 +259,9 @@ void board_refresh_cell_real (int x, int y, int real_x, int real_y)
 //! A wrapper around board_refresh_cell_real() to take care of whether the board is flipped
 void board_refresh_cell (int x, int y)
 {
-	int real_x = (state_board_flipped ? board_wid - 1 - x : x);
-	int real_y = (state_board_flipped ? y : board_heit - 1 - y);
+	int real_x, real_y;
+	real_x = (state_board_flipped ? board_wid - 1 - x : x);
+	real_y = (state_board_flipped ? y : board_heit - 1 - y);
 	board_refresh_cell_real (x, y, real_x, real_y);
 }
 
@@ -268,7 +272,18 @@ gboolean board_redraw (GtkWidget *widget, GdkEventExpose *event)
 {
 	int x, y;
 	int xmin = 0, ymin = 0, xmax = board_wid, ymax = board_heit;
-	if (!opt_game) return TRUE;
+	if (!opt_game)
+	{
+		GdkPixmap *splash_pixmap;
+		splash_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
+				gdk_colormap_get_system (), NULL, NULL, splash_xpm);
+		gdk_draw_pixmap ((GdkDrawable *)board_area->window, 
+				board_area->style->bg_gc[GTK_STATE_NORMAL],
+				(GdkDrawable *)splash_pixmap, 
+				0, 0, 0, 0, -1, -1);
+		gdk_pixmap_unref (splash_pixmap);
+		return TRUE;
+	}
 	if (event)
 	{
 		xmin = event->area.x / cell_size;
@@ -357,7 +372,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 		}
 		else //(if game_getmove_kb)
 			status = game_getmove_kb (&cur_pos, 
-				((GdkEventKey *)event)->keyval, cur_pos.player, &move, &rmove);
+				((GdkEventKey *)event)->keyval, &move, &rmove);
 	}
 	else
 	{
@@ -409,6 +424,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 				: g_strdup_printf ("Illegal move");
 			sb_error (tmpstr, FALSE);
 			g_free (tmpstr);
+			sound_play (SOUND_ILLEGAL_MOVE);
 		}
 	}
 	if (status <= 0)
@@ -418,6 +434,7 @@ gint board_signal_handler (GtkWidget *widget, GdkEventButton *event,
 			menu_start_stop_game (NULL, MENU_START_GAME); 
 		return FALSE;
 	}
+	sound_play (SOUND_USER_MOVE);
 	menu_start_stop_game (NULL, MENU_START_GAME); 
 	ui_make_human_move (move, rmove);
 	return FALSE;
@@ -528,7 +545,6 @@ void board_init ()
 #else
 		gtk_widget_set_size_request (GTK_WIDGET (board_area), 300, 300);
 #endif
-		gdk_draw_rectangle ((GdkDrawable *)board_area->window, def_gc, TRUE, 0, 0, 300, 300);
 		return;
 	}
 	

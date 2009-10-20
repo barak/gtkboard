@@ -27,8 +27,8 @@
 #define INFILTRATE_CELL_SIZE 40
 #define INFILTRATE_NUM_PIECES 2
 
-#define INFILTRATE_BOARD_WID 7
-#define INFILTRATE_BOARD_HEIT 7
+#define INFILTRATE_BOARD_WID 5
+#define INFILTRATE_BOARD_HEIT 5
 
 #define INFILTRATE_EMPTY 0
 #define INFILTRATE_WP 1
@@ -40,13 +40,11 @@ char infiltrate_colors[] =
 	
 int	infiltrate_init_pos[] = 
 {
-	 2 , 0 , 2 , 0 , 2 , 0 , 2 , 
-	 0 , 2 , 0 , 2 , 0 , 2 , 0 , 
-	 0 , 0 , 0 , 0 , 0 , 0 , 0 , 
-	 0 , 0 , 0 , 0 , 0 , 0 , 0 , 
-	 0 , 0 , 0 , 0 , 0 , 0 , 0 , 
-	 0 , 1 , 0 , 1 , 0 , 1 , 0 , 
-	 1 , 0 , 1 , 0 , 1 , 0 , 1 , 
+	 2 , 2 , 2 , 2 , 2 ,
+	 2 , 0 , 0 , 0 , 2 ,
+	 0 , 0 , 0 , 0 , 0 ,
+	 1 , 0 , 0 , 0 , 1 ,
+	 1 , 1 , 1 , 1 , 1 ,
 };
 
 static int infiltrate_max_moves = 200;
@@ -57,13 +55,13 @@ int infiltrate_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int
 //ResultType infiltrate_who_won (byte *, int, char **);
 byte *infiltrate_movegen (Pos *);
 ResultType infiltrate_eval (Pos *, Player, float *);
-char ** infiltrate_get_pixmap (int idx, int color);
+guchar * infiltrate_get_rgbmap (int idx, int color);
 void infiltrate_reset_uistate ();
 	
 Game Infiltrate = 
 	{ INFILTRATE_CELL_SIZE, INFILTRATE_BOARD_WID, INFILTRATE_BOARD_HEIT, 
 	INFILTRATE_NUM_PIECES,
-	infiltrate_colors, infiltrate_init_pos, NULL, "Infiltrate",
+	infiltrate_colors, infiltrate_init_pos, NULL, "Infiltrate", NULL,
 	infiltrate_init};
 
 void infiltrate_init ()
@@ -72,16 +70,15 @@ void infiltrate_init ()
 	game_movegen = infiltrate_movegen;
 	//game_who_won = infiltrate_who_won;
 	game_eval = infiltrate_eval;
-	game_get_pixmap = infiltrate_get_pixmap;
+	game_get_rgbmap = infiltrate_get_rgbmap;
 	game_reset_uistate = infiltrate_reset_uistate;
+	game_doc_about_status = STATUS_PARTIAL;
 	game_doc_about = 
 		"Infiltrate\n"
 		"Two player game\n"
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL ("infiltrate");
 	game_doc_rules = 
-		"Infiltrate rules\n"
-		"\n"
 		"The pieces move diagonally, one square at a time. The objective is to get all your pieces to the starting squares of your opponent's pieces.\n";
 }
 
@@ -180,6 +177,21 @@ int infiltrate_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player t
 	}
 }
 
+guchar *infiltrate_get_rgbmap (int idx, int color)
+{
+	static guchar rgbbuf[3*INFILTRATE_CELL_SIZE*INFILTRATE_CELL_SIZE];
+	int fg, bg, i;
+	char *colors;
+	colors = infiltrate_colors;
+	fg = (idx == INFILTRATE_WP ? 0xffffff : 0x0000ff);
+	if (color == BLACK) colors += 3;
+	for(i=0, bg=0;i<3;i++) 
+	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
+	rgbmap_ball_shadow_gen(INFILTRATE_CELL_SIZE, rgbbuf, fg, bg, 8, 24, 2);
+	return rgbbuf;
+}
+
+/*
 char ** infiltrate_get_pixmap (int idx, int color)
 {
 	int bg;
@@ -192,3 +204,4 @@ char ** infiltrate_get_pixmap (int idx, int color)
 			idx == INFILTRATE_WP ? 0xffffff : 0x0000ff, bg, 
 			8, 24);
 }
+*/

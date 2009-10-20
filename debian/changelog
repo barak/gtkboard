@@ -1,3 +1,9 @@
+gtkboard (0.11pre0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Tue, 27 Jan 2004 15:02:50 -0700
+
 gtkboard (0.10.7-1) unstable; urgency=low
 
   * Initial Release.

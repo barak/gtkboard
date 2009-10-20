@@ -65,7 +65,7 @@ install: build
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/gtkboard
 	mkdir --parents debian/gtkboard/usr/share/doc/gtkboard/html/devel
 	cp -a doc/index.html       debian/gtkboard/usr/share/doc/gtkboard/html/
-	cp -a doc/devel/index.html debian/gtkboard/usr/share/doc/gtkboard/html/devel/
+	cp -a doc/devel/devel/index.html debian/gtkboard/usr/share/doc/gtkboard/html/devel/
 
 
 # Build architecture-independent files here.
