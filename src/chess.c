@@ -117,7 +117,7 @@ void chess_reset_uistate ();
 Game Chess = 
 	{ CHESS_CELL_SIZE, CHESS_BOARD_WID, CHESS_BOARD_HEIT, 
 	CHESS_NUM_PIECES,
-	chess_colors, chess_init_pos, chess_pixmaps, "Chess",
+	chess_colors, chess_init_pos, chess_pixmaps, "Chess", "Chess variants",
 	chess_init};
 
 typedef struct 
@@ -144,6 +144,7 @@ void chess_init ()
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_reset_uistate = chess_reset_uistate;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Chess\n"
 		"Two player game\n"

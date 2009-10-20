@@ -40,14 +40,14 @@ int * fifteen_init_pos = NULL;
 void fifteen_init ();
 
 Game Fifteen = { FIFTEEN_CELL_SIZE, FIFTEEN_BOARD_WID, FIFTEEN_BOARD_HEIT, 
-	FIFTEEN_NUM_PIECES, fifteen_colors,  NULL, NULL, "Fifteen Puzzle", fifteen_init};
+	FIFTEEN_NUM_PIECES, fifteen_colors,  NULL, NULL, "Fifteen Puzzle", "Arcade",
+	fifteen_init};
 
 static void fifteen_set_init_pos (Pos *pos);
 static char ** fifteen_get_pixmap (int idx, int color);
 static guchar * fifteen_get_rgbmap (int idx, int color);
 int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player, byte **, int **);
-static int fifteen_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int fifteen_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 void fifteen_free ();
 void fifteen_init ();
 ResultType fifteen_who_won (Pos *, Player, char **);
@@ -58,6 +58,23 @@ int fifteen_done (byte *board)
 	for (i=0; i<size; i++)
 		if (board[i] != (i+1) && board[i] != 0) return 0;
 	return 1;
+}
+
+//! will the game be completed by moving piece
+int fifteen_nearly_done (byte *board, int piece)
+{
+	int size = board_wid * board_heit, i;
+	int empty = -1, count;
+	for (i=0, count=0; i<size; i++)
+	{
+		if (board[i] == 0) empty = i;
+		else if (board[i] != i+1) count++;
+//		if (board[i] != (i+1) && board[i] != 0) return 0;
+	}
+	if (count != 1) return 0;
+	if (piece != empty+1) return 0;
+	return 1;
+	
 }
 
 // After fifteen_done returns true user must click on the remaining empty square to complete the game
@@ -79,14 +96,8 @@ void fifteen_init ()
 	game_getmove_kb = fifteen_getmove_kb;
 	game_who_won = fifteen_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
-	game_doc_about = 
-		"Fifteen puzzle\n"
-		"Single player game\n"
-		"Status: Fully implemented\n"
-		"URL: "GAME_DEFAULT_URL ("fifteen");
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_rules = 
-		"Fifteen puzzle rules\n"
-		"\n"
 		"The classic fifteen puzzle (Sam Loyd, c.a. 1870). On each turn you move to the empty square one of the adjacent pieces. The objective is to complete the pattern. In the gtkboard implementation the pattern is a pair of concentric circles.\n";
 }
 
@@ -113,7 +124,7 @@ ResultType fifteen_who_won (Pos *pos, Player to_play, char **commp)
 }
 
 
-int fifteen_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int fifteen_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	byte *mp = move;
@@ -160,11 +171,11 @@ void fifteen_set_init_pos (Pos *pos)
 		int tmp;
 		if (!board[i]) continue;
 		do j = random() % (i + 1); while (!board[j]);
+		if (j == i) continue;
 		tmp = board[i]; board[i] = board[j]; board[j] = tmp;
-		swaps += (i%board_wid-j%board_wid+i/board_wid-j/board_wid);
+		swaps += 1;
 	}
-	// total number of swaps must be even
-	// FIXME: this is not working
+	
 	if (swaps % 2 != 0)
 	{
 		int tmp;
@@ -196,7 +207,10 @@ int fifteen_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_p
 			continue;
 		if (pos->board [newy * board_wid + newx] == 0)
 		{
-			*mp++ = x; *mp++ = y; *mp++ = 0;
+			*mp++ = x; *mp++ = y; 
+			if (fifteen_nearly_done (pos->board, pos->board[y * board_wid + x]))
+				*mp++ = y * board_wid + x + 1;
+			else *mp++ = 0;
 			*mp++ = newx; *mp++ = newy; *mp++ = pos->board [y * board_wid + x];
 			*mp++ = -1;
 			*movp = move;

@@ -64,7 +64,7 @@ typedef struct
 }Knights_state;
 
 static int knights_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-static int knights_getmove_kb (Pos *, int, Player, byte ** , int **);
+static int knights_getmove_kb (Pos *, int, byte ** , int **);
 void knights_init ();
 static ResultType knights_who_won (Pos *, Player, char **);
 static ResultType knights_eval (Pos *, Player, float *eval);
@@ -74,7 +74,8 @@ static void *knights_newstate (Pos *, byte *);
 
 Game Knights = { KNIGHTS_CELL_SIZE, KNIGHTS_BOARD_WID, KNIGHTS_BOARD_HEIT, 
 	KNIGHTS_NUM_PIECES, 
-	knights_colors, knights_initpos, knights_pixmaps, "Knights", knights_init};
+	knights_colors, knights_initpos, knights_pixmaps, "Balanced Joust", "Nimlike games",
+	knights_init};
 
 void knights_init ()
 {
@@ -89,11 +90,9 @@ void knights_init ()
 	game_draw_cell_boundaries = TRUE;
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
-	game_doc_about = 
-		"Knights\n"
-		"Two player game\n"
-		"Status: Fully implemented\n"
-		"URL: "GAME_DEFAULT_URL ("knights");
+	game_doc_about_status = STATUS_COMPLETE;
+	game_doc_rules = "Two players take turns in moving their respective knights on a 7x7 chessboard. Squares that have been visited are considered \"eaten\" and cannot be revisited. When the knights are attacking each other, the player to move can pass by hitting Space. If both players pass in the same position, the game is a draw. The goal is to be the last player to make a move.";
+	game_doc_strategy = "As the game progresses, there will eventually appear a single square, which, if eaten, will partition the board into two, such that a knight cannot move from one part to the other. The player who eats this square is often at an advantage because they can choose which part to move to.";
 }
 
 static int incx[] = { -2, -2, -1, -1, 1, 1, 2, 2};
@@ -143,7 +142,7 @@ ResultType knights_who_won (Pos *pos, Player player, char **commp)
 }
 
 
-int knights_getmove_kb (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp)
+int knights_getmove_kb (Pos *pos, int key, byte ** movp, int **rmovp)
 {
 	int i, j, wx = 0, wy = 0, bx = 0, by = 0;
 	static byte move[1] = {-1};
@@ -170,6 +169,8 @@ int knights_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player play
 	static byte move[128];
 	byte *mp = move;
 	if (type != GTKBOARD_BUTTON_RELEASE)
+		return 0;
+	if (pos->board[y * board_wid + x] == (player == WHITE ? KNIGHTS_WN : KNIGHTS_BN))
 		return 0;
 	if (pos->board[y * board_wid + x] != KNIGHTS_EMPTY)
 		return -1;

@@ -438,7 +438,7 @@ static int wordtris_wordcmp (const void *p1, const void *p2)
 
 static void wordtris_init ();
 int wordtris_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int wordtris_getmove_kb (Pos *, int, Player, byte **, int **);
+int wordtris_getmove_kb (Pos *, int, byte **, int **);
 void wordtris_free ();
 ResultType wordtris_who_won (Pos *, Player , char **);
 int wordtris_animate (Pos *pos, byte **movp);
@@ -447,7 +447,7 @@ static void *wordtris_newstate (Pos *, byte *);
 Game Wordtris = { WORDTRIS_CELL_SIZE, WORDTRIS_BOARD_WID, WORDTRIS_BOARD_HEIT, 
 	WORDTRIS_NUM_PIECES, 
 	wordtris_colors, NULL, wordtris_pixmaps, 
-	"Wordtris", 
+	"Wordtris", "Word games", 
 	wordtris_init};
 
 /* This list was produced using
@@ -556,13 +556,13 @@ static void wordtris_init ()
 	game_bg_pixmap = wordtris_getbgxpm ();
 	game_highlight_colors = wordtris_highlight_colors;
 	game_set_init_render = wordtris_set_init_render;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Wordtris\n"
 		"Single player game\n"
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL("wordtris");
 	game_doc_rules = 
-		" Wordtris rules\n\n"
 		"Press Ctrl+G to start the game.\n\n"
 		" Click one of the letters of the word at the bottom and type the letter on one of the falling blocks to change that letter to the new letter. The new word must be legal.\n"
 		"The smiley face acts as a wildcard and can be used as an arbitrary letter.\n"
@@ -668,7 +668,7 @@ gboolean wordtris_findletter (byte *board, int letter, int *x, int *y)
 	return TRUE;
 }
 
-int wordtris_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int wordtris_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static int rmove[10];
 	static byte move[10];

@@ -186,7 +186,7 @@ int dnb_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to_play,
 static void dnb_get_render (Pos *pos, byte *move, int **rmovp);
 
 Game Dnb = { DNB_CELL_SIZE, DNB_BOARD_WID, DNB_BOARD_HEIT, 
-	DNB_NUM_PIECES, dnb_colors, NULL, NULL, "Dots and boxes", dnb_init};
+	DNB_NUM_PIECES, dnb_colors, NULL, NULL, "Dots and Boxes", "Nimlike games", dnb_init};
 
 static int dnb_curx = - 1, dnb_cury = -1;
 
@@ -206,6 +206,7 @@ void dnb_init ()
 	game_getmove = dnb_getmove;
 	game_search = dnb_search;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Dots and boxes\n"
 		"Two player game\n"

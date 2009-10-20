@@ -129,8 +129,33 @@ typedef struct
 	gchar *human_readable;
 }MoveInfo;
 
+//! the completion status of the game
+/** 
+  This is the type of #game_doc_about_status.
+  At the moment it only matters if the status is STATUS_COMPLETE or not 
+ */
+typedef enum
+{
+	//! don't use this
+	STATUS_NONE,
+
+	//! unplayable
+	STATUS_UNPLAYABLE,
+
+	//! partial
+	STATUS_PARTIAL,
+
+	//! complete
+	STATUS_COMPLETE
+} CompletionStatus;
+
 //! values of #game_file_label and #game_rank_label
-typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_TYPE_ALPHA, FILERANK_LABEL_TYPE_ALPHA_CAPS} FILERANK_LABEL_TYPE;
+typedef enum {
+	FILERANK_LABEL_TYPE_NONE, 
+	FILERANK_LABEL_TYPE_NUM,
+	FILERANK_LABEL_TYPE_ALPHA,
+	FILERANK_LABEL_TYPE_ALPHA_CAPS
+} FILERANK_LABEL_TYPE;
 
 #define FILERANK_LABEL_TYPE_MASK 0x3
 
@@ -144,7 +169,9 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
 #define ISINBOARD(x,y) ((x)>=0 && (y)>=0 && (x)<board_wid && (y)< board_heit)
 
 //! Home page for the game <tt>x</tt>
-#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/showgame.pl?game="x
+#define GAME_DEFAULT_URL(x) "http://gtkboard.sourceforge.net/games"
+
+struct _Game;
 
 //! The Game struct gives essential information about the game
 /** Only information that <b>must</b> be provided by every game
@@ -153,7 +180,7 @@ typedef enum {FILERANK_LABEL_TYPE_NONE, FILERANK_LABEL_TYPE_NUM, FILERANK_LABEL_
  set in the function game_init(). The good thing is that you can
  get your game running first and only use new features as you need
  them.*/
-typedef struct
+typedef struct _Game
 {
 	//! The size of each square on the board in pixels
 	int cell_size;
@@ -183,9 +210,15 @@ typedef struct
 	//! An array of pixmaps representing the pieces
 	char *** pixmaps;
 
+	//! Name of the game
 	char *name;
+
+	//! Which group does this game belong to. 
+	/** In the menu, the game will be nested within this group. Use NULL for no group. */
+	char *group;
+	
 	//! A pointer to the function that will be called when initializing the game
-	void (*game_init) ();
+	void (*game_init) (struct _Game *);
 }Game;
 
 //! How to render a square
@@ -211,6 +244,9 @@ typedef enum
 //! A struct describing a position in a game.
 typedef struct
 {
+	//! Which game is going on
+	Game *game;
+	
 	//! An array representing the pieces of each square.
 	/** The size of the array is #board_wid * #board_heit.
 	  For each pair (x, y), board[y * board_wid + x] is a value between 0
@@ -228,8 +264,6 @@ typedef struct
 	int *render;
 
 	//! Which player has the move. 
-	/** Currently this is unused, and a separate argument gets passed to every
-	  function along with the Pos. This will change soon. */
 	Player player;
 
 	//! State information required to completely describe the position
@@ -241,12 +275,15 @@ typedef struct
 	  game_newstate().*/
 	void *state;
 
+	//! Client-side state information () (currently unused)
+	void *ui_state;
+
 	//! The number of moves that have been made to reach the current position.
 	/** In two-player games, it represents the number of ply.*/
 	int num_moves;
 
-	//! Client-side state information () (currently unused)
-	void *ui_state;
+	//! (engine only) If this position has been generated during search, how deep from the root node is it.
+	int search_depth;
 }Pos;
 
 //! If you have implemented more than one evaluation function then you put them in an array of structs of type HeurTab. Its unlikely that you'll need to know about this. See #game_htab for more details.
@@ -265,6 +302,15 @@ typedef struct
 	char *args;
 }HeurTab;
 
+typedef struct
+{
+	//! The name to show in the Levels menu
+	char *name;
+
+	//! Pointer to the Game (Each level is treated as a separate Game)
+	Game *game;
+}GameLevel;
+
 //! A pointer to the game's evaluation function. 
 /** Only for two player games. It <b>must</b> be implemented if you want
   the computer to be able to play the game. */
@@ -280,10 +326,10 @@ extern ResultType (*game_eval) (Pos *pos, Player player, float *eval);
  premature optimization is the root of all evil, it is highly recommended
  that you get your game working and stable before you think of implementing
  this function :)*/
-extern ResultType (*game_eval_incr) (Pos *pos, Player player, byte *move, float *eval);
+extern ResultType (*game_eval_incr) (Pos *pos, byte *move, float *eval);
 
 //! Should we use the incr eval function
-extern gboolean (*game_use_incr_eval) (Pos *pos, Player player);
+extern gboolean (*game_use_incr_eval) (Pos *pos);
 
 //! A function to search and return the best move - for games for which minimax is not appropriate
 extern void (*game_search) (Pos *pos, byte **move);
@@ -327,7 +373,7 @@ extern InputType (*game_event_handler) (Pos *pos, GtkboardEvent *event, MoveInfo
 	@param movp a pointer to the move. The game must allocate memory for this (statically).
 	@param rmovp pointer to rendering change
 */
-extern int (*game_getmove_kb) (Pos *pos, int key, Player to_play, byte ** movp, int **rmovp);
+extern int (*game_getmove_kb) (Pos *pos, int key, byte ** movp, int **rmovp);
 
 //! Checks if the game is over, and if so, who has won
 /** This function is called after every move, both for single player and two player games. 
@@ -370,6 +416,7 @@ extern void (*game_free) ();
  clicked the back button, for example. Then the game must forget the saved clicks.*/
 extern void (*game_reset_uistate) ();
 
+//! Globals for convenience.
 extern int board_wid, board_heit, cell_size, num_pieces;
 
 //! Are we a single player game or a two-player game? DEFAULT: FALSE.
@@ -414,6 +461,8 @@ extern gboolean game_file_label, game_rank_label;
 /** For stateful games, you need to specify the size of the state structure (as defined by the sizeof operator.) */
 extern int game_state_size;
 
+extern GameLevel *game_levels;
+
 //! Array of structs representing evaluation functions.
 extern HeurTab *game_htab;
 
@@ -423,6 +472,11 @@ extern gchar *game_doc_about;
 extern gchar *game_doc_rules;
 //! The text to be shown in the Strategy dialog for the game (Help->GameName->Strategy).
 extern gchar *game_doc_strategy;
+//! The text to be shown in the History dialog for the game (Help->GameName->History).
+extern gchar *game_doc_history;
+
+//! Completion status of the game
+extern CompletionStatus game_doc_about_status;
 
 //! User visible labels for white and black
 extern gchar *game_white_string, *game_black_string;

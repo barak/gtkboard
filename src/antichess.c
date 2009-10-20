@@ -30,6 +30,7 @@
 #define ANTICHESS_BOARD_WID 8
 #define ANTICHESS_BOARD_HEIT 8
 
+#define ANTICHESS_EMPTY 0
 #define ANTICHESS_WK 1
 #define ANTICHESS_WQ 2
 #define ANTICHESS_WR 3
@@ -97,7 +98,8 @@ ResultType antichess_eval_incr (Pos *, Player, byte *, float *);
 Game Antichess = 
 	{ ANTICHESS_CELL_SIZE, ANTICHESS_BOARD_WID, ANTICHESS_BOARD_HEIT, 
 	ANTICHESS_NUM_PIECES,
-	antichess_colors, antichess_init_pos, antichess_pixmaps, "Antichess",
+	antichess_colors, antichess_init_pos, antichess_pixmaps, "Antichess", 
+	"Chess variants",
 	antichess_init};
 
 Game * plugin_game = &Antichess;
@@ -113,14 +115,13 @@ void antichess_init ()
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_highlight_colors = antichess_highlight_colors;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Antichess\n"
 		"Two player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("antichess");
 	game_doc_rules = 
-		"Antichess rules\n"
-		"\n"
 		"The objective of the game is to force your opponent to capture all your pieces or to stalemate you. What makes this possible is that if you can capture, then you MUST.\n"
 		"\n"
 		"The pieces move as in chess. However:\n"
@@ -650,24 +651,63 @@ byte *antichess_movegen (Pos *pos)
 	return movlist;
 }
 
-ResultType antichess_eval (Pos * pos, Player player, float *eval)
-	// TODO: detect end of game by stalemate
+// True if this square is a pawn and it can move
+static gboolean eval_pawn_has_move (byte *board, int i, int j)
 {
-	int wsum = 0, bsum = 0, i;
-	for (i=0; i < board_wid * board_heit; i++)
-		if (ANTICHESS_ISWHITE (pos->board[i]))
+	int val = board [j * board_wid + i];
+	int x, y;
+	if (val == ANTICHESS_WP) y = j+1;
+	else if (val == ANTICHESS_BP) y = j-1;
+	else return FALSE;
+
+	if (board [y * board_wid + i] == ANTICHESS_EMPTY) return TRUE;
+	
+	for (x=i-1; x<=i+1; x+=2)
+	{
+		if (x < 0 || x >= board_wid) continue;
+		if (val == ANTICHESS_WP && ANTICHESS_ISBLACK (board [y * board_wid + x]))
+			return TRUE;
+		if (val == ANTICHESS_BP && ANTICHESS_ISWHITE (board [y * board_wid + x]))
+			return TRUE;
+	}
+
+	return FALSE;	
+}
+
+ResultType antichess_eval (Pos * pos, Player player, float *eval)
+{
+	int wsum = 0, bsum = 0, i, j;
+	gboolean wfound = FALSE, bfound = FALSE;
+	for (i=0; i < board_wid; i++)
+	for (j=0; j < board_heit; j++)
+		if (ANTICHESS_ISWHITE (pos->board[j * board_wid + i]))
+		{
 			wsum++;
-		else if (ANTICHESS_ISBLACK (pos->board[i]))
+			if (!wfound && eval_pawn_has_move (pos->board, i, j))
+				wfound = TRUE;
+				
+		}
+		else if (ANTICHESS_ISBLACK (pos->board[j * board_wid + i]))
+		{
 			bsum++;
-	if (wsum == 0)
+			if (!bfound && eval_pawn_has_move (pos->board, i, j))
+				bfound = TRUE;
+		}
+	
+	if (wsum == 0 || (!wfound && bfound && player == WHITE))
 	{
 		*eval = GAME_EVAL_INFTY;
 		return RESULT_WHITE;
 	}
-	if (bsum == 0)
+	if (bsum == 0 || (!bfound && wfound && player == BLACK))
 	{
 		*eval = -GAME_EVAL_INFTY;
 		return RESULT_BLACK;
+	}
+	if (!wfound && !bfound)
+	{
+		*eval = 0;
+		return RESULT_TIE;
 	}
 	*eval = bsum - wsum;
 	return RESULT_NOTYET;

@@ -56,12 +56,12 @@ SCORE_FIELD hypermaze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCOR
 char *hypermaze_score_field_names[] = {"User", "Time", "Date", NULL};
 
 Game Hypermaze = { HYPERMAZE_CELL_SIZE, HYPERMAZE_BOARD_WID, HYPERMAZE_BOARD_HEIT, 
-	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", hypermaze_init};
+	HYPERMAZE_NUM_PIECES, hypermaze_colors,  NULL, NULL, "Hypermaze", "Maze", hypermaze_init};
 
 
 static void hypermaze_set_init_pos (Pos *pos);
 static char ** hypermaze_get_pixmap (int idx, int color);
-static int hypermaze_getmove_kb (Pos *, int, Player, byte **, int **);
+static int hypermaze_getmove_kb (Pos *, int, byte **, int **);
 int hypermaze_getmove (Pos *pos, int, int, GtkboardEventType, Player, byte **, int **);
 ResultType hypermaze_who_won (Pos *, Player, char **);
 
@@ -78,14 +78,13 @@ void hypermaze_init ()
 	game_scorecmp = game_scorecmp_def_time;
 	game_score_fields = hypermaze_score_fields;
 	game_score_field_names = hypermaze_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"HyperMaze\n"
 		"Single player game\n"
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("hypermaze");
 	game_doc_rules = 
-		"Hypermaze rules\n"
-		"\n"
 		"Your goal is to get from the lower left corner to the upper right. But you can travel only along the arrows. Beware - the arrows are one-way! You can easily get trapped in a blind end from which there is no escape."
 		"\n"
 		"To move with the mouse, click on the square to which you want to move. To move with the keyboard, use the NumPad keys.\n";
@@ -160,7 +159,7 @@ int hypermaze_getmove (Pos *pos, int x, int y, GtkboardEventType type, Player to
 	
 }
 
-int hypermaze_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int hypermaze_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	//static byte move[10];
 	int curx = -1, cury = -1;

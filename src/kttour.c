@@ -45,7 +45,7 @@ void kttour_init ();
 
 Game Kttour = { KTTOUR_CELL_SIZE, KTTOUR_BOARD_WID, KTTOUR_BOARD_HEIT, 
 	KTTOUR_NUM_PIECES, 
-	kttour_colors, NULL, /*kttour_pixmaps,*/ NULL, "Knight's tour", 
+	kttour_colors, NULL, /*kttour_pixmaps,*/ NULL, "Knight's Tour", NULL,
 	kttour_init};
 
 SCORE_FIELD kttour_score_fields[] = {SCORE_FIELD_RANK, SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
@@ -66,13 +66,13 @@ void kttour_init ()
 	game_score_field_names = kttour_score_field_names;
 	game_draw_cell_boundaries = TRUE;
 	game_allow_undo = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Kttour\n"
 		"Single player game\n"
 		"Status: Partially implemented\n"
 		"URL: "GAME_DEFAULT_URL("kttour");
 	game_doc_rules = 
-		"Kttour rules\n\n"
 		"  Complete the knight's tour of the chessboard.\n"
 		"\n"
 		"  In the initial position click on any square to start the tour on that square. "

@@ -23,6 +23,8 @@
   \brief function declarations common to all ui modules
   */
 
+#include "config.h"
+
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>

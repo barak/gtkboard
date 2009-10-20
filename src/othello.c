@@ -28,12 +28,9 @@
 #define OTHELLO_CELL_SIZE 55
 #define OTHELLO_NUM_PIECES 2
 
-#define OTHELLO_BOARD_WID 8
-#define OTHELLO_BOARD_HEIT 8
-
 char othello_colors[6] = {200, 200, 200, 140, 140, 140};
 
-int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] = 
+int othello_init_pos [8*8] = 
 {
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
@@ -45,28 +42,42 @@ int othello_init_pos [OTHELLO_BOARD_WID*OTHELLO_BOARD_HEIT] =
 	0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  ,
 };
 
+int othello6x6_init_pos [6*6] = 
+{
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 2 , 1 , 0 , 0  ,
+	0 , 0 , 1 , 2 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
+	0 , 0 , 0 , 0 , 0 , 0  ,
+};
+
 #define OTHELLO_WP 1
 #define OTHELLO_BP 2
 #define OTHELLO_EMPTY 0
 
 
 int othello_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
-int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp);
+int othello_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp);
 void othello_init ();
 ResultType othello_who_won (Pos *, Player, char **);
 ResultType othello_eval (Pos *, Player, float *);
-ResultType othello_eval_incr (Pos *, Player, byte *, float *);
+ResultType othello_eval_incr (Pos *, byte *, float *);
 byte * othello_movegen (Pos *);
 char ** othello_get_pixmap (int, int);
 guchar *othello_get_rgbmap (int, int);
-gboolean othello_use_incr_eval (Pos *pos, Player player);
+gboolean othello_use_incr_eval (Pos *pos);
 
-Game Othello = { OTHELLO_CELL_SIZE, OTHELLO_BOARD_WID, OTHELLO_BOARD_HEIT, 
+Game Othello = { OTHELLO_CELL_SIZE, 8, 8,
 	OTHELLO_NUM_PIECES, 
-	othello_colors, othello_init_pos, NULL, "Othello", othello_init};
+	othello_colors, othello_init_pos, NULL, "Othello", "Othello", othello_init};
+
+Game Othello6x6 = { OTHELLO_CELL_SIZE, 6, 6,
+	OTHELLO_NUM_PIECES, 
+	othello_colors, othello6x6_init_pos, NULL, "Othello 6x6", "Othello", othello_init};
 
 
-void othello_init ()
+void othello_init (Game *game)
 {
 	game_getmove = othello_getmove;
 	game_getmove_kb = othello_getmove_kb;
@@ -80,14 +91,21 @@ void othello_init ()
 	game_black_string = "Blue";
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
-	game_doc_about = 
-		"Othello\n"
-		"Two player game\n"
-		"Status: Fully implemented (but AI needs improvement)\n"
-		"URL: "GAME_DEFAULT_URL ("othello");
+	
+	game_doc_about_status = STATUS_COMPLETE;
+	if (game == &Othello)
+		game_doc_about =
+			"Othello\n"
+			"Two player game\n"
+			"Status: Fully implemented\n"
+			"URL: "GAME_DEFAULT_URL ("othello");
+	else
+		game_doc_about =
+			"Othello 6x6\n"
+			"Two player game\n"
+			"Status: Fully implemented\n"
+			"URL: "GAME_DEFAULT_URL ("othello6x6");
 	game_doc_rules = 
-		"Othello rules\n"
-		"\n"
 		"Two players take turns in placing balls of either color. The objective is to get as many balls of your color as possible.\n"
 		"\n"
 		"When you place a ball in such a way that two of your balls sandwich one or more of the opponent's balls along a line (horizontal, vertical, or diagonal), then the sandwiched balls change to your color. You must move in such a way that at least one switch happens.\n"
@@ -95,8 +113,6 @@ void othello_init ()
 		"If you don't have a move, you pass by hitting space or clicking on an empty square."
 		;
 	game_doc_strategy = 
-		"Othello tips\n"
-		"\n"
 		"The number of balls of either color at a given time is, paradoxically, a _very_ poor indicator of who has the advantage. This is because balls can flip color en masse and wildly, especially during the last few moves.\n"
 		"\n"
 		"Indeed, in the beginning you should try to minimize the number of balls you have. The key is mobility. You must strive to maximize your number of legal moves so that you can try to force your opponent into making bad moves.\n"
@@ -127,7 +143,7 @@ guchar *othello_get_rgbmap (int idx, int color)
 	if (color == BLACK) colors += 3;
 	for(i=0, bg=0;i<3;i++) 
 	{ int col = colors[i]; if (col<0) col += 256; bg += col * (1 << (16-8*i));}
-	rgbmap_ball_shadow_gen(55, rgbbuf, fg, bg, 17.0, 30.0, 3);
+	rgbmap_ball_shadow_gen(OTHELLO_CELL_SIZE, rgbbuf, fg, bg, 17.0, 30.0, 3);
 	return rgbbuf;
 }
 
@@ -171,11 +187,11 @@ static gboolean hasmove (Pos *pos, Player player)
 	return found;
 }
 
-int othello_getmove_kb (Pos *pos, int key, Player player, byte **movp, int **rmovp)
+int othello_getmove_kb (Pos *pos, int key,  byte **movp, int **rmovp)
 {
 	static byte move[1];
 	if (key != GDK_space) return -1;
-	if (hasmove (pos, player)) return -1;
+	if (hasmove (pos, pos->player)) return -1;
 	move[0] = -1;
 	*movp = move;
 	return 1;	
@@ -398,9 +414,9 @@ static float othello_eval_safe (Pos *pos)
 {
 	int i, x, y, sum=0;
 	if (pos->board [0 * board_wid + 0] == OTHELLO_EMPTY &&
-		pos->board [0 * board_wid + 7] == OTHELLO_EMPTY &&
-		pos->board [7 * board_wid + 0] == OTHELLO_EMPTY &&
-		pos->board [7 * board_wid + 7] == OTHELLO_EMPTY )
+		pos->board [0 * board_wid + board_wid - 1] == OTHELLO_EMPTY &&
+		pos->board [(board_heit - 1) * board_wid + 0] == OTHELLO_EMPTY &&
+		pos->board [(board_heit - 1) * board_wid + board_wid - 1] == OTHELLO_EMPTY )
 		return 0;
 	safe_cached = (byte *) malloc (board_wid * board_heit);
 	assert (safe_cached);
@@ -459,12 +475,20 @@ static float othello_eval_material (Pos *pos)
 
 static float othello_eval_weights (Pos *pos)
 {
-	static int weights [4][4] = 
+	static int weights8 [4][4] = 
 	{
 		{ 500, -240, 85, 69 },
 		{ 0  , -130, 49, 23 },
 		{ 0  ,    0,  1,  9 },
 		{ 0  ,    0,  0, 32 },
+	};
+	
+	// FIXME: find a decent weight set
+	static int weights6 [3][3] = 
+	{
+		{ 500, -200, 80},
+		{ 0  , -300, 50},
+		{ 0  ,    0, 20},
 	};
 
 	int i, j, wtsum = 0;
@@ -476,10 +500,22 @@ static float othello_eval_weights (Pos *pos)
 		int x = i, y = j;
 		if (val == OTHELLO_EMPTY)
 			continue;
-		if (x > 3) x = 7-x;
-		if (y > 3) y = 7-y;
+
+		if (pos->game == &Othello)
+		{
+			if (x > 3) x = 7-x;
+			if (y > 3) y = 7-y;
+		}
+		else //if (pos->game == Othello6x6)
+		{
+			if (x > 2) x = 5-x;
+			if (y > 2) y = 5-y;
+		}
+		
 		if (x > y)  {int tmp = y; y = x; x = tmp;}
-		wtsum += weights [x][y] * (val == OTHELLO_WP ? 1 : -1);
+		
+		wtsum += (pos->game == &Othello ? weights8 [x][y] : weights6[x][y])  
+			* (val == OTHELLO_WP ? 1 : -1);
 	}
 	return wtsum;	
 }
@@ -488,9 +524,8 @@ ResultType othello_eval (Pos *pos, Player player, float *eval)
 {
 	int i;
 	gboolean found;
-	assert (board_wid == 8 && board_heit == 8);
 
-	if (pos->num_moves >= 64)
+	if (pos->num_moves >= board_wid * board_heit)
 	{
 		for (i=0, found=FALSE; i<board_wid*board_heit; i++)
 			if (pos->board [i] == OTHELLO_EMPTY) {found = TRUE; break;}
@@ -512,7 +547,7 @@ ResultType othello_eval (Pos *pos, Player player, float *eval)
 	return RESULT_NOTYET;
 }
 
-ResultType othello_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+ResultType othello_eval_incr (Pos *pos, byte *move, float *eval)
 {
 	int i;
 	for (i=0; move[3*i] != -1; i++)
@@ -520,11 +555,12 @@ ResultType othello_eval_incr (Pos *pos, Player player, byte *move, float *eval)
 	if (i == 0) 
 		*eval = 0;
 	else
-		*eval = (player == WHITE ? (2 * i - 1) : - (2 * i - 1));
+		*eval = (pos->player == WHITE ? (2 * i - 1) : - (2 * i - 1));
 	return RESULT_NOTYET;
 }
 
-gboolean othello_use_incr_eval (Pos *pos, Player player)
+gboolean othello_use_incr_eval (Pos *pos)
 {
+	// TODO: use different threshold for Othello6x6
 	return pos->num_moves > 50 ? TRUE : FALSE;
 }

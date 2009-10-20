@@ -67,7 +67,7 @@
 static char cpento_colors[6];
 static int cpento_initpos[CPENTO_BOARD_WID*CPENTO_BOARD_HEIT];
 static char **cpento_pixmaps[CPENTO_NUM_PIECES];
-static void cpento_init(void);
+static void cpento_init();
 
 static int cpento_getmove(Pos *, int, int,
                    GtkboardEventType,
@@ -80,6 +80,7 @@ Game CapturePento = {
     cpento_colors, cpento_initpos,
     cpento_pixmaps,
     "Capture Pentominoes",
+	"Nimlike games",
     cpento_init
 };
 
@@ -179,13 +180,14 @@ static char **cpento_pixmaps[CPENTO_NUM_PIECES] =
 };
 
 
-static void cpento_init(void)
+static void cpento_init()
 {
     game_single_player = 1;
     game_getmove = cpento_getmove;
     game_who_won = NULL;
     game_get_pixmap = NULL;
     game_scorecmp = game_scorecmp_def_iscore;
+	game_doc_about_status = STATUS_UNPLAYABLE;
     game_doc_about =
     "Capture Pentominoes\n"
     "Two player game\n"
@@ -193,8 +195,6 @@ static void cpento_init(void)
     "URL: " GAME_DEFAULT_URL("cpento")
     ;
     game_doc_rules =
-    "Capture Pentominoes rules\n"
-    "\n"
     "The objective is to be the last player able to move.\n"
     "\n"
     "Each move consists of selecting a piece from the pool"

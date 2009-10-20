@@ -41,6 +41,8 @@ static int maze_maze[MAZE_BOARD_WID][MAZE_BOARD_HEIT] = {{0}};
 #define MAZE_WALL 2
 #define MAZE_CUR 1
 
+#define CORNER_SIZE 3
+
 void maze_init ();
 
 SCORE_FIELD maze_score_fields[] = {SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
@@ -48,13 +50,12 @@ char *maze_score_field_names[] = {"User", "Time", "Date", NULL};
 
 
 Game Maze = { MAZE_CELL_SIZE, MAZE_BOARD_WID, MAZE_BOARD_HEIT, 
-	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", maze_init};
+	MAZE_NUM_PIECES, maze_colors,  NULL, NULL, "Maze", "Maze", maze_init};
 
 
 static void maze_set_init_pos (Pos *pos);
 static char ** maze_get_pixmap (int idx, int color);
-static int maze_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int maze_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 ResultType maze_who_won (Pos *, Player, char **);
 
 void maze_init ()
@@ -68,14 +69,13 @@ void maze_init ()
 	game_scorecmp = game_scorecmp_def_time;
 	game_score_fields = maze_score_fields;
 	game_score_field_names = maze_score_field_names;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Maze\n"
 		"Single player game\n"
 		"Status: Partially implemented (playable)\n"
 		"URL: "GAME_DEFAULT_URL ("maze");
 	game_doc_rules = 
-		"Maze rules\n"
-		"\n"
 		"Your objective is to lead the man (or mouse or whatever) trapped in the maze from the lower left corner to the upper right.\n"
 		"\n"
 		"The maze is randomly generated, and is currently not very good at generating particularly hard-to-solve mazes.\n";
@@ -85,7 +85,13 @@ void maze_init ()
 ResultType maze_who_won (Pos *pos, Player to_play, char **commp)
 {
 	static char comment[32];
-	gboolean over = (pos->board [board_wid * board_heit - 1] == MAZE_CUR);
+	int i, j;
+	gboolean over = FALSE;
+	for (i=0; i<CORNER_SIZE; i++)
+	for (j=0; j<CORNER_SIZE; j++)
+		if (pos->board [(board_heit - 1 - j) * board_wid + (board_wid - 1 - i)] == MAZE_CUR)
+			over = TRUE;
+//	gboolean over = (pos->board [board_wid * board_heit - 1] == MAZE_CUR);
 	snprintf (comment, 32, "%sMoves: %d", 
 			over ? "You won. " : "",
 			pos->num_moves);
@@ -103,7 +109,7 @@ void maze_get_cur_pos (byte *pos, int *x, int *y)
 		}
 }
 
-int maze_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int maze_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	int curx = -1, cury = -1;
@@ -233,11 +239,11 @@ void maze_set_init_pos (Pos *pos)
 		for (i=0; i<board_wid; i++)
 		for (j=0; j<board_heit; j++)
 			pos->board [j * board_wid + i] = maze_maze[i][j];
-		for (i=0; i<3; i++)
-		for (j=0; j<3; j++)
+		for (i=0; i<CORNER_SIZE; i++)
+		for (j=0; j<CORNER_SIZE; j++)
 			pos->board [j * board_wid + i] = 0;
-		for (i=board_wid-3; i<board_wid; i++)
-		for (j=board_heit-3; j<board_heit; j++)
+		for (i=board_wid-CORNER_SIZE; i<board_wid; i++)
+		for (j=board_heit-CORNER_SIZE; j<board_heit; j++)
 			pos->board [j * board_wid + i] = 0;
 		recursive_pathgen (pos->board, 0, 0, -1);
 	}

@@ -26,6 +26,11 @@
 
 #include "prefs.h"
 #include "ui_common.h"
+#include "sound.h"
+
+#ifdef HAVE_GNOME
+#include <libgnome/libgnome.h>
+#endif
 
 static Score scores[MAX_HIGHSCORES];
 static int num_highscores = 0;
@@ -35,6 +40,26 @@ SCORE_FIELD prefs_score_fields_def[] =
 {SCORE_FIELD_USER, SCORE_FIELD_SCORE, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
 
 gchar* prefs_score_field_names_def[] = {"User", "Score", "Time", "Date", NULL};
+
+ConfigVar prefs_config_vars[] = 
+{
+	{ "sound_dir", "Directory to load sounds from", NULL, NULL, NULL, NULL },
+	{ "enable_sound", "Enable sound effects", NULL, "true", NULL, sound_enable_pref_cb },
+	{ "recent_game_1", "Recent game 1", NULL, NULL, NULL, NULL },
+	{ "recent_game_2", "Recent game 2", NULL, NULL, NULL, NULL },
+	{ "recent_game_3", "Recent game 3", NULL, NULL, NULL, NULL },
+	{ NULL} 
+};
+
+
+gboolean prefs_get_bool_val (gchar *value)
+{
+	if (!value) return FALSE;
+	if (!strcasecmp (value, "false")) return FALSE;
+	if (!strcasecmp (value, "no")) return FALSE;
+	if (!strcasecmp (value, "0")) return FALSE;
+	return TRUE;
+}
 
 static void prefs_strip_special_chars (gchar *str)
 	// $ is the field separator in our scores file
@@ -96,6 +121,7 @@ gboolean prefs_load_scores (gchar *name)
 	if (!in) 
 	{ 
 		g_free (scorefile);		
+		num_highscores = 0;
 		return FALSE;
 	}
 	for (i=0; !feof (in) && i < MAX_HIGHSCORES;)
@@ -262,6 +288,7 @@ gboolean prefs_save_scores (gchar *name)
 		sb_error (tempstr = g_strdup_printf 
 				("couldn't write to %s", scorefile),
 				FALSE);
+		fprintf (stderr, "%s\n", tempstr);
 		g_free (tempstr);
 		g_free (scorefile);		
 		return FALSE;
@@ -354,8 +381,8 @@ void prefs_show_username_dialog ()
 	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
 			GTK_DIALOG_MODAL, NULL);
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
-	g_signal_connect_swapped (GTK_OBJECT (entry),
-			"activate", G_CALLBACK (prefs_username_cb), GTK_OBJECT (dialog));
+//	g_signal_connect_swapped (GTK_OBJECT (entry),
+//			"activate", G_CALLBACK (prefs_username_cb), GTK_OBJECT (dialog));
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_OK, GTK_RESPONSE_NONE);
 #endif
 
@@ -373,31 +400,32 @@ void prefs_show_username_dialog ()
 #endif
 }
 
-void prefs_add_highscore (gchar *score, int temps)
+gboolean prefs_add_highscore (gchar *score, int temps)
 	// the argument score is the string returned by game_who_won. We expect
 	// it to have a substring which is an integer
 {
 	int i, j;
 	char *realscore = strpbrk (score, "0123456789");
 	if (!realscore) realscore = "";
-	if (!game_scorecmp) return;
+	if (!game_scorecmp) return FALSE;
 	for (i=0; i<num_highscores; i++)
 		if (game_scorecmp (realscore, temps, 
 					scores[i].score, scores[i].time) > 0)
 			break;
-	if (i == MAX_HIGHSCORES) return;
+	if (i == MAX_HIGHSCORES) return FALSE;
 	highscore_index = i;
 	strncpy (highscore_score, realscore, 31);
 	prefs_strip_special_chars (highscore_score);
 	highscore_temps = temps;
 	highscore_date = time (0);
 	prefs_show_username_dialog ();
+	return TRUE;
 }
 
 void prefs_zap_highscores ()
 {
 	gchar *tempstr;
-	GtkWidget *dialog, *label;
+	GtkWidget *dialog;
 	gint result;
 	if (!gamename) return;
 #if GTK_MAJOR_VERSION == 1
@@ -405,24 +433,133 @@ void prefs_zap_highscores ()
 			tempstr = g_strdup_printf ("Zapped %s highscores", gamename));
 	g_free (tempstr);
 #else
-	dialog = gtk_dialog_new_with_buttons ("Zap highscores?", 
-			GTK_WINDOW (main_window), GTK_DIALOG_MODAL, 
-			GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
-			GTK_STOCK_NO, GTK_RESPONSE_REJECT,
-			NULL);
-	tempstr = g_strdup_printf (
-			"<b>Warning</b>: This will clear your %s highscores.\n"
-	   "Your highscores in other games will be unaffected.\nProceed?", gamename);
-	label = gtk_label_new (NULL);
-	gtk_label_set_markup (GTK_LABEL (label), tempstr);
-	g_free (tempstr);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
-	gtk_window_set_default_size (GTK_WINDOW (dialog), 300, 100);
+	dialog = gtk_message_dialog_new (
+			GTK_WINDOW (main_window),
+			GTK_DIALOG_MODAL, 
+			GTK_MESSAGE_WARNING,
+			GTK_BUTTONS_OK_CANCEL,
+			"This will clear your %s highscores.\n"
+		   "Your highscores in other games will be unaffected.\nProceed?", gamename);
 	gtk_widget_show_all (dialog);
 	result = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
-	if (result == GTK_RESPONSE_REJECT)
+	if (result != GTK_RESPONSE_OK)
 		return;
 #endif
 	num_highscores = 0;
+}
+
+gchar *prefs_get_config_val (gchar *key)
+{
+	ConfigVar *entry = prefs_config_vars;
+	while (entry->key)
+	{
+		if (strcasecmp (entry->key, key) == 0)
+		{
+			if (entry->cur_val) return entry->cur_val;
+			if (entry->def_val) return entry->def_val;
+			return NULL;
+		}
+		entry++;
+	}
+	fprintf (stderr, "warning: prefs_get_config_val (): no such key: %s", key);
+	return NULL;
+}
+
+void prefs_set_config_val_real (char *key, char *value, gboolean callback)
+{
+	ConfigVar *entry = prefs_config_vars;
+	while (entry->key)
+	{
+		if (strcasecmp (entry->key, key) == 0)
+		{
+			// NOTE: here the old value should not be freed because it is static
+			entry->cur_val = g_strdup (value);
+			if (callback && entry->callback)
+				entry->callback (key, value);
+			return;
+		}
+		entry++;
+	}
+	fprintf (stderr, "Warning: invalid key %s in config file\n", key);
+}
+
+void prefs_set_config_val (char *key, char *value)
+{
+	prefs_set_config_val_real (key, value, FALSE);
+}
+
+void prefs_write_config_file ()
+{
+	ConfigVar *entry = prefs_config_vars;
+	char *prefs_file;
+	FILE *out;
+	prefs_file = g_strdup_printf ("%s/%s", getenv ("HOME"), ".gtkboard/gtkboardrc");
+	out = fopen (prefs_file, "w");
+	if (!out)
+	{
+		fprintf (stderr, "Couldn't open config file %s for writing: ", prefs_file);
+		perror (NULL);
+		g_free (prefs_file);
+		return;
+	}
+	g_free (prefs_file);
+	
+	while (entry->key)
+	{
+		if (entry->description)
+			fprintf (out, "#%s\n", entry->description);
+		if (entry->comment)
+			fprintf (out, "#\n#%s\n", entry->comment);
+		fprintf (out, "%s = %s\n", entry->key, entry->cur_val ? entry->cur_val : 
+				(entry->def_val ? entry->def_val : ""));
+		entry++;
+	}
+	
+	fclose (out);
+}
+
+void prefs_read_config_file ()
+{
+	char linebuf[1024];
+	char *prefs_file;
+	FILE *in;
+	int line_num = 0;
+	if (!prefs_first_time ())
+		return;
+	prefs_file = g_strdup_printf ("%s/%s", getenv ("HOME"), ".gtkboard/gtkboardrc");
+	in = fopen (prefs_file, "r");
+	if (!in)
+	{
+		fprintf (stderr, "Couldn't open config file %s for reading: ", prefs_file);
+		perror (NULL);
+		g_free (prefs_file);
+		return;
+	}
+	g_free (prefs_file);
+	
+	while (!feof (in))
+	{
+		gchar **tokens;
+		line_num ++;
+		if (fgets (linebuf, 1024, in) == NULL)
+			continue;
+		g_strstrip (linebuf);
+		if (linebuf[0] == '#' || linebuf[0] == '\0')
+			continue;
+		tokens = g_strsplit (linebuf, "=", 2);
+		if (tokens[0] == NULL || tokens[1] == NULL)
+		{
+			fprintf (stderr, "Warning: line %d of config file (%s) not of the form \"key = value\"\n",
+				   line_num, linebuf);
+			g_strfreev (tokens);
+			continue;
+		}
+		g_strstrip (tokens[0]);
+		g_strstrip (tokens[1]);
+		prefs_set_config_val_real (tokens[0], tokens[1][0] ? tokens[1] : NULL, TRUE);
+		g_strfreev (tokens);
+	}
+	
+	fclose (in);
 }

@@ -131,13 +131,12 @@ void pacman_init ();
 
 Game Pacman = { PACMAN_CELL_SIZE, PACMAN_BOARD_WID, PACMAN_BOARD_HEIT, 
 	PACMAN_NUM_PIECES,
-	pacman_colors,  NULL, NULL, "Pacman", pacman_init};
+	pacman_colors,  NULL, NULL, "Pacman", "Arcade", pacman_init};
 
 
 static void pacman_set_init_pos (Pos *pos);
 static char ** pacman_get_pixmap (int idx, int color);
-static int pacman_getmove_kb (Pos *cur_pos, int key, Player glob_to_play, 
-		byte **move, int **);
+static int pacman_getmove_kb (Pos *cur_pos, int key, byte **move, int **);
 static int pacman_animate (Pos *pos, byte **movp);
 
 
@@ -149,6 +148,7 @@ void pacman_init ()
 	game_getmove_kb = pacman_getmove_kb;
 	game_animation_time = 100;
 	game_animate = pacman_animate;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Pacman\n"
 		"Single player game\n"
@@ -275,7 +275,7 @@ int pacman_animate (Pos *pos, byte **movp)
 }
 
 // TODO
-int pacman_getmove_kb (Pos *pos, int key, Player glob_to_play, byte **movp, int **rmovp)
+int pacman_getmove_kb (Pos *pos, int key, byte **movp, int **rmovp)
 {
 	static byte move[10];
 	int curx = -1, cury = -1;

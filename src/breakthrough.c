@@ -63,13 +63,14 @@ static int breakthrough_getmove_kb (Pos *, int, Player, byte ** , int **);
 void breakthrough_init ();
 static ResultType breakthrough_who_won (Pos *, Player, char **);
 static ResultType breakthrough_eval (Pos *, Player, float *eval);
-static ResultType breakthrough_eval_incr (Pos *, Player, byte *, float *);
+static ResultType breakthrough_eval_incr (Pos *, byte *, float *);
 static byte * breakthrough_movegen (Pos *);
 static void *breakthrough_newstate (Pos *, byte *);
 
 Game Breakthrough = { BREAKTHROUGH_CELL_SIZE, BREAKTHROUGH_BOARD_WID, BREAKTHROUGH_BOARD_HEIT, 
 	BREAKTHROUGH_NUM_PIECES, 
-	breakthrough_colors, breakthrough_initpos, breakthrough_pixmaps, "Breakthrough", breakthrough_init};
+	breakthrough_colors, breakthrough_initpos, breakthrough_pixmaps, 
+	"Breakthrough", "Chess variants", breakthrough_init};
 
 void breakthrough_init ()
 {
@@ -81,6 +82,7 @@ void breakthrough_init ()
 	game_file_label = FILERANK_LABEL_TYPE_ALPHA;
 	game_rank_label = FILERANK_LABEL_TYPE_NUM | FILERANK_LABEL_DESC;
 	game_allow_flip = TRUE;
+	game_doc_about_status = STATUS_UNPLAYABLE;
 	game_doc_about = 
 		"Breakthrough\n"
 		"Two player game\n"
@@ -222,11 +224,11 @@ static ResultType breakthrough_eval (Pos *pos, Player player, float *eval)
 	return RESULT_NOTYET;
 }
 
-static ResultType breakthrough_eval_incr (Pos *pos, Player player, byte *move, float *eval)
+static ResultType breakthrough_eval_incr (Pos *pos, byte *move, float *eval)
 {
 	byte *board = pos->board;
 	if (move[0] == move[3]) *eval = 0;
-	else *eval = (player == WHITE ? 1 : -1);
+	else *eval = (pos->player == WHITE ? 1 : -1);
 	*eval += 0.01 * random() / RAND_MAX;
 	return RESULT_NOTYET;
 }

@@ -46,7 +46,7 @@ void plot4_init ();
 
 Game Plot4 = { PLOT4_CELL_SIZE, PLOT4_BOARD_WID, PLOT4_BOARD_HEIT, 
 	PLOT4_NUM_PIECES,
-	plot4_colors,  NULL, NULL, "Plot4", plot4_init};
+	plot4_colors,  NULL, NULL, "Plot 4", "k-in-a-row", plot4_init};
 
 
 
@@ -73,14 +73,13 @@ void plot4_init ()
 	game_get_pixmap = plot4_get_pixmap;
 	game_white_string = "Green";
 	game_black_string = "Yellow";
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Plot4\n"
 		"Two player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("plot4");
 	game_doc_rules = 
-		"Plot4 rules\n"
-		"\n"
 		"Two players alternate in placing balls of either color on a 7x6 board. Not exactly placing, because the balls have gravity and fall down to the lowest unoccupied square on the column. The goal is to get as many 4-in-a-row's as possible. A 5-in-a-row counts as two, 6 as 3, and 7 as 4.\n";
 }
 

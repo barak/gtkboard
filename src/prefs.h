@@ -26,6 +26,11 @@
 
 #define MAX_HIGHSCORES 10
 
+#define NUM_RECENT_GAMES 3
+
+typedef void (*PrefsCallbackFunc) (gchar * key, gchar *value);
+
+
 typedef struct
 {
 	char name[32];
@@ -33,6 +38,28 @@ typedef struct
 	int time;
 	int date;
 } Score;
+
+//! An entry in the config file. See #prefs_config_vars
+typedef struct
+{
+	//! name of the variable
+	char *key;
+
+	//! description, perhaps to present to the user?
+	char *description;
+
+	//! comment in the config file
+	char *comment;
+
+	//! default value
+	char *def_val;
+
+	//! current value
+	char *cur_val;
+
+	//! callback function to call when the value changes
+	PrefsCallbackFunc callback;
+} ConfigVar;
 
 
 extern SCORE_FIELD prefs_score_fields_def[];
@@ -42,9 +69,14 @@ gboolean prefs_load_scores (gchar *);
 gboolean prefs_save_scores (gchar *);
 void prefs_show_scores ();
 void prefs_zap_highscores ();
-void prefs_add_highscore (gchar *, int);
+gboolean prefs_add_highscore (gchar *, int);
 int prefs_scorecmp_dscore (gchar *, int, gchar*, int);
 int prefs_scorecmp_iscore (gchar *, int, gchar*, int);
 int prefs_scorecmp_time (gchar *, int, gchar*, int);
+void prefs_read_config_file ();
+gchar *prefs_get_config_val (gchar *key);
+void prefs_set_config_val (gchar *key, gchar *value);
+void prefs_write_config_file ();
+gboolean prefs_get_bool_val (gchar *value);
 extern int (*game_scorecmp) (gchar *, int, gchar*, int);
 #endif

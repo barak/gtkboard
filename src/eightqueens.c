@@ -36,8 +36,8 @@
 #define EIGHTQUEENS_QUEEN 1
 #define EIGHTQUEENS_CONTROLLED 2
 
-#define ABS(x) ((x) < 0 ? -(x) : (x))
-#define ATTACKS(i, j, x, y) ((i)==(x) || (j)==(y) || ABS((i)-(x)) == ABS((j)-(y)))
+#define abs(x) ((x) < 0 ? -(x) : (x))
+#define ATTACKS(i, j, x, y) ((i)==(x) || (j)==(y) || abs((i)-(x)) == abs((j)-(y)))
 
 char eightqueens_colors[6] = {200, 200, 160, 200, 200, 160};
 
@@ -52,7 +52,8 @@ char ** eightqueens_pixmaps [] =
 Game Eightqueens = { EIGHTQUEENS_CELL_SIZE, 
 	EIGHTQUEENS_BOARD_WID, EIGHTQUEENS_BOARD_HEIT, 
 	EIGHTQUEENS_NUM_PIECES, 
-	eightqueens_colors, NULL, eightqueens_pixmaps, "Eight queens puzzle", 
+	eightqueens_colors, NULL, eightqueens_pixmaps, "Eight Queens Puzzle", 
+	"Logic puzzles",
 	eightqueens_init};
 
 SCORE_FIELD eightqueens_score_fields[] = {SCORE_FIELD_RANK, SCORE_FIELD_USER, SCORE_FIELD_TIME, SCORE_FIELD_DATE, SCORE_FIELD_NONE};
@@ -71,13 +72,13 @@ void eightqueens_init ()
 	game_score_fields =  eightqueens_score_fields;
 	game_score_field_names = eightqueens_score_field_names;
 	game_draw_cell_boundaries = TRUE;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Eightqueens\n"
 		"Single player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL("eightqueens");
 	game_doc_rules = 
-		"Eightqueens rules\n\n"
 		"Place 8 non-attacking queens on the chessboard";
 		;
 }

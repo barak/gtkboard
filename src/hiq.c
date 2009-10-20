@@ -118,7 +118,7 @@ void hiq_init ();
 
 Game Hiq = { HIQ_CELL_SIZE, HIQ_BOARD_WID, HIQ_BOARD_HEIT, 
 	HIQ_NUM_PIECES, 
-	hiq_colors, hiq_init_pos, NULL, "Hiq", 
+	hiq_colors, hiq_init_pos, NULL, "Hiq", "Logic puzzles",
 	hiq_init};
 
 typedef struct
@@ -126,7 +126,8 @@ typedef struct
 	int score;
 }Hiq_state;
 
-static int hiq_getmove (Pos *, int, int, GtkboardEventType, Player, byte **, int **);
+InputType hiq_event_handler
+	(Pos *pos,  GtkboardEvent *event, MoveInfo *move_info_p);
 ResultType hiq_who_won (Pos *, Player , char **);
 char ** hiq_get_pixmap (int , int); 
 void hiq_reset_uistate ();
@@ -134,20 +135,20 @@ void hiq_reset_uistate ();
 void hiq_init ()
 {
 	game_single_player = 1;
-	game_getmove = hiq_getmove;
+//	game_getmove = hiq_getmove;
+	game_event_handler = hiq_event_handler;
 	game_who_won = hiq_who_won;
 	game_get_pixmap = hiq_get_pixmap;
 	game_who_won = hiq_who_won;
 	game_scorecmp = game_scorecmp_def_iscore;
 	game_reset_uistate = hiq_reset_uistate;
+	game_doc_about_status = STATUS_COMPLETE;
 	game_doc_about = 
 		"Hiq\n"
 		"Single player game\n"
 		"Status: Fully implemented\n"
 		"URL: "GAME_DEFAULT_URL ("hiq");
 	game_doc_rules = 
-		"Hiq rules\n"
-		"\n"
 		"The objective is to eliminate as many balls as possible.\n"
 		"\n"
 		"Each move consists of clicking on a filled square and then clicking on an empty square with exactly one square in between, which must be filled. The ball on the original square goes to the empty square and the middle ball disappears. Diagonal moves are not allowed.\n"
@@ -204,7 +205,7 @@ ResultType hiq_who_won (Pos *pos, Player player, char **commp)
 				count == 1 ? "Congrats!" : "Game over.", 
 				count, count == 1 ? "ball" : "balls");
 		*commp = comment;
-		return RESULT_WHITE;
+		return RESULT_WON;
 	}
 	snprintf (comment, 32, "%d balls left", 32 - pos->num_moves);
 	*commp = comment;
@@ -218,54 +219,70 @@ void hiq_reset_uistate ()
 	oldx = oldy = -1;
 }
 
-int hiq_getmove 
-	(Pos *pos, int x, int y, GtkboardEventType type, Player to_play, byte **movp, int ** rmovep)
+InputType hiq_event_handler
+	(Pos *pos,  GtkboardEvent *event, MoveInfo *move_info_p)
 {
 	static byte move[10];
 	static int rmove[10];
-	int diffx, diffy;
-	if (type != GTKBOARD_BUTTON_RELEASE)
-		return 0;
+	int diffx, diffy, x, y;
+	x = event->x;
+	y = event->y;
+	if (event->type != GTKBOARD_BUTTON_RELEASE)
+		return INPUT_NOTYET;
 	if (oldx == -1)
 	{
-		if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED) 
-			{ return oldx = oldy = -1; }
-		if (pos->board [y * board_wid + x] == HIQ_HOLE)
-			return -1;
+		if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED 
+				|| pos->board [y * board_wid + x] == HIQ_HOLE) 
+		{ 
+			move_info_p->help_message = "You must click on a ball.";
+			return INPUT_ILLEGAL;
+		}
 		oldx = x; oldy = y;
 		rmove[0] = x;
 		rmove[1] = y;
 		rmove[2] = RENDER_HIGHLIGHT1;
 		rmove[3] = -1;
-		*rmovep = rmove;
-		return 0;
+		move_info_p->rmove = rmove;
+		return INPUT_NOTYET;
 	}
 
 	rmove[0] = oldx;
 	rmove[1] = oldy;
 	rmove[2] = RENDER_NONE;
 	rmove[3] = -1;
-	*rmovep = rmove;
+	move_info_p->rmove = rmove;
 	if (hiq_init_pos[y * board_wid + x] == HIQ_UNUSED) 
-		{ return oldx = oldy = -1; }
+	{ 
+		oldx = oldy = -1;
+		move_info_p->help_message = "You must jump over a ball.";
+		return INPUT_ILLEGAL;
+	}
 
 	if (x == oldx && y == oldy)
 	{
-		oldx = -1; oldy = -1; return 0;
+		oldx = -1; oldy = -1; return INPUT_NOTYET;
 	}
 	
-	if (pos->board [y * board_wid + x] != HIQ_HOLE) { return oldx = oldy = -1; }
+	if (pos->board [y * board_wid + x] != HIQ_HOLE) 
+	{
+		oldx = oldy = -1; 
+		move_info_p->help_message = "You must click on an empty square.";
+		return INPUT_ILLEGAL;
+	}
 	diffx = abs (x - oldx); diffy = abs (y - oldy);
-	if (diffx * diffy) { return oldx = oldy = -1; }
-	if (diffx != 2 && diffy != 2) { return oldx = oldy = -1; }
+	if ((diffx != 2 && diffy != 2) || diffx * diffy != 0) 
+	{ 
+		oldx = oldy = -1; 
+		move_info_p->help_message = "You must jump over a ball.";
+		return INPUT_ILLEGAL;
+	}
 	move[0] = oldx; move[1] = oldy; move[2] = HIQ_HOLE;
 	move[3] = x; move[4] = y; move[5] = pos->board [oldy * board_wid + oldx];
 	move[6] = (x+oldx)/2; move[7] = (y+oldy)/2; move[8] = HIQ_HOLE;
 	move[9] = -1;
 	oldx = -1; oldy = -1;
 
-	if (movp)
-		*movp = move;	
-	return 1;
+	move_info_p->move = move;	
+	return INPUT_LEGAL;
 }
 
