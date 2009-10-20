@@ -4,6 +4,9 @@ Priority: optional
 Maintainer: Barak A. Pearlmutter <bap@debian.org>
 Build-Depends: debhelper (>= 7.2.5), libgtk2.0-dev | libgtk1.3-dev | libgtk1.2-dev, libsdl-mixer1.2-dev
 Standards-Version: 3.8.3
+Vcs-Git: git://git.debian.org/git/collab-maint/gtkboard.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/gtkboard.git
+Homepage: http://gtkboard.sourceforge.net/
 
 Package: gtkboard
 Architecture: any

@@ -1,0 +1,17 @@
+*.o
+*~
+/Makefile
+/config.h
+/config.log
+/config.status
+/debian/*.debhelper
+/debian/*.log
+/debian/*.substvars
+/debian/files
+/debian/gtkboard/
+/doc/Makefile
+/pixmaps/Makefile
+/sounds/Makefile
+/src/Makefile
+/src/gtkboard
+/stamp-h1
