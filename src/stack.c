@@ -34,6 +34,9 @@
    movstack_ptr ---> movstack_max : "forward" list
 */
 
+//! Start offset of the stack in the circular buffer
+static int movstack_start = 0;
+
 //! Current position in the stack
 static int movstack_ptr = 0;
 
@@ -67,31 +70,38 @@ int movstack_get_num_moves()
 
 void movstack_push (byte *board, byte *move)
 {
-	assert (movstack_ptr < STACK_SIZE - 1);
-	movstack[movstack_ptr] = movdup (move);
-	movinvstack[movstack_ptr] = mov_getinv (board, move);
-	movstack_ptr++;
-	if (movstack_ptr > movstack_max)
-		movstack_max = movstack_ptr;
+	movstack[(movstack_start + movstack_ptr) % STACK_SIZE] = movdup (move);
+	movinvstack[(movstack_start + movstack_ptr) % STACK_SIZE] = mov_getinv (board, move);
+	if (movstack_ptr < STACK_SIZE - 1) {
+		movstack_ptr++;
+		if (movstack_ptr > movstack_max)
+			movstack_max = movstack_ptr;
+	} else {
+		free (movstack[movstack_start]);
+		free (movinvstack[movstack_start]);
+		movstack_start = (movstack_start + 1) % STACK_SIZE;
+	}
 }
 
 byte *movstack_pop ()
 {
 	if (movstack_ptr == 0)
 		return NULL;
-	return movstack[--movstack_ptr];
+	movstack_ptr--;
+	return movstack[(movstack_start + movstack_ptr) % STACK_SIZE];
 }
 
-//! Truncates a stack to the current poisition. 
-/** This will be called when the user makes a move when it is not the final poisition. */
+//! Truncates a stack to the current position. 
+/** This will be called when the user makes a move when it is not the final position. */
 void movstack_trunc ()
 {
 	int i;
 	assert (movstack_ptr <= movstack_max);
 	for (i = movstack_ptr; i < movstack_max; i++)
 	{
-		free (movstack[i]);
-		free (movinvstack[i]);
+		int j = (movstack_start + i) % STACK_SIZE;
+		free (movstack[j]);
+		free (movinvstack[j]);
 	}
 	movstack_max = movstack_ptr;
 }
@@ -101,7 +111,7 @@ byte * movstack_forw ()
 	if (movstack_ptr < movstack_max)
 		movstack_ptr++;
 	else return NULL;
-	return movstack[movstack_ptr-1];
+	return movstack[(movstack_start + movstack_ptr - 1) % STACK_SIZE];
 }
 
 byte * movstack_back ()
@@ -109,7 +119,7 @@ byte * movstack_back ()
 	if (movstack_ptr > 0)
 		movstack_ptr--;
 	else return NULL;
-	return movinvstack[movstack_ptr];
+	return movinvstack[(movstack_start + movstack_ptr) % STACK_SIZE];
 }
 
 void movstack_free ()
@@ -117,8 +127,9 @@ void movstack_free ()
 	int i;
 	for (i=0; i<movstack_max; i++)
 	{
-		free (movstack[i]);
-		free (movinvstack[i]);
+		int j = (movstack_start + i) % STACK_SIZE;
+		free (movstack[j]);
+		free (movinvstack[j]);
 	}
 	movstack_max = movstack_ptr = 0;
 }
@@ -128,7 +139,7 @@ void movstack_free ()
    state stack
 */
 
-static int statestack_ptr = 0, statestack_max = 0;
+static int statestack_start = 0, statestack_ptr = 0, statestack_max = 0;
 
 static void *statestack[STACK_SIZE];
 
@@ -136,28 +147,35 @@ static void *statestack[STACK_SIZE];
 void statestack_push (void *state)
 {
 	void *newstate;
-	assert (statestack_ptr < STACK_SIZE - 1);
 	newstate = malloc (game_state_size);
 	assert (newstate);
 	memcpy (newstate, state, game_state_size);
-	statestack[statestack_ptr] = newstate;
-	statestack_ptr++;
-	if (statestack_ptr > statestack_max)
-		statestack_max = statestack_ptr;
+
+	statestack[(statestack_start + statestack_ptr) % STACK_SIZE] = newstate;
+
+	if (statestack_ptr < STACK_SIZE - 1) {
+		statestack_ptr++;
+		if (statestack_ptr > statestack_max)
+			statestack_max = statestack_ptr;
+	} else {
+		free (statestack[statestack_start]);
+		statestack_start = (statestack_start + 1) % STACK_SIZE;
+	}
 }
 
 void *statestack_peek ()
 {
 	if (statestack_ptr == 0)
 		return NULL;
-	return statestack[statestack_ptr-1];
+	return statestack[(statestack_start + statestack_ptr - 1) % STACK_SIZE];
 }
 
 void *statestack_pop ()
 {
 	if (statestack_ptr == 0)
 		return NULL;
-	return statestack[--statestack_ptr];
+	statestack_ptr--;
+	return statestack[(statestack_start + statestack_ptr) % STACK_SIZE];
 }
 
 void statestack_trunc ()
@@ -165,7 +183,7 @@ void statestack_trunc ()
 	int i;
 	assert (statestack_ptr <= statestack_max);
 	for (i = statestack_ptr; i < statestack_max; i++)
-		free (statestack[i]);
+		free (statestack[(statestack_start + i) % STACK_SIZE]);
 	statestack_max = statestack_ptr;
 }
 
@@ -174,7 +192,7 @@ void * statestack_forw ()
 	if (statestack_ptr < statestack_max)
 		statestack_ptr++;
 	else return NULL;
-	return statestack[statestack_ptr-1];
+	return statestack[(statestack_start + statestack_ptr - 1) % STACK_SIZE];
 }
 
 void * statestack_back ()
@@ -182,14 +200,14 @@ void * statestack_back ()
 	if (statestack_ptr > 0)
 		statestack_ptr--;
 	else return NULL;
-	return statestack[statestack_ptr-1];
+	return statestack[(statestack_start + statestack_ptr - 1) % STACK_SIZE];
 }
 
 void statestack_free ()
 {
 	int i;
 	for (i=0; i<statestack_max; i++)
-		free (statestack[i]);
+		free (statestack[(statestack_start + i) % STACK_SIZE]);
 	statestack_max = statestack_ptr = 0;
 }
 
