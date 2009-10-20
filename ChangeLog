@@ -1,0 +1,162 @@
+2003-07-17	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* Initial release
+
+2003-07-18	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* board.c: Changed gtk_drawing_area_size() to gtk_widget_set_size_request()
+
+2003-07-19	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* parse_opts(): Implemented loading a game from .so file (only from command line; -G option)
+	* checkers.c: fixed bug in check_who_won(), pointed out by Paddu, where it wouldn't reset the score string when the state changed from gameover to not gameover.
+	* game.h: updated documentation
+	
+2003-07-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* ui: implemented feature to show row and column names
+	* ui: implemented feature for game to change the user-visible label for white and black
+	* ab.c: implemented end-of-game checking in game_ab_hash()
+	* rgb: fixed eval function to use GAME_EVAL_INFTY
+	* board: fixed bug where there was no way for samegame to know that the cursor had left the screen
+	* bumped version to 0.10.1
+
+2003-07-21	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* engine: fixed really nasty bug, pointed out by Uday, which caused all gtk1 two player games to freeze.
+	* released version 0.10.2
+	* ui: fixed bug where ui would freeze when engine was killed (e.g, by closing the terminal)
+	* ui: changed gtk_timeout_add to g_timeout_add so that quiet mode can run in the background
+
+2003-07-22	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* menu: added Help->Begging
+
+2003-07-25	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* flw.c: wrote a new game Four Letter Words. Still incomplete, needs highlighting of selected square, and is too simple to win.
+	* board: added highlighting feature. Still needs to be implemented by games though.
+	* menu.c: fixed bug where sb_update wasn't called when changing the player
+	* bumped version to 0.10.3
+
+2003-07-26	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* infiltrate.c: fixed bug, pointed out by Thomas Klausner, where you could make a ball disappear by making it the destination of a move
+	* mastermind.c: changed the notation so that num_white doesn't count the balls in correct positions as well, as suggested by Thomas Klausner
+	* mastermind.c: implemented who_won
+	* mastermind.c: fixed bug which caused balls to become dice on resetting the game
+	* flw.c: fixed bug, pointed out by Thomas Klausner, where return wouldn't work sometimes
+
+2003-07-27	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* ui.c: fixed bug, pointed out by Thomas Klausner, where motion_notify events were not being received
+	* wordtris.c: implemented wordtris
+	* bumped version to 0.10.4
+
+2003-07-28	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* wordtris.c: implemented lives
+	* prefs.c: added OK button to "enter your name" dialog in gtk2 version
+	* menu.c: implemented different cursor types reflecting the state of the game
+
+2003-07-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* board: implemented support for bg image
+	* ninemm: implemented pixmaps and getmove (partially)
+
+
+2003-07-30	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* wordtris.c: fixed compiler warning on NetBsd
+	* game.h: implemented highlighting in game_getmove; implemented support in mastermind and wordtris
+	* :globally changed rand() to random() to fix freeze on some OSes
+	* wordtris.c: implemented wildcard
+
+2003-07-31	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* game.h: implemented render for getmove_kb
+	* game.h: implemented game_setinitrender	
+	* wordtris.c: implemented changing render with kb
+	* mastermind.c: implemented changing render with kb
+
+2003-08-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* flw.c: implemented render
+	* wordtris: fixed starting with words without any neighbor
+
+2003-08-02	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* Makefile.am: changed CFLAGS to AM_CFLAGS as suggested by Frank Gevaerts
+	* move.h: changed byte from char to gint8 to fix powerpc crash. Patch by Frank Gevaerts.
+	
+2003-08-03	Arvind Narayanan	<arvindn@users.sourceforge.net>
+
+	* board.c: fixed bug where bgimage wouldn't get drawn on non-empty squares 
+	* wordtris.c: fixed bug where blank would sometimes be chosen in preference to non-blank
+
+2003-08-06	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* flw.c: wrote flw_get_render(). Support in ui.c still not added.
+
+2003-08-10	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* ui.c: beginning to separate out the client side protocol handler module
+
+2003-08-13	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* stopgate.c: implemented stopgate
+
+2003-08-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: partially implemented knights
+
+2003-08-24	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: fully implemented
+
+2003-08-29	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* breakthrough.c: partially implemented
+
+2003-08-30	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* cpento.c: Capture pentominoes by Arthur O'Dwyer
+
+2003-09-01	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* knights.c: kickass eval function for knights :)
+	* othello.c: tried several things with the eval function, remains poor as ever
+	* ab.c: bugfixes
+	* hash.c: bugfix: added a new field num_moves
+	* board.c: implemented RENDER_REPLACE
+	* ninemm.c: implemented partial move using RENDER_REPLACE
+
+2003-09-02	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* mastermind.c: fixed bug where solution won't be displayed if all 10 tries are wrong
+	* board.c: implemented RENDER_SHADE1
+	* aaball.c: implemented shadow in ball_gen MWAHAHAHAHA
+	* board.c: implemented RENDER_BUTTONIZE
+
+2003-09-03	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* breakthrough.c: lots of improvements to eval
+
+2003-09-04	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* othello.c: mapped space key to passing
+	* towers.c: started Towers of Hanoi
+
+2003-09-05	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* towers.c: tower of Hanoi almost finished, but some decent looking pixmaps badly needed!
+	
+2003-09-06	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* towers.c: improved graphics
+	* quarto.c: new game implemented
+	* board.c: fixed some bugs in RENDER_SHADE etc
+	* ataxx.c: implemented highlight
+
+2003-09-07	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* kttour.c: knight's tour - new game
+
+2003-09-08	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* eightqueens.c: eight queens puzzle - new game
+
+2003-09-11	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* dotsandboxes.c: new game "dots and boxes", just started.
+
+2003-09-20	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* forgot to write changelog for several days.
+	* major changes: implemented move ordering heuristic and completed movegen() for chess
+
+2003-09-24	Arvind Narayanan	<arvindn@users.sourceforge.net>
+	* lots of changes, but too lazy to write changelog

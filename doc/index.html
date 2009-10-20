@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+	<title>Gtkboard documentation</title>
+	<!--We have to do it this way because the same file will be used both in the local documentation and on the website-->
+	<!--#include virtual=".stylefile"-->
+</head>
+<body bgcolor="white">
+<h1 align="center">Gtkboard documentation</h1>
+<p align="center"> <font size="-1"> This is the end user documentation for gtkboard version 0.10.0. If you are interested in hacking gtkboard or writing a new game for gtkboard you can also read the <a href="devel/">
+developer documentation</a>. </font> </p>
+ 
+<p align="center"> <font size="-1">Please note that a stable version of gtkboard has not been released yet. 0.10.0 is a developer release and hence this documentation is necessarily incomplete. </font></p>
+<!--#include virtual="../header.html"-->
+
+<h2>Installation</h2>
+ 
+<p> 
+You can download the source tarball or the source or
+binary (i386) rpm from the 
+<a href="http://sourceforge.net/project/showfiles.php?group_id=83635">download page</a>.
+To install from the sources, do the usual 
+<br/>
+<tt>
+ $ gzip -cd gtkboard-x.y.z.tar.gz | tar xvf -<br/>
+ $ cd gtkboard-x.y.z<br/>
+ $ ./configure<br/>
+ $ make <br/>
+ $ make install<br/>
+</tt>
+For <tt>make install</tt> to work you must be root.
+</p>
+To install from rpm do
+<br/>
+<tt>
+ $ rpm -ivh gtkboard-x.y.z-v.i386.rpm
+</tt>
+
+<h3>Requirements</h3>
+gtk+ version 1.2 or higher is required. However, there are a few features
+that will work only if gtk+ version 2.0 or higher is available.
+
+<h2>Getting started</h2>
+Gtkboard aims to provide a common platform for all board games. What this
+means for the user is that all games will have a common interface. The
+first thing you do on starting gtkboard is to select a game from the
+"Game-&gt;Select Game" menu. Currently 18 games are implemented. Of these,
+Antichess, Ataxx, Fifteen puzzle, Hiq, Memory, Othello, Pentaline, Plot4, Rgb 
+and Samegame are fully implemented. Checkers, Infiltrate, Hypermaze, Mastermind, 
+Maze, and Tetris are partially implemented but playable. Chess, and Pacman
+are partially implemented and currently unplayable. Some are single player and
+some are two player games. You can find out about the game from the Help menu.
+  
+<h2>The menubar</h2>
+<h3>The Game menu</h3>
+From the Game menu you can select a game, reset the current game
+("Game-&gt;New game"), or pause/restart the game. "Game-&gt;Highscores"
+displays the highscores (only for single player games) and 
+"Game-&gt;Zap Highscores" clears it.
+
+<h3>The File menu</h3>
+Gtkboard can save your game to a file and replay it. 
+All games are stored in a common format, called cbgf (common board game format).
+This is currently not fully implemented.
+
+<h3>The move menu</h3>
+You can go back and forward to any point in the current game, in other words
+you have infinite levels of undo and redo.
+
+<h3>The settings menu</h3>
+In two player games you can play with another person, or with the computer,
+or let the computer play with itself. 
+<p>
+Some games let you configure the computer's AI, by setting the Evaluation function.
+<p>
+Flipping the board rotates it by 180&deg;
+
+<h2>The game bar</h2>
+Below the menu bar is the game bar (or whatever you want to call it). It is
+divided into 7 parts. (Not all are shown at the same time)
+The first shows the name of the game. The second 
+displays "H/H", "H/M" etc indicating human vs. human, human vs. machine etc.
+The third shows whose turn it is, white or black (the last 2 are only for two
+player games). The player who moves first is always denoted by white. The fourth
+shows the score. The fifth is supposed to show the current move but is not
+yet implemented. The sixth shows the time spent so far (only for single player
+games). The last is a status indicator. This is available only in
+the gtk2 version. The color denotes as follows:
+<ul>
+<li/>
+Dark green: it's your turn to move and your clock is running.
+<li/>
+Light green: it's your turn and your clock is not running (e.g, you paused the game or the displayed position is not the current position).
+<li/>
+Dark red: it's the computer's turn to move and it's thinking.
+<li/>
+Light red: it's the computer's turn but it's not thinking right now.
+<li/>
+Dark blue: In two player games with both players human, it's the second
+player's turn to move and their clock is running
+<li/>
+Light blue: In two player games with... well you get the idea.
+<li/>
+Grey: No game is selected, or the game is a saved game being replayed.
+</ul>
+
+<h2>Command line options</h2>
+There are a few command line options. You should know about them because
+there are certain things (like setting the time per move) that can 
+currently be done only through  command line options and not through the
+GUI. The output of <tt>gtkboard -h</tt> is shown below:
+<pre>
+Usage: gtkboard 	[-qvh] [-g game] [-f file] [-l logfile] [-d msec]
+			[-p XX] [-w wheur -b bheur] 
+	-g	name of the game
+	-f	file to load game from
+	-l	log file to record game
+	-q	don't show board
+	-d	delay in milliseconds
+	-p	human or machine players. Each X must be 'h' or 'm'
+	-w	name of heuristic function for white
+	-b	name of heuristic function for black
+	-v	be verbose
+	-h	print this help
+</pre>
+<hr/>
+<!--#include virtual="../footer.html"-->
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>Gtkboard developer documentation</title>
+	<!--We have to do it this way because the same file will be used both in the local documentation and on the website-->
+	<!--#include virtual="../.stylefile"-->
+</head>
+<body bgcolor="white">
+<h1 align="center">Gtkboard developer documentation</h1>
+<p align="center"> <font size="-1">This is the developer documentation
+for gtkboard version 0.10.0. The end-user documentation is <a
+ href="../">here</a>. </font> </p>
+<table width="100%" bgcolor="#ddeeee">
+  <tbody>
+    <tr>
+      <td>
+      <table cellspacing="3" align="center">
+        <tbody>
+	<tr>
+		<td>[</td>
+		<td> <a href="/">Home</a> </td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a
+ href="http://sourceforge.net/project/showfiles.php?group_id=83635">Download</a></td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a href="/screenshots/">Screenshots</a></td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a href="/doc/">Documentation</a></td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a href="/doc/devel/">Hacking</a></td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a href="http://sourceforge.net/projects/gtkboard/">Project page</a></td>
+		<td><br>
+            </td>
+            <td>|</td>
+            <td><br>
+            </td>
+		<td> <a href="mailto:arvindn%20AT%20users%20DOT%20sourceforge.net">Contact</a></td>
+		<td>]</td>
+	</tr>
+        </tbody>
+      </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li><a href="#philosophy">Gtkboard philosophy</a> </li>
+  <li><a href="#newgame">Writing a new game</a> </li>
+  <li><a href="#howtohelp">How you can help</a> </li>
+  <li><a href="#codingstyle">Coding style</a> </li>
+  <li><a href="#features">Gtkboard features</a> </li>
+  <li><a href="#roadmap">Roadmap</a> </li>
+  <li><a href="../doxygen/">Doxygen documentation for source code</a> </li>
+</ul>
+<h2> <a name="philosophy"></a> Gtkboard philosophy</h2>
+<p> <b>No duplication.</b> The raison d'etre of gtkboard is to reduce
+the duplication of effort involved in writing hundreds of board games.
+Therefore, <i>anything</i> that is common between two or more board
+games must be implemented by gtkboard and available to all games. </p>
+<p> <b>Allow games to be created incrementally.</b> Just because a
+feature exists, a game shouldn't be forced to do something about it.
+Thus, when writing a new game you can concentrate on exactly what you
+need and ignore the rest. For instance, you can make a new game compile
+and display the board <i>without writing any code</i>, just specifying
+the dimensions, colors and images for the pieces. (Several common
+pixmaps are available for reuse.) Further, the user can already replay
+a game from a file -- the game doesn't need to implement anything. </p>
+<p> <b>Homogenize.</b> If two games require a thing to be done in
+slightly different ways, see if both can be expressed as special cases
+of a more generic way, and the differences expressed in data rather
+than code. That way, if a new game required the thing to be done in a
+third way, it is more likely that it can be accomodated without
+modifying the existing code. This principle is related to the next one. </p>
+<p> <b>Generality is more important than efficiency.</b> This is an
+application of the maxim that premature optimization is the root of all
+evil. For example, the AI of some games would probably become somwhat
+more efficient if the search strategy incorporated game specific
+information, and the evaluation function and the move generation
+function were tightly coupled. However, the extra complexity is judged
+to be not worth the gain in efficiency. </p>
+<p> <b>TIMTOWTDI.</b> There is more than one way to do it. As far as
+possible, nothing will be forced on the games. Everything is a hook.
+The game can choose from among the defaults or provide its own. For
+example, three defaults are provided for ordering the highscores:
+decreasing order of score, increasing order of score and decreasing
+order of time. The game can use one of these or write its own. </p>
+<p> <b>Client-server model.</b> This is the most important part.
+Gtkboard is currently implemented as a pair of processes, one for the
+ui and one for the number crunching, which communicate through a pair
+of pipes. This has several benefits: </p>
+<ul>
+  <li> Ui won't feel slow when the machine is thinking</li>
+  <li> Keeps the code clean</li>
+  <li> It is relatively easy to change the code to communicate through
+sockets and thus have network functionality.</li>
+</ul>
+<p> TODO: complete this </p>
+<h2> <a name="newgame"></a> Writing a new game</h2>
+This is a simple step-by-step guide to get you started writing a new
+game.
+<ul>
+  <li> Get the latest source from cvs using the command: <br>
+    <code> $ cvs -z3
+-d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/gtkboard co gtkboard </code> <br>
+Getting the latest source release from the file releases page is
+usually OK. </li>
+  <li> Think about what game you want to implement and decide basic
+things like will it be a single or a two player game, the dimensions
+and colors of the board, etc. </li>
+  <li> Read the <a
+ href="http://gtkboard.sourceforge.net/doc/doxygen/game_h.html">game.h
+documentation</a>. <i>This is very important</i>. All the details
+might need to know are in that file. You need to create a <tt>Game</tt>
+struct for your game before you can compile your game. </li>
+  <li>
+    <ul>
+      <li> In the "src/" directory of the source, create a new file
+"yourgame.c". </li>
+      <li> In "yourgame.c" you should <tt>#include game.h</tt> and
+define a <tt>Game yourgame</tt>. </li>
+      <li> Edit the file "ui.c" and add your game to the list of games
+(the <tt>Game *games[]</tt> array). </li>
+    </ul>
+  </li>
+  <li>You are now ready to compile your game! In the root directory of
+the source invoke automake and then make. </li>
+  <li>Now run gtkboard. Your game should appear in the "Game-&gt;Select
+game" menu. When you choose it you will see the initial board position
+that you specified. However, you can not do anything yet. If you try to
+make a move a dialog will pop up saying "Not yet implemented." </li>
+  <li>Your next job is to write a function that will take user input
+and return a move. Moves are represented in a standard format for all
+games. See the <a
+ href="http://gtkboard.sourceforge.net/doc/doxygen/move_h.html">move.h
+documentation</a> for a description of this format. You should also see
+the source of some other game to get a feel for the code. The function
+you will need to implement is <tt>game_getmove()</tt>. After writing
+the function remember to add a function pointer to this function in
+your <tt>game_init()</tt> function. </li>
+  <li>If your game is a single player game you are nearly done. The
+user will be able to play your game, the only thing missing is that
+there is no notification of when the game is over. Skip the next step.
+In two player games, at this stage two humans can play the game against
+each other but not human vs. machine. Read the next step. </li>
+  <li>(Only for two player games.) You need to implement two functions, <tt>game_movegen()</tt>
+and <tt>game_eval()</tt>. The first function generates a list of legal
+moves in a given position and the second associates a "goodness" value
+to a given position. This is used by the AI in deciding which move to
+make, in conjuction with the alpha-beta search strategy and
+transposition tables. Writing these functions (movegen and eval) is
+probably the most time consuming part. </li>
+  <li>Next you have to write a function to determine whether the game
+is over. This function has the dual role of showing the "score", for
+most single player games and some two player games too. This function
+is <tt>game_who_won()</tt>. Again see the game.h documentation for
+details. </li>
+  <li>Congrats! Now you've got a fully working game, with features like
+highscores (for single player games), ability to go back and forward,
+saving and loading the game etc. There are several frills that you
+could add to your game, such as animations. </li>
+  <li>When you feel your game is complete mail me a copy of
+"yourgame.c". </li>
+</ul>
+<h2> <a name="howtohelp"></a> How you can help</h2>
+Here's a list of ways you can help gtkboard:
+<ul>
+  <li> Write code for gtkboard. Good at AI, search trees and the like?
+You could work on the back end. Like doing UI stuff? There's a lot of
+front end work left to do, too. </li>
+  <li> Write a <a href="#newgame">new game</a>. You've always wanted to
+write a game, didn't you? You don't get a better opportunity than this!
+The mundane part is already taken care of, you just have to worry about
+the rules and strategy of the game you want to implement. </li>
+  <li> Describe a game: If the rules and strategy (i.e, evaluation
+function) of a game are described precisely, it usually takes only an
+hour to code it up :) Therefore if there's a game you're good at that's
+not been implemented, please please consider visiting the <a
+ href="http://sourceforge.net/forum/forum.php?thread_id=900029&amp;forum_id=285669">forum</a>
+and describing the game. </li>
+  <li> Write documentation. End-user documentation, that is. The rules
+haven't been documented for several games yet. If you are good at some
+game, please consider writing a strategy document for the game. </li>
+  <li> Create artwork. We badly need a logo, a splash screen, some icons
+etc. Apart from that, many games currently have simple colored balls as
+their pieces. While this helps rapid development, it doesn't hurt to
+have some eye candy! </li>
+  <li> Be a tester. The hard part of fixing a bug is finding it. We
+could use your help! </li>
+  <li> Contribute builds: Even though gtkboard should build without
+problems on any Unix with gtk+-1.2 or greater, not all users would be
+willing to compile from source. So if there's no build available for
+your platform, and you have compiled gtkboard, please contribute a
+build. Thanks. </li>
+</ul>
+<h2> <a name="codingstyle"></a> Coding style</h2>
+You are requested to follow these guidelines if you intend to
+contribute to gtkboard.
+<ul>
+  <li> <b>Spaces and tabs</b>. This being the subject of eternal
+flamewars, the project maintainer is usually allowed to make their
+decision binding on everybody, so I will take that liberty :) Your code
+should use <i>only tabs</i> for indenting, <i>not spaces</i>. Further,
+your code should look right whatever be the tabstop setting (I use 4; 3
+and 8 are also common.) Therefore, no end-of-line comments. (See the
+section on comments.) Also
+    <pre>int foo;<br>float bar;<br>     ^<br>// NO tab here<br></pre>
+  </li>
+  <li> <b>Don't make your lines too long.</b> 80 chars is not a rigid
+limit, because after all not many people are going to be looking at the
+code on 80 character terminals, I mean, its <i>gtk</i>board, so a
+little over 80 chars is probably OK, but still don't make your lines
+too long. </li>
+  <li> <b>Minimize comments.</b> Another subject of heated controversy.
+Comments are good, because they let other people understand your code.
+Comments are bad, because they are a maintenance nightmare. Over time,
+comment rot happens: your code was updated but the comment wasn't, so
+it serves to confuse rather than to enlighten. In my experience, the
+best way out is to write self-documenting code augmented by sparse
+comments. Therefore the rules are:
+    <ul>
+      <li> Use clear variable (esp. global) and function names that
+describes what it is. A function name should typically be
+module_verb_noun(). </li>
+      <li> Describe what a function does rather than how it does it. </li>
+      <li> Documenting module interfaces is more important than
+documenting modules. </li>
+      <li> Use doxygen for documentation. (No learning curve here; `//!'
+for single line comments, and `/** ... */' for multi-line comments is
+all you need to know.) </li>
+      <li> Comments inside a function should be limited, as far as
+possible, to: <tt>FIXME</tt>s, <tt>TODO</tt>s, indication of ugly
+hacks and misc gotchas. </li>
+    </ul>
+  </li>
+</ul>
+Well that's it I guess. And also keep in mind the general words of C
+wisdom, like remember to <tt>free()</tt> everything, use <tt>snprintf</tt>
+rather than <tt>sprintf</tt>, use lots of <tt>assert()</tt>s and that
+sort of thing. So far the code's been rather clean, I've never had a
+gdb session longer than a couple of minutes, let's keep it that way :)
+<h2> <a name="features"></a> Gtkboard features</h2>
+<h3>Features currently provided by gtkboard</h3>
+<ul>
+  <li> Common user interface </li>
+  <li> AI using alpha beta search and transposition tables </li>
+  <li> Common representation of board position and moves of all board
+games </li>
+  <li> Highscores </li>
+  <li> Human vs. human, human vs. machine, machine vs. machine modes </li>
+  <li> Animations </li>
+  <li> Move back and forward </li>
+  <li> Pause and unpause games </li>
+  <li> Common interface to game documentation </li>
+  <li> Tournament mode: create a computer game tournament among several
+evaluation functions! </li>
+</ul>
+<h3>Features coming real soon now</h3>
+<ul>
+  <li> Games available as dynamically loadable plugins </li>
+  <li> Common board game format (cbgf): this format is still being
+decided. Once this is finalized all games will be able to save and load
+their games in a common format. </li>
+  <li> Drag and drop support </li>
+  <li> Genetic algorithm for evolving an  evaluation function </li>
+  <li> pgn2cbgf: convert a chess game (Portable Game Notation) into a
+cbgf game. </li>
+  <li> Network support: this one's a killer :) Hopefully we'll be able
+to do something like <a href="http://www.freechess.org/">FICS</a> (Free
+Internet Chess Server). </li>
+</ul>
+<h2> <a name="roadmap"></a> Roadmap</h2>
+The current priority is to get a <b>stable 1.0 release</b> out.
+<p> The main things that have to be done before this are: </p>
+<ul>
+  <li> Plugin support (i.e, implement games as plugins) </li>
+  <li> Standardize and implement the cbgf format </li>
+  <li> Implement several more games, so that this will reveal missing
+features of the game.h API. </li>
+</ul>
+<p></p>
+<p> The last is very important, because at 1.0 we will freeze the game
+API. Until then it will be fluid. We hope that a huge number of games
+will be written for the 1.0 release, and also that some major distros
+will include gtkboard 1.0 :) Therefore the API should be complete
+enough that almost anything that can be called a board game should be
+implementable in gtkboard. </p>
+<p> Post 1.0, our focus will shift to two things: </p>
+<ul>
+  <li> Network support. This will involve a lot of time and planning </li>
+  <li> Alternate implementations -- Possibilities are a java client, and
+a stripped down javascript client so that users can view a database of
+games through their browser. </li>
+</ul>
+<p></p>
+<p> Of course all this is kinda the best case scenario since gtkboard is
+entirely a spare time/hobby project. </p>
+<hr>
+<table width="100%">
+  <tbody>
+    <tr>
+      <td width="33%"><a href="http://validator.w3.org/check/referer"><img
+ border="0" src="/images/icons/valid-html401.png" alt="Valid HTML 4.01!"
+ height="31" width="88"></a> </td>
+      <td width="33%" align="center"> <a href="http://www.vim.org/"><img
+ border="0" src="/images/icons/vim.png" alt="Created with vim"
+ height="36" width="90"></a> 	</td>
+      <td align="right"> <a href="http://sourceforge.net"><img
+ src="http://sourceforge.net/sflogo.php?group_id=74796&amp;type=1"
+ width="88" height="31" border="0" alt="SourceForge.net Logo"></a> </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
