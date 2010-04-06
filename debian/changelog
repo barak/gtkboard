@@ -1,7 +1,7 @@
 gtkboard (0.11pre0-12) unstable; urgency=low
 
   * bump deb standards
-  * Switch to dpkg-source 3.0 (git) format
+  * Switch to dpkg-source 3.0 (quilt) format
 
  -- Barak A. Pearlmutter <bap@debian.org>  Thu, 25 Mar 2010 18:56:38 +0000
 
