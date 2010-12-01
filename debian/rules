@@ -6,23 +6,12 @@
 override_dh_auto_configure:
 	dh_auto_configure -- --bindir=\$${prefix}/games
 
-override_dh_auto_install:
-	install -d debian/gtkboard/usr/share/doc/gtkboard/html/devel
-	install doc/index.html \
-		debian/gtkboard/usr/share/doc/gtkboard/html/
-	install doc/devel/devel/index.html \
-		debian/gtkboard/usr/share/doc/gtkboard/html/devel/
-	install -d debian/gtkboard/usr/share/applications
-	install debian/gtkboard.desktop \
-		debian/gtkboard/usr/share/applications/
-	dh_auto_install
-
 ## This will re-generate the man page.
 ## Not used during normal build; just a convenient place to keep this info.
 
 manpage: debian/gtkboard.6
 
-debian/gtkboard.6: build
+debian/gtkboard.6: src/gtkboard
 	help2man --name="play a variety of board games" \
 		 --section=6 --no-info --output=$@ \
 		src/gtkboard

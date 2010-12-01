@@ -1,0 +1,3 @@
+doc/index.html usr/share/doc/gtkboard/html/
+doc/devel/devel/index.html usr/share/doc/gtkboard/html/devel/
+debian/gtkboard.desktop usr/share/applications/
