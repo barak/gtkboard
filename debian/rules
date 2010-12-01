@@ -14,13 +14,11 @@ override_dh_auto_install:
 		debian/gtkboard/usr/share/doc/gtkboard/html/devel/
 	install -d debian/gtkboard/usr/share/applications
 	install debian/gtkboard.desktop \
-		debian/gtkboard/usr/share/applications
+		debian/gtkboard/usr/share/applications/
 	dh_auto_install
 
 ## This will re-generate the man page.
 ## Not used during normal build; just a convenient place to keep this info.
-
-#install-stamp: manpage
 
 manpage: debian/gtkboard.6
 
