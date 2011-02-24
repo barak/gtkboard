@@ -1,0 +1,5 @@
+Upstream CVS imported:
+git cvsimport -v -k -u -a gtkboard \
+ -d :pserver:anonymous@gtkboard.cvs.sourceforge.net:/cvsroot/gtkboard
+
+ -- Barak A. Pearlmutter <bap@debian.org>, Thu, 24 Feb 2011 15:45:58 +0000
