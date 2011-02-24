@@ -1,12 +1,13 @@
-gtkboard (0.11pre0-13) UNRELEASED; urgency=low
+gtkboard (0.11pre0+cvs.2003.11.02-1) UNRELEASED; urgency=low
 
   * bump standards version (debian/control)
   * dh 8
   * dh --parallel
   * dh --with autotools_dev
   * break out files to install (debian/rules, debian/gtkboard.install)
+  * merge upstream CVS tip, fixing ghost scores bug (closes: #215476)
 
- -- Barak A. Pearlmutter <bap@debian.org>  Wed, 01 Dec 2010 18:01:58 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 24 Feb 2011 16:32:36 +0000
 
 gtkboard (0.11pre0-12) unstable; urgency=low
 
