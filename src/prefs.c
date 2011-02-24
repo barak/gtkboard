@@ -215,8 +215,8 @@ static void prefs_show_scores_real (int index)
 			{
 				case SCORE_FIELD_NONE: found = TRUE; break;
 				case SCORE_FIELD_RANK:
-					   sprintf (tempstr, "%d", i);
-					   strings[j] = i ? tempstr : game_score_field_names[j];
+						snprintf (tempstr, 128, "%d", i);
+						strings[j] = i ? tempstr : game_score_field_names[j];
 					   break;
 				case SCORE_FIELD_USER:
 						strings[j] = i ? scores[i-1].name : game_score_field_names[j];

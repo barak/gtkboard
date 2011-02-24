@@ -500,10 +500,11 @@ void menu_put_game ()
 	gchar path[128] = "/Game/Select Game/";
 	if (opt_game->group)
 	{
-		strcat (path, opt_game->group);
-		strcat (path, "/");
+		// FIXME: don't use strcat
+		strncat (path, opt_game->group, 128);
+		strncat (path, "/", 128);
 	}
-	strcat (path, opt_game->name);
+	strncat (path, opt_game->name, 128);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM
 			(gtk_item_factory_get_widget (menu_factory, path)), TRUE);
 }

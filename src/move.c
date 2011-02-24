@@ -143,11 +143,21 @@ byte *move_fread (FILE *fin)
 
 byte *move_fread_ack (FILE *fin)
 {
+	// FIXME: this is an ugly workaround for a bug which causes some junk data prefixing every move data.
+	// Needs a real fix
+	char *start;
+	fgets (linebuf, 4096, fin);
+	start = strstr (linebuf, "ACK");
+	if (!start) return NULL;
+	return move_read (start + 4);
+
+/*	
 	fgets (linebuf, 4096, fin);
 	//printf ("%s\n", linebuf);
 	if (strncasecmp (linebuf, "ACK", 3))
 		return NULL;
 	return move_read (linebuf + 4);
+*/
 }
 
 char *line_read (FILE *fin)
