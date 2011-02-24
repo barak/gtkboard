@@ -1,4 +1,4 @@
-gtkboard (0.11pre0+cvs.2003.11.02-1) UNRELEASED; urgency=low
+gtkboard (0.11pre0+cvs.2003.11.02-1) unstable; urgency=low
 
   * bump standards version (debian/control)
   * dh 8
