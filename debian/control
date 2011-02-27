@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Barak A. Pearlmutter <bap@debian.org>
 Build-Depends: debhelper (>= 8),
 	autotools-dev (>= 20100122.1~),
-	libgtk2.0-dev | libgtk1.3-dev | libgtk1.2-dev,
+	libgtk2.0-dev,
 	libsdl-mixer1.2-dev
 Standards-Version: 3.9.1
 Vcs-Git: git://git.debian.org/git/collab-maint/gtkboard.git
