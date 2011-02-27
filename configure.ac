@@ -1,14 +1,17 @@
-
-AC_INIT
+AC_PREREQ([2.67])
+AC_INIT([gtkboard],[0.11pre0])
 AC_CONFIG_SRCDIR([src/])
+AC_CONFIG_HEADERS([config.h])
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE(gtkboard,0.11pre0)
+
+# Checks for programs.
 AC_PROG_CC
 
+# Checks for libraries.
 AC_ARG_ENABLE(gtk2,
 		[  --disable-gtk2      Don't look for GTK2 libraries],
 		enable_gtk2=$enableval,
@@ -76,21 +79,22 @@ AM_CONDITIONAL(WITH_GNOME, test "x$gnome" = "xtrue")
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
+AC_HEADER_STDBOOL
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(mkdir strtol)
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([getcwd memset mkdir sqrt strcasecmp strncasecmp strpbrk strstr strtol])
 
-AC_CONFIG_FILES([
-		Makefile
-		doc/Makefile
-		src/Makefile
-		sounds/Makefile
-		pixmaps/Makefile
-		])
+AC_CONFIG_FILES([Makefile
+                 doc/Makefile
+                 pixmaps/Makefile
+                 sounds/Makefile
+                 src/Makefile])
 AC_OUTPUT
 
 echo " "
@@ -111,4 +115,3 @@ if test "$enable_gnome" = "yes" ; then
 else
 	AC_MSG_RESULT([   GNOME disabled.])
 fi
-
