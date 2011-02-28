@@ -1,10 +1,11 @@
 
-AC_INIT(src/)
+AC_INIT
+AC_CONFIG_SRCDIR([src/])
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE(gtkboard,0.11pre0)
 AC_PROG_CC
 
@@ -83,13 +84,14 @@ AC_C_CONST
 dnl Checks for library functions.
 AC_CHECK_FUNCS(mkdir strtol)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 		Makefile
 		doc/Makefile
 		src/Makefile
 		sounds/Makefile
 		pixmaps/Makefile
 		])
+AC_OUTPUT
 
 echo " "
 
