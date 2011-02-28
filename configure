@@ -4070,7 +4070,7 @@ fi
 
 $as_echo "#define HAVE_SDL /**/" >>confdefs.h
 
-	    LIBS="$LIBS -lSDL_mixer"
+	    LIBS="$LIBS -lSDL_mixer -lSDL"
 	else
 	    echo "*** SDL_mixer not found.  Configuring without audio support."
 	fi

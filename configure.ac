@@ -43,7 +43,7 @@ if test "$enable_sdl" = "yes" ; then
 	if test "$have_SDL_mixer" = "yes" ; then 
 #		CFLAGS="$CFLAGS -DHAVE_SDL" 
 		AC_DEFINE([HAVE_SDL], [], [Do we have the SDL library])
-	    LIBS="$LIBS -lSDL_mixer"
+	    LIBS="$LIBS -lSDL_mixer -lSDL"
 	else
 	    echo "*** SDL_mixer not found.  Configuring without audio support."
 	fi
