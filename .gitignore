@@ -1,5 +1,6 @@
 *.o
 /*.dh-orig
+/.pc/
 /Makefile
 /autom4te.cache/
 /config.h
