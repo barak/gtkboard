@@ -227,7 +227,7 @@ char ** fifteen_pixmap_square_gen (char *col)
 	static char line[FIFTEEN_CELL_SIZE];
 	memset(line, ' ', FIFTEEN_CELL_SIZE);
 	pixmap = g_new(char *, FIFTEEN_CELL_SIZE + 2);
-	pixmap[0] = "60 60 1 1"; // FIXME: dont hard code
+	pixmap[0] = "60 60 1 1"; // FIXME: don't hard code
 	// FIXME: not freed
 	pixmap[1] = g_strdup_printf (" c %s", col);
 	for (i=0; i<FIFTEEN_CELL_SIZE; i++) pixmap[i+2] = line; return pixmap;

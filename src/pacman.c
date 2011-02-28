@@ -204,7 +204,7 @@ int pacman_animate (Pos *pos, byte **movp)
 	int oldboard;
 	// FIXME: do this using stateful
 	static int prevx[4] = {0, 0, 0, 0}, prevy[4] = {0, 0, 0, 0};
-	// make sure the ghosts dont step on each others toes
+	// make sure the ghosts don't step on each others' toes
 	int taken[4] = {-1, -1, -1, -1}, t=0, gid;
 	byte *board = pos->board;
 	pacman_set_dist (board);
