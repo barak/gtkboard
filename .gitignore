@@ -14,6 +14,7 @@
 /doc/Makefile
 /pixmaps/Makefile
 /sounds/Makefile
+/src/.deps/
 /src/Makefile
 /src/gtkboard
 /stamp-h1
