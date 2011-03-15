@@ -122,7 +122,7 @@ static char **wordtris_pixmaps [] =
 
 // TODO: change this so that we only need to specify pixmaps for individual squares
 
-static const int lava_xpm_header_size = 253+1;
+#define lava_xpm_header_size (253+1)
 static char * lava_xpm_header[] = 
 {
 "144 504 253 2",

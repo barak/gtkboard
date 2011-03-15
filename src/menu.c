@@ -172,12 +172,15 @@ void menu_sensitize (int which, gboolean sens)
 					menu_des_paths[i]), sens);
 }
 
+#if GTK_MAJOR_VERSION == 2
+#define size_sb_set_turn_image 20
+#endif
+
 void sb_set_turn_image ()
 {
 #if GTK_MAJOR_VERSION == 2
 	// FIXME: can't get existing bgcolor
-	const int size = 20;
-	static char pixbufs [7][size*(size+1)];
+	static char pixbufs [7][size_sb_set_turn_image*(size_sb_set_turn_image+1)];
 	char **pixmap_data;
 	static GdkPixmap *pixmaps[7];
 	int colors[7] = {0x007700, 0x77ff77, 0x770000, 0xff7777, 0x000077, 0x7777ff,
@@ -191,7 +194,7 @@ void sb_set_turn_image ()
 		int i;
 		for (i=0; i<7; i++)
 		{
-			pixmap_data = pixmap_ball_gen (size, pixbufs[i], colors[i],
+			pixmap_data = pixmap_ball_gen (size_sb_set_turn_image, pixbufs[i], colors[i],
 					0xffffff, 6.5, 24);
 			pixmaps[i] = gdk_pixmap_create_from_xpm_d
 				((GdkWindow *)main_window->window, NULL, NULL, pixmap_data);
