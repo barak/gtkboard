@@ -3,7 +3,6 @@ Name=Gtkboard Board Games
 GenericName=Board Games
 Comment=Play various and sundry board games
 Version=1.0
-Encoding=UTF-8
 Exec=gtkboard
 Icon=gtkboard
 Terminal=false
