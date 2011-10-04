@@ -1,8 +1,12 @@
 gtkboard (0.11pre0+cvs.2003.11.02-4) unstable; urgency=low
 
   * dh --with autoreconf
+  * fix some dash-vs-hyphen man page issues for lintian
+  * remote charset line from desktop file for lintian
+  * single-debian-patch source option (closes: #643150)
+  * bump debian standard
 
- -- Barak A. Pearlmutter <bap@debian.org>  Wed, 31 Aug 2011 20:49:39 +0100
+ -- Barak A. Pearlmutter <bap@debian.org>  Tue, 04 Oct 2011 13:58:20 +0100
 
 gtkboard (0.11pre0+cvs.2003.11.02-3) unstable; urgency=low
 
