@@ -1223,7 +1223,7 @@ void html_help_gen_format (FILE *fout, gchar *outfile, gchar *title, gchar *stri
 		perror (NULL);
 		exit(1);
 	}
-	fprintf (ftmp, string);
+	fprintf (ftmp, "%s", string);
 	fclose (ftmp);
 	fprintf (fout, "<h2> %s </h2>\n\n <pre>", title);
 	fflush (fout);
@@ -1328,8 +1328,7 @@ void html_help_gen ()
 {
 	int i;
 	char dirbuf[1024];
-	getcwd (dirbuf, 1024);
-	if (strcmp (basename (dirbuf), "games"))
+	if (getcwd (dirbuf, 1024) && strcmp (basename (dirbuf), "games"))
 	{
 		fprintf (stderr, "To generate html help, you must be in the \"games\" directory.\n");
 		exit (1);

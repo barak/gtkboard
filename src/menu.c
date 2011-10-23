@@ -335,6 +335,7 @@ void menu_show_pause_dialog ()
 			GTK_DIALOG_MODAL,
 			GTK_MESSAGE_INFO,
 			GTK_BUTTONS_OK,
+			"%s",
 			msg);
 /*	dialog = gtk_dialog_new_with_buttons (title, GTK_WINDOW (main_window),
 			GTK_DIALOG_MODAL, NULL);
