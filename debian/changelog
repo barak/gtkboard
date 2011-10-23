@@ -1,3 +1,10 @@
+gtkboard (0.11pre0+cvs.2003.11.02-5) unstable; urgency=low
+
+  * tweaks around gcc -Wformat-security issues (closes: #646270)
+  * check for -lm in configure.ac
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Sun, 23 Oct 2011 08:27:31 +0100
+
 gtkboard (0.11pre0+cvs.2003.11.02-4) unstable; urgency=low
 
   * dh --with autoreconf
