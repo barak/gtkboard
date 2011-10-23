@@ -500,14 +500,17 @@ void menu_put_player (gboolean first)
 
 void menu_put_game ()
 {
-	gchar path[128] = "/Game/Select Game/";
+	gchar *prefix = "/Game/Select Game/";
+	gchar path0[128], path[128];
 	if (opt_game->group)
 	{
-		// FIXME: don't use strcat
-		strncat (path, opt_game->group, 128);
-		strncat (path, "/", 128);
+		snprintf (path0, sizeof (path0), "%s%s/", prefix, opt_game->group);
 	}
-	strncat (path, opt_game->name, 128);
+	else
+	{
+		snprintf (path0, sizeof (path0), "%s", prefix);
+	}
+	snprintf (path, sizeof (path), "%s%s", path0, opt_game->name);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM
 			(gtk_item_factory_get_widget (menu_factory, path)), TRUE);
 }
