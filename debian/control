@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 8),
 	dh-autoreconf,
 	libgtk2.0-dev,
 	libsdl-mixer1.2-dev
-Standards-Version: 3.9.2
+Standards-Version: 3.9.4
 Vcs-Git: git://git.debian.org/git/collab-maint/gtkboard.git
 Vcs-Browser: http://git.debian.org/?p=collab-maint/gtkboard.git
 Homepage: http://gtkboard.sourceforge.net/
