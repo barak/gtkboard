@@ -1,3 +1,10 @@
+gtkboard (0.11pre0+cvs.2003.11.02-6) unstable; urgency=low
+
+  * dh 9
+  * bump debian standard
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Wed, 16 Jan 2013 12:26:17 +0000
+
 gtkboard (0.11pre0+cvs.2003.11.02-5) unstable; urgency=low
 
   * tweaks around gcc -Wformat-security issues (closes: #646270)
