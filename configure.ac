@@ -53,6 +53,8 @@ if test "$enable_sdl" = "yes" ; then
 #	LIBS="$LIBS $SDL_LIBS -lSDL_mixer"
 fi
 
+AC_CHECK_LIB([gmodule-2.0], [g_module_symbol], [LIBS="$LIBS -lgmodule-2.0"], AC_MSG_WARN([Cannot find gmodule-2.0 library]))
+
 AC_CHECK_LIB([m], [sincosf], [LIBS="$LIBS -lm"], AC_MSG_WARN([Cannot find math library]))
 
 gnome=false
