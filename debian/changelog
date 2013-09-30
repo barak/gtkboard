@@ -2,8 +2,9 @@ gtkboard (0.11pre0+cvs.2003.11.02-6) unstable; urgency=low
 
   * dh 9
   * bump debian standard
+  * add link option -lgmodule-2.0 (closes: #713484)
 
- -- Barak A. Pearlmutter <bap@debian.org>  Wed, 16 Jan 2013 12:26:17 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Mon, 30 Sep 2013 12:31:19 +0100
 
 gtkboard (0.11pre0+cvs.2003.11.02-5) unstable; urgency=low
 
