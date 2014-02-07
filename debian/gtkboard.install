@@ -1,3 +1,4 @@
 doc/index.html usr/share/doc/gtkboard/html/
 doc/devel/index.html usr/share/doc/gtkboard/html/devel/
 debian/gtkboard.desktop usr/share/applications/
+debian/gtkboard32.xpm usr/share/pixmaps/

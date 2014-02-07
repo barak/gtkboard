@@ -1,2 +1,3 @@
 ?package(gtkboard):needs="X11" section="Games/Board"\
-   title="GTK Board" command="/usr/games/gtkboard"
+   title="GTK Board" command="/usr/games/gtkboard" \
+   icon="/usr/share/pixmaps/gtkboard32.xpm"
