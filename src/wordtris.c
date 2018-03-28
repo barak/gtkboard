@@ -569,7 +569,7 @@ static void wordtris_init ()
 		"\n"
 		"You get a point for every new word you make. You have a total of ten lives. You lose a life when a block falls to the bottom row. The game ends when you lose all your lives.";
 	game_doc_strategy = 
-		"Try to replace rarely occuring letters with more commonly occuring	letters\n";
+		"Try to replace rarely occurring letters with more commonly occurring letters\n";
 }
 
 static int wordtris_curx = 0, wordtris_cury = 0;
