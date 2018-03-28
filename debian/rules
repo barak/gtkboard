@@ -1,11 +1,9 @@
 #!/usr/bin/make -f
 
-## uncomment these to enable hardened build for no particular reason
-# DPKG_EXPORT_BUILDFLAGS = 1
-# include /usr/share/dpkg/buildflags.mk
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@ --with autoreconf --parallel
+	dh $@
 
 override_dh_auto_configure:
 	dh_auto_configure -- --bindir=\$${prefix}/games
