@@ -810,7 +810,8 @@ void menu_insert_recent_game (gchar *gamename)
 	if (tmpname)
 	{
 		GtkWidget *wid;
-		gtk_widget_destroy (menu_recent_widgets[i == NUM_RECENT_GAMES ? i - 1 : i]);
+		if (i == NUM_RECENT_GAMES) i -= 1;
+		gtk_widget_destroy (menu_recent_widgets[i]);
 		menu_recent_widgets[i] = NULL;
 		gtk_item_factory_delete_item (menu_factory, tmp = g_strdup_printf ("/Game/%s", tmpname));
 		g_free (tmp);
