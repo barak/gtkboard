@@ -62,7 +62,7 @@ extern Game
 	Pentaline, Mastermind, Pacman, Flw, Wordtris,
 	Ninemm, Stopgate, Knights, Breakthrough, 
 	CapturePento, Towers, Quarto, Kttour, Eightqueens, Dnb,
-	Blet, Othello6x6
+	Blet, Othello6x6, Simple
 	;
 
 Game *games[] = { 
@@ -106,6 +106,7 @@ Game *games[] = {
 	&Checkers, 
 	&Memory, 
 	&Ninemm, 
+	&Simple
 		
 };
 

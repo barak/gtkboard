@@ -53,6 +53,7 @@ gtkboard_SOURCES = 	\
 	quarto.c\
 	rgb.c\
 	samegame.c\
+	simple.c\
 	stopgate.c\
 	tetris.c\
 	towers.c\
