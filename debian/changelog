@@ -1,3 +1,10 @@
+gtkboard (0.11pre0+cvs.2003.11.02-9) unstable; urgency=medium
+
+  * recent list crash bug fix, thanks to Nelson Benítez León (closes: #820595)
+  * Add new game "Simple game", thanks to Nelson Benítez León
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Sun, 29 Jul 2018 12:02:29 +0200
+
 gtkboard (0.11pre0+cvs.2003.11.02-8) unstable; urgency=medium
 
   * bump debian standard
