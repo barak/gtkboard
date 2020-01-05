@@ -345,10 +345,10 @@ static gboolean process_line ()
 
 static gboolean channel_process_input ()
 {
-	static char linebuf[4096];
+	static char linebuf[4096+1];
 	char *linep = linebuf;
 	char *line;
-	int bytes_read;
+	gsize bytes_read;
 #if GLIB_MAJOR_VERSION > 1
 	// we need to call this again because we will get new events before returning
 	// from this function
