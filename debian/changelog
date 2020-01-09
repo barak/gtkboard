@@ -1,8 +1,16 @@
-gtkboard (0.11pre0+cvs.2003.11.02-10) UNRELEASED; urgency=medium
+gtkboard (0.11pre0+cvs.2003.11.02-10) unstable; urgency=medium
 
+  [ Ondřej Nový ]
   * d/watch: Use https protocol
 
- -- Ondřej Nový <onovy@debian.org>  Mon, 01 Oct 2018 10:10:49 +0200
+  [ Takahide Nojima <nozzy123nozzy@gmail.com> ]
+  * Fix stack overflow in engine.c. (closes: #948527)
+    It has 2 overflows.
+      -The 'linebuf' have 4096 bytes,but '\0' puts in 4097th.
+      -The last argument of g_io_channel_read should be
+       'unsigned long' not 'int'.
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 09 Jan 2020 21:19:17 +0000
 
 gtkboard (0.11pre0+cvs.2003.11.02-9) unstable; urgency=medium
 
