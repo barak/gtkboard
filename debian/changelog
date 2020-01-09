@@ -13,8 +13,9 @@ gtkboard (0.11pre0+cvs.2003.11.02-10) unstable; urgency=medium
   [ Barak A. Pearlmutter ]
   * Bump debhelper from old 11 to 12.
   * Set debhelper-compat version in Build-Depends.
+  * Bump policy
 
- -- Barak A. Pearlmutter <bap@debian.org>  Thu, 09 Jan 2020 21:29:02 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 09 Jan 2020 21:32:54 +0000
 
 gtkboard (0.11pre0+cvs.2003.11.02-9) unstable; urgency=medium
 
