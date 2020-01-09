@@ -1,6 +1,7 @@
 gtkboard (0.11pre0+cvs.2003.11.02-11) UNRELEASED; urgency=medium
 
   * Bump debhelper from old 11 to 12.
+  * Set debhelper-compat version in Build-Depends.
 
  -- Barak A. Pearlmutter <bap@debian.org>  Thu, 09 Jan 2020 21:27:24 +0000
 
