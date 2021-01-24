@@ -1,6 +1,6 @@
 gtkboard (0.11pre0+cvs.2003.11.02-11) unstable; urgency=medium
 
-  * GCC 10 fix, thanks to Alexey Sokolov <sokolov@google.com>
+  * GCC 10 fix, thanks to Alexey Sokolov <sokolov@google.com> (closes: #957317)
   * bump to dh13
   * bump policy version
   * put stack-smash fix inline instead of as quilt patch
